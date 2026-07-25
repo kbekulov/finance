@@ -93,6 +93,8 @@ Read the final amount actually paid, not subtotal, tax, savings, balance due bef
 - Use `source: "receipt"`.
 - Record merchant and receipt-specific details when visible.
 - Preserve the receipt currency and convert only when the user requests conversion or a reliable conversion value is available.
+- Classify the purchase using an existing supported category when one accurately fits. If the receipt reveals a meaningful, reusable type of spending that none of the existing categories represents, create a new stable category without waiting for separate approval.
+- Keep receipt-discovered categories broad enough to reuse across merchants and future expenses. Never create a merchant-specific, product-specific, or one-off category merely to avoid making a reasonable classification.
 - If the final total is ambiguous, do not guess; explain what is ambiguous and ask the user.
 
 ### Salary
@@ -122,14 +124,18 @@ Internal values must remain exactly:
 - `Devices & installments`
 - `Transport & Travel`
 
-Translate only the displayed labels. If a genuinely necessary new category is added, update:
+Receipt evaluation may introduce a genuinely necessary new category. Treat that as a complete database and product feature, never as a JSON-only value. Translate only the displayed labels. In the same committed update, change:
 
 - the JSON record;
 - `CATEGORIES` and category labeling/classification in both JavaScript and React;
 - the form options;
 - English and Russian labels;
 - colored category strip, breakdown bar, legend, and accessibility text;
+- warning guidance and flexible-category behavior when applicable;
+- tests for canonical data, calculations, rendering, and translation parity;
 - this manual.
+
+Keep the static and React implementations equivalent, use one stable English internal key everywhere, and do not ship an uncategorized fallback or an untranslated visible category.
 
 ## Rolling 12-month history
 

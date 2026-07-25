@@ -29,7 +29,8 @@ test("server-renders the current finance tracker", async () => {
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
 
   const html = await response.text();
-  assert.match(html, /<title>Kinance — Your salary-cycle money, clearly<\/title>/i);
+  assert.match(html, /<title>Kinance<\/title>/i);
+  assert.doesNotMatch(html, /—|&mdash;|&#8212;|&#x2014;/i);
   assert.match(html, /kinance-favicon\.jpg/i);
   assert.match(html, />kinance<\/span>/i);
   assert.doesNotMatch(html, />euroscope<\/span>/i);

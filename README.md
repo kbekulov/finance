@@ -195,6 +195,8 @@ For every change, inspect:
 
 Canonical `note` and category keys remain English, while every canonical expense also stores `noteTranslations.en` and `noteTranslations.ru`. Render expense names from those database fields. Persist the selected language locally. Never ship a new visible English string without its Russian equivalent.
 
+Never use em dashes in user-facing site copy, metadata, or titles. The document title, Open Graph title, and X/Twitter title must be exactly `Kinance` unless the user explicitly renames the product.
+
 ## Calculation invariants
 
 After each finance-data update, verify:

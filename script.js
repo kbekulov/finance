@@ -10,7 +10,7 @@ const CATEGORIES = [
 
 const CATEGORY_ICONS = {
   Food: "/public/category-icons/food.png?v=2",
-  "Subscriptions & services": "/public/category-icons/subscriptions-services.png?v=2",
+  "Subscriptions & services": "/public/category-icons/subscriptions-services.png?v=3",
   "Luxury purchases": "/public/category-icons/luxury-purchases.png?v=2",
   "Debt & repayments": "/public/category-icons/debt-repayments.png?v=2",
   "Devices & installments": "/public/category-icons/devices-installments.png?v=2",

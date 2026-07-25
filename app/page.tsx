@@ -68,7 +68,7 @@ const CATEGORIES: Category[] = [
 
 const CATEGORY_ICONS: Record<Category, string> = {
   Food: "/category-icons/food.png?v=2",
-  "Subscriptions & services": "/category-icons/subscriptions-services.png?v=2",
+  "Subscriptions & services": "/category-icons/subscriptions-services.png?v=3",
   "Luxury purchases": "/category-icons/luxury-purchases.png?v=2",
   "Debt & repayments": "/category-icons/debt-repayments.png?v=2",
   "Devices & installments": "/category-icons/devices-installments.png?v=2",

@@ -54,7 +54,7 @@ Every month record must contain:
 - `timezone`: `Europe/Vilnius`
 - `updatedAt`: actual date of the latest committed code/data update affecting that month, `YYYY-MM-DD`
 - `revision`: positive integer incremented whenever canonical values for that month change
-- `salary`: non-negative numeric base monthly income
+- `salary`: non-negative numeric salary actually assigned to that specific salary cycle; this is historical source data, not a global setting
 - `savingsGoal`: non-negative numeric amount protected from spending
 - `expenses`: ordered array of expense records
 
@@ -108,9 +108,15 @@ Read the final amount actually paid, not subtotal, tax, savings, balance due bef
 
 ### Salary
 
-When the user states a monthly salary, replace the current salary cycle’s `salary`. Salary is the base from which savings and expenses are deducted. Current canonical salary is €2,150 until changed.
+Salary is cycle-specific historical source data. Every month record keeps its own `salary`, and all spendable balance, remaining balance, used percentage, and daily-pace calculations for a selected cycle must use that cycle’s value. The July 2026 cycle is currently €2,150; do not interpret that as a permanent global salary.
 
-Salary is backend-owned canonical data and must never be editable from either frontend interface. Render it as a visually distinct locked or fixed value with no input control, mutation handler, or browser-local override. Salary changes happen only by editing the canonical database through the maintenance workflow.
+When the user states a salary for a named month or says that one specific month was higher or lower, update only that salary cycle’s `salary`, `updatedAt`, and `revision`. Never propagate a one-off salary adjustment into earlier or later cycles. When the user says the new salary applies from now on, update the current cycle and use it as the starting salary carried into newly created future cycles, while preserving all existing historical salaries. If the intended cycle is genuinely ambiguous, resolve it from the conversation and current Vilnius salary cycle before editing rather than assuming a calendar month.
+
+When creating a new salary cycle, copy the immediately preceding cycle’s salary as the best known starting value. If the user later provides the actual salary for that cycle, replace only that cycle’s value. Do not create fake salary transactions or a separate derived salary-total field. The ordered `months[].salary` values are the salary history.
+
+Salary is the income base from which that cycle’s savings requirement and expenses are deducted. Treat it as the usable salary amount supplied by the user; do not infer gross pay, net pay, bonuses, taxes, or other payroll components that were not stated.
+
+Salary is backend-owned canonical data and must never be editable from either frontend interface. Render it as a visually distinct locked value for the selected cycle with no input control, mutation handler, or browser-local override. Device-local storage may persist editable savings and expense data, but it must never persist or override salary. Salary changes happen only by editing the targeted cycle in the canonical database through the maintenance workflow.
 
 Salary is nominally paid on the 12th of every month. If the 12th is Saturday or Sunday, the effective salary and reset date is the Friday immediately before that weekend. A cycle starts on that effective salary date and ends one calendar day before the next effective salary date. Use `Europe/Vilnius` dates and calculate this rule for each month; never hard-code a permanent day-of-week assumption.
 
@@ -227,6 +233,7 @@ Never use em dashes in user-facing site copy, metadata, or titles. The document 
 After each finance-data update, verify:
 
 - `spent = sum(expense.amount)` using integer cents for aggregation
+- every displayed cycle reads `salary` from that exact month record, allowing salaries to differ across history without cross-cycle leakage
 - `spendable = max(salary - savingsGoal, 0)`
 - `remaining = salary - savingsGoal - spent`
 - used percentage is based on `spent / spendable`; show the real percentage above 100% while capping only the ring graphic at 100%

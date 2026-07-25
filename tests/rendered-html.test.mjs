@@ -88,7 +88,8 @@ test("server-renders the current finance tracker", async () => {
   assert.match(html, /Beer/);
   assert.match(html, /Ice cream/);
   assert.match(html, /class="stat-card salary salary-locked"/);
-  assert.match(html, /Fixed in your finance plan/);
+  assert.match(html, /SALARY THIS CYCLE/);
+  assert.match(html, /Locked to this salary cycle/);
   assert.doesNotMatch(html, /Monthly salary in euros[^<]*<\/span>\s*<span[^>]*>€<\/span>\s*<input/s);
   assert.doesNotMatch(html, /class="daily-chart-panel"/);
   assert.match(html, /class="daily-expense-chart"/);
@@ -114,6 +115,7 @@ test("keeps database history and translations aligned", async () => {
     weekendRule: "previousFriday",
   });
   assert.ok(database.months.length <= database.maxMonths);
+  assert.ok(database.months.every((month) => Number.isFinite(month.salary) && month.salary >= 0));
   assert.equal(database.currency, "EUR");
   assert.equal(database.timezone, "Europe/Vilnius");
   assert.equal(current.updatedAt, "2026-07-25");
@@ -429,6 +431,16 @@ test("keeps database history and translations aligned", async () => {
   assert.equal(remainingDaysAfterToday, 17);
   assert.equal(Math.round((99854 / 100) / remainingDaysAfterToday), 59);
   assert.equal(Math.round((spentCents / (current.salary * 100 - current.savingsGoal * 100)) * 100), 49);
+
+  const salaryHistoryScenario = [
+    { salary: 2150, savingsGoal: 200, spent: 951.46 },
+    { salary: 2750, savingsGoal: 200, spent: 951.46 },
+  ].map((cycle) => ({
+    remaining: Math.round((cycle.salary - cycle.savingsGoal - cycle.spent) * 100) / 100,
+    usedPercent: (cycle.spent / Math.max(cycle.salary - cycle.savingsGoal, 0)) * 100,
+  }));
+  assert.deepEqual(salaryHistoryScenario.map(({ remaining }) => remaining), [998.54, 1598.54]);
+  assert.ok(salaryHistoryScenario[1].usedPercent < salaryHistoryScenario[0].usedPercent);
   for (const expense of current.expenses) {
     assert.equal(typeof expense.noteTranslations?.en, "string");
     assert.equal(typeof expense.noteTranslations?.ru, "string");
@@ -446,6 +458,8 @@ test("keeps database history and translations aligned", async () => {
     assert.match(source, /Алкоголь и ночная жизнь/);
     assert.match(source, /Expected monthly expenses/);
     assert.match(source, /Ожидаемые ежемесячные расходы/);
+    assert.match(source, /SALARY THIS CYCLE/);
+    assert.match(source, /ДОХОД В ЭТОМ ЦИКЛЕ/);
     assert.doesNotMatch(source, /Expected monthly total/);
     assert.match(source, /effectiveSalaryDate/);
     assert.match(source, /previousFriday/);
@@ -472,9 +486,9 @@ test("keeps database history and translations aligned", async () => {
     assert.doesNotMatch(source, /const TODAY\s*=/);
   }
   assert.match(index, /id="theme-select"/);
-  assert.match(index, /styles\.css\?v=26/);
+  assert.match(index, /styles\.css\?v=27/);
   assert.match(index, /public\/vendor\/apexcharts\.min\.js\?v=21/);
-  assert.match(index, /script\.js\?v=26/);
+  assert.match(index, /script\.js\?v=27/);
   assert.match(index, /data-current-theme="kinance"/);
   assert.match(index, /id="credit-alert"[^>]*hidden/);
   assert.match(index, /id="payment-method"/);
@@ -512,8 +526,16 @@ test("keeps database history and translations aligned", async () => {
   assert.match(index, /id="salary-value"/);
   assert.doesNotMatch(index, /id="salary"/);
   assert.doesNotMatch(script, /element\("salary"\)\.addEventListener/);
-  assert.match(script, /salary:\s*month\.salary/);
-  assert.match(page, /salary:\s*selectedMonth\.salary/);
+  assert.match(script, /financeDataForMonth/);
+  assert.match(script, /salary:\s*safeNumber\(month\.salary\)/);
+  assert.match(page, /financeDataForMonth/);
+  assert.match(page, /salary:\s*safeMoney\(month\.salary\)/);
+  for (const source of [page, script]) {
+    assert.match(source, /JSON\.stringify\(\{[\s\S]*savingsGoal:[\s\S]*expenses:/);
+    assert.doesNotMatch(source, /JSON\.stringify\(\{[\s\S]{0,240}salary:/);
+    assert.doesNotMatch(source, /JSON\.stringify\(data\)/);
+  }
+  assert.match(page, /hydratedStorageKey !== selectedStorageKey/);
   for (const source of [page, script]) {
     assert.match(source, /dailyExpensePoints/);
     assert.match(source, /type:\s*"area"/);

@@ -22,8 +22,8 @@ const TRANSLATIONS = {
     availableAfterPlan: "AVAILABLE AFTER PLAN",
     leftForMonth: "left until next salary",
     dailyPace: "Comfortable daily pace",
-    monthlySalary: "MONTHLY SALARY",
-    salaryLocked: "Fixed in your finance plan",
+    monthlySalary: "SALARY THIS CYCLE",
+    salaryLocked: "Locked to this salary cycle",
     dailySpendingEyebrow: "DAILY RHYTHM",
     dailySpending: "Daily expenses",
     dailySpendingIntro: "What left your account each day this salary cycle",
@@ -71,7 +71,6 @@ const TRANSLATIONS = {
     receipt: "Receipt",
     chat: "Added in chat",
     here: "Added here",
-    salaryEuroLabel: "Monthly salary in euros",
     savingsEuroLabel: "Monthly savings requirement in euros",
     recordedExpenses: "{count} recorded expense{plural}",
     perDay: "/ day",
@@ -111,8 +110,8 @@ const TRANSLATIONS = {
     availableAfterPlan: "ДОСТУПНО ПОСЛЕ ПЛАНА",
     leftForMonth: "до следующей зарплаты",
     dailyPace: "Комфортный дневной лимит",
-    monthlySalary: "МЕСЯЧНЫЙ ДОХОД",
-    salaryLocked: "Зафиксировано в финансовом плане",
+    monthlySalary: "ДОХОД В ЭТОМ ЦИКЛЕ",
+    salaryLocked: "Зафиксировано для этого цикла зарплаты",
     dailySpendingEyebrow: "ДНЕВНОЙ РИТМ",
     dailySpending: "Расходы по дням",
     dailySpendingIntro: "Сколько уходило со счёта каждый день этого цикла зарплаты",
@@ -160,7 +159,6 @@ const TRANSLATIONS = {
     receipt: "Чек",
     chat: "Добавлено в чате",
     here: "Добавлено здесь",
-    salaryEuroLabel: "Месячный доход в евро",
     savingsEuroLabel: "Цель ежемесячных накоплений в евро",
     recordedExpenses: "Записано расходов: {count}",
     perDay: "/ день",
@@ -324,6 +322,19 @@ function applyTheme() {
 function safeNumber(value) {
   const number = Number(value);
   return Number.isFinite(number) ? Math.max(number, 0) : 0;
+}
+
+function financeDataForMonth(month, savedData = null) {
+  const savedSavings = Number(savedData?.savingsGoal);
+  return {
+    salary: safeNumber(month.salary),
+    savingsGoal: Number.isFinite(savedSavings)
+      ? Math.max(savedSavings, 0)
+      : safeNumber(month.savingsGoal),
+    expenses: structuredClone(
+      Array.isArray(savedData?.expenses) ? savedData.expenses : month.expenses,
+    ),
+  };
 }
 
 function toCents(value) {
@@ -539,17 +550,21 @@ function loadMonth(month) {
       localStorage.getItem(storageKey(month)) ??
       localStorage.getItem(legacyStorageKey(month));
     const savedData = JSON.parse(saved);
-    data = savedData
-      ? { ...savedData, salary: month.salary }
-      : structuredClone(month);
+    data = financeDataForMonth(month, savedData);
   } catch {
-    data = structuredClone(month);
+    data = financeDataForMonth(month);
   }
   render();
 }
 
 function save() {
-  localStorage.setItem(storageKey(selectedMonth), JSON.stringify(data));
+  localStorage.setItem(
+    storageKey(selectedMonth),
+    JSON.stringify({
+      savingsGoal: data.savingsGoal,
+      expenses: data.expenses,
+    }),
+  );
 }
 
 function renderHistory() {

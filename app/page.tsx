@@ -41,6 +41,8 @@ type FinanceData = {
   expenses: Expense[];
 };
 
+type SavedFinanceData = Pick<FinanceData, "savingsGoal" | "expenses">;
+
 type MonthRecord = FinanceData & {
   month: string;
   label: string;
@@ -75,8 +77,8 @@ const COPY = {
     left: "left until next salary",
     pace: "Comfortable daily pace",
     day: "/ day",
-    salary: "MONTHLY SALARY",
-    salaryLocked: "Fixed in your finance plan",
+    salary: "SALARY THIS CYCLE",
+    salaryLocked: "Locked to this salary cycle",
     dailySpendingEyebrow: "DAILY RHYTHM",
     dailySpending: "Daily expenses",
     dailySpendingIntro: "What left your account each day this salary cycle",
@@ -139,7 +141,6 @@ const COPY = {
     monthlyTotalsLabel: "Salary cycle totals",
     budgetUsed: "{percent}% of spending budget used",
     noSpendingBudget: "NO SPENDING BUDGET",
-    salaryEuroLabel: "Monthly salary in euros",
     savingsEuroLabel: "Monthly savings requirement in euros",
   },
   ru: {
@@ -152,8 +153,8 @@ const COPY = {
     left: "до следующей зарплаты",
     pace: "Комфортный дневной лимит",
     day: "/ день",
-    salary: "МЕСЯЧНЫЙ ДОХОД",
-    salaryLocked: "Зафиксировано в финансовом плане",
+    salary: "ДОХОД В ЭТОМ ЦИКЛЕ",
+    salaryLocked: "Зафиксировано для этого цикла зарплаты",
     dailySpendingEyebrow: "ДНЕВНОЙ РИТМ",
     dailySpending: "Расходы по дням",
     dailySpendingIntro: "Сколько уходило со счёта каждый день этого цикла зарплаты",
@@ -216,7 +217,6 @@ const COPY = {
     monthlyTotalsLabel: "Итоги цикла зарплаты",
     budgetUsed: "Использовано {percent}% бюджета на расходы",
     noSpendingBudget: "НЕТ БЮДЖЕТА НА РАСХОДЫ",
-    salaryEuroLabel: "Месячный доход в евро",
     savingsEuroLabel: "Цель ежемесячных накоплений в евро",
   },
 };
@@ -328,6 +328,22 @@ function safeMoney(value: number) {
   return Number.isFinite(value) ? Math.max(value, 0) : 0;
 }
 
+function financeDataForMonth(
+  month: MonthRecord,
+  savedData?: Partial<SavedFinanceData> | null,
+): FinanceData {
+  const savedSavings = Number(savedData?.savingsGoal);
+  return {
+    salary: safeMoney(month.salary),
+    savingsGoal: Number.isFinite(savedSavings)
+      ? Math.max(savedSavings, 0)
+      : safeMoney(month.savingsGoal),
+    expenses: Array.isArray(savedData?.expenses)
+      ? savedData.expenses
+      : month.expenses,
+  };
+}
+
 function toCents(value: number) {
   return Math.round(safeMoney(value) * 100);
 }
@@ -390,17 +406,21 @@ function dailyExpensePoints(
 
 export default function Home() {
   const [selectedMonth, setSelectedMonth] = useState<MonthRecord>(INITIAL_MONTH);
-  const [data, setData] = useState<FinanceData>(INITIAL_MONTH);
+  const [data, setData] = useState<FinanceData>(() => financeDataForMonth(INITIAL_MONTH));
   const [amount, setAmount] = useState("");
   const [note, setNote] = useState("");
   const [category, setCategory] = useState<Category>("Food");
   const [paymentMethod, setPaymentMethod] = useState<"debit" | "credit">("debit");
-  const [isReady, setIsReady] = useState(false);
+  const [hydratedStorageKey, setHydratedStorageKey] = useState("");
   const [language, setLanguage] = useState<Language>("en");
   const [theme, setTheme] = useState<ThemeId>("kinance");
   const [recurringExpanded, setRecurringExpanded] = useState(true);
   const [oneTimeExpanded, setOneTimeExpanded] = useState(true);
   const dailyChartRef = useRef<HTMLDivElement>(null);
+  const selectedStorageKey =
+    `kinance:${selectedMonth.month}:${selectedMonth.updatedAt}:r${selectedMonth.revision}`;
+  const legacySelectedStorageKey =
+    `euroscope:${selectedMonth.month}:${selectedMonth.updatedAt}:r${selectedMonth.revision}`;
 
   /* Device-local preferences and entries hydrate only after the client mounts. */
   /* eslint-disable react-hooks/set-state-in-effect */
@@ -421,31 +441,34 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
+    let savedData: Partial<SavedFinanceData> | null = null;
     try {
-      const key =
-        `${selectedMonth.month}:${selectedMonth.updatedAt}:r${selectedMonth.revision}`;
       const saved =
-        localStorage.getItem(`kinance:${key}`) ??
-        localStorage.getItem(`euroscope:${key}`);
-      if (saved) {
-        const savedData = JSON.parse(saved) as FinanceData;
-        setData({ ...savedData, salary: selectedMonth.salary });
-      }
-      else setData(selectedMonth);
+        localStorage.getItem(selectedStorageKey) ??
+        localStorage.getItem(legacySelectedStorageKey);
+      if (saved) savedData = JSON.parse(saved) as Partial<SavedFinanceData>;
     } catch {
       // Source data remains available if browser storage is unavailable.
     }
-    setIsReady(true);
-  }, [selectedMonth]);
+    setData(financeDataForMonth(selectedMonth, savedData));
+    setHydratedStorageKey(selectedStorageKey);
+  }, [legacySelectedStorageKey, selectedMonth, selectedStorageKey]);
   /* eslint-enable react-hooks/set-state-in-effect */
 
   useEffect(() => {
-    if (!isReady) return;
-    localStorage.setItem(
-      `kinance:${selectedMonth.month}:${selectedMonth.updatedAt}:r${selectedMonth.revision}`,
-      JSON.stringify(data),
-    );
-  }, [data, isReady, selectedMonth]);
+    if (hydratedStorageKey !== selectedStorageKey) return;
+    try {
+      localStorage.setItem(
+        selectedStorageKey,
+        JSON.stringify({
+          savingsGoal: data.savingsGoal,
+          expenses: data.expenses,
+        } satisfies SavedFinanceData),
+      );
+    } catch {
+      // The canonical cycle remains usable when browser storage is unavailable.
+    }
+  }, [data.expenses, data.savingsGoal, hydratedStorageKey, selectedStorageKey]);
 
   const spent = useMemo(
     () => sumExpenses(data.expenses),

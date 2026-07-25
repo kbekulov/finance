@@ -479,23 +479,9 @@ function createExpenseList(expenses) {
 function renderLedger() {
   const container = element("ledger");
   container.replaceChildren();
-  element("ledger-count").textContent = `${data.expenses.length} ${t("items")}`;
-
-  if (!data.expenses.length) {
-    container.innerHTML = `
-      <div class="empty-state">
-        <span aria-hidden="true">○</span>
-        <h3>${t("nothingSpent")}</h3>
-        <p>${t("monthEmpty", { month: formatMonth(selectedMonth.month) })}</p>
-      </div>
-    `;
-    return;
-  }
 
   const recurringExpenses = data.expenses.filter((expense) => expense.recurring);
   const oneTimeExpenses = data.expenses.filter((expense) => !expense.recurring);
-  const groups = document.createElement("div");
-  groups.className = "expense-groups";
 
   if (recurringExpenses.length) {
     const recurring = document.createElement("section");
@@ -505,7 +491,7 @@ function renderLedger() {
       <div class="expense-group-heading">
         <div>
           <p class="eyebrow">${t("expectedEyebrow")}</p>
-          <h3 id="expected-monthly-title">${t("expectedMonthly")}</h3>
+          <h2 id="expected-monthly-title">${t("expectedMonthly")}</h2>
         </div>
         <span>${recurringExpenses.length} ${t("items")}</span>
       </div>
@@ -523,24 +509,36 @@ function renderLedger() {
       <strong>${formatEuro(recurringTotal)}</strong>
     `;
     recurring.append(footer);
-    groups.append(recurring);
+    container.append(recurring);
   }
+
+  const oneTime = document.createElement("section");
+  oneTime.className = "activity-panel one-time-expenses-table";
+  oneTime.setAttribute("aria-labelledby", "one-time-title");
+  oneTime.innerHTML = `
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">${t("ledger")}</p>
+        <h2 id="one-time-title">${t("oneTimeExpenses")}</h2>
+      </div>
+      <span>${oneTimeExpenses.length} ${t("items")}</span>
+    </div>
+  `;
 
   if (oneTimeExpenses.length) {
-    const oneTime = document.createElement("section");
-    oneTime.className = "one-time-expenses";
-    oneTime.setAttribute("aria-labelledby", "one-time-title");
-    oneTime.innerHTML = `
-      <div class="expense-group-heading compact">
-        <h3 id="one-time-title">${t("oneTimeExpenses")}</h3>
-        <span>${oneTimeExpenses.length} ${t("items")}</span>
-      </div>
-    `;
     oneTime.append(createExpenseList(oneTimeExpenses));
-    groups.append(oneTime);
+  } else {
+    const empty = document.createElement("div");
+    empty.className = "empty-state";
+    empty.innerHTML = `
+      <span aria-hidden="true">○</span>
+      <h3>${t("nothingSpent")}</h3>
+      <p>${t("monthEmpty", { month: formatMonth(selectedMonth.month) })}</p>
+    `;
+    oneTime.append(empty);
   }
 
-  container.append(groups);
+  container.append(oneTime);
 }
 
 function render() {

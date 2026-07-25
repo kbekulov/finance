@@ -52,6 +52,8 @@ test("server-renders the current finance tracker", async () => {
   assert.match(html, /Adobe/);
   assert.match(html, /G Suite/);
   assert.match(html, /class="recurring-expenses"/);
+  assert.match(html, /class="ledger-stack"/);
+  assert.match(html, /class="activity-panel one-time-expenses-table"/);
   assert.match(html, /Expected monthly expenses/);
   assert.match(html, /Expected monthly total/);
   assert.match(html, /€863\.46/);

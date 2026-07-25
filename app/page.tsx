@@ -678,57 +678,48 @@ export default function Home() {
         </section>
 
         <section className="workspace">
-          <div className="activity-panel">
-            <div className="section-heading">
-              <div>
-                <p className="eyebrow">{copy.ledger}</p>
-                <h2>{copy.recent}</h2>
-              </div>
-              <span>{data.expenses.length} {copy.items}</span>
-            </div>
-
-            {data.expenses.length === 0 ? (
-              <div className="empty-state">
-                <span aria-hidden="true">○</span>
-                <h3>{copy.empty}</h3>
-                <p>{monthLabel}: {copy.emptyText}</p>
-              </div>
-            ) : (
-              <div className="expense-groups">
-                {recurringExpenses.length > 0 && (
-                  <section
-                    className="recurring-expenses"
-                    aria-labelledby="expected-monthly-title"
-                  >
-                    <div className="expense-group-heading">
-                      <div>
-                        <p className="eyebrow">{copy.expectedEyebrow}</p>
-                        <h3 id="expected-monthly-title">{copy.expectedMonthly}</h3>
-                      </div>
-                      <span>{recurringExpenses.length} {copy.items}</span>
-                    </div>
-                    {expenseList(recurringExpenses)}
-                    <footer className="recurring-total">
-                      <span>{copy.expectedMonthlyTotal}</span>
-                      <strong>{euro.format(recurringTotal)}</strong>
-                    </footer>
-                  </section>
-                )}
-
-                {oneTimeExpenses.length > 0 && (
-                  <section
-                    className="one-time-expenses"
-                    aria-labelledby="one-time-title"
-                  >
-                    <div className="expense-group-heading compact">
-                      <h3 id="one-time-title">{copy.oneTimeExpenses}</h3>
-                      <span>{oneTimeExpenses.length} {copy.items}</span>
-                    </div>
-                    {expenseList(oneTimeExpenses)}
-                  </section>
-                )}
-              </div>
+          <div className="ledger-stack">
+            {recurringExpenses.length > 0 && (
+              <section
+                className="recurring-expenses"
+                aria-labelledby="expected-monthly-title"
+              >
+                <div className="expense-group-heading">
+                  <div>
+                    <p className="eyebrow">{copy.expectedEyebrow}</p>
+                    <h2 id="expected-monthly-title">{copy.expectedMonthly}</h2>
+                  </div>
+                  <span>{recurringExpenses.length} {copy.items}</span>
+                </div>
+                {expenseList(recurringExpenses)}
+                <footer className="recurring-total">
+                  <span>{copy.expectedMonthlyTotal}</span>
+                  <strong>{euro.format(recurringTotal)}</strong>
+                </footer>
+              </section>
             )}
+
+            <section
+              className="activity-panel one-time-expenses-table"
+              aria-labelledby="one-time-title"
+            >
+              <div className="section-heading">
+                <div>
+                  <p className="eyebrow">{copy.ledger}</p>
+                  <h2 id="one-time-title">{copy.oneTimeExpenses}</h2>
+                </div>
+                <span>{oneTimeExpenses.length} {copy.items}</span>
+              </div>
+              {oneTimeExpenses.length > 0 ? (
+                expenseList(oneTimeExpenses)
+              ) : (
+                <div className="empty-state">
+                  <span aria-hidden="true">○</span>
+                  <h3>{copy.empty}</h3>
+                  <p>{monthLabel}: {copy.emptyText}</p>
+                </div>
+              )}
+            </section>
           </div>
 
           <aside className="add-panel" aria-labelledby="add-title">

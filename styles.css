@@ -951,8 +951,9 @@ h1 em {
   margin-bottom: 18px;
 }
 
-.expense-groups {
+.ledger-stack {
   display: grid;
+  min-width: 0;
   gap: 18px;
 }
 
@@ -962,9 +963,13 @@ h1 em {
   border-radius: 18px;
   background:
     linear-gradient(145deg, rgba(10, 132, 255, 0.11), transparent 52%),
-    rgba(10, 10, 12, 0.34);
+    rgba(28, 28, 30, 0.82);
   padding: 20px 20px 0;
-  box-shadow: inset 0 1px rgba(255, 255, 255, 0.05);
+  box-shadow:
+    inset 0 1px rgba(255, 255, 255, 0.05),
+    var(--shadow-card);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
 }
 
 .expense-group-heading {
@@ -975,7 +980,7 @@ h1 em {
   margin-bottom: 10px;
 }
 
-.expense-group-heading h3 {
+.expense-group-heading h2 {
   margin: 3px 0 0;
   color: var(--label);
   font-size: 17px;
@@ -991,14 +996,6 @@ h1 em {
   font-size: 9px;
   font-weight: 700;
   letter-spacing: 0.08em;
-}
-
-.expense-group-heading.compact {
-  margin: 0 4px 7px;
-}
-
-.expense-group-heading.compact h3 {
-  font-size: 14px;
 }
 
 .recurring-total {
@@ -1024,8 +1021,8 @@ h1 em {
   letter-spacing: -0.02em;
 }
 
-.one-time-expenses {
-  padding: 4px;
+.one-time-expenses-table {
+  min-width: 0;
 }
 
 .expense-list {

@@ -77,6 +77,10 @@ const COPY = {
     ledger: "THE LEDGER",
     recent: "Recent expenses",
     items: "ITEMS",
+    expectedEyebrow: "EXPECTED",
+    expectedMonthly: "Expected monthly expenses",
+    expectedMonthlyTotal: "Expected monthly total",
+    oneTimeExpenses: "One-time expenses",
     empty: "Nothing spent yet",
     emptyText: "expenses will appear here as you add them.",
     monthly: "Monthly",
@@ -133,6 +137,10 @@ const COPY = {
     ledger: "ЖУРНАЛ",
     recent: "Последние расходы",
     items: "ЗАПИСЕЙ",
+    expectedEyebrow: "ОЖИДАЕТСЯ",
+    expectedMonthly: "Ожидаемые ежемесячные расходы",
+    expectedMonthlyTotal: "Всего ожидается в месяц",
+    oneTimeExpenses: "Разовые расходы",
     empty: "Расходов пока нет",
     emptyText: "расходы появятся здесь после добавления.",
     monthly: "Ежемесячно",
@@ -327,6 +335,12 @@ export default function Home() {
       })),
     [data.expenses],
   );
+  const recurringExpenses = data.expenses.filter((expense) => expense.recurring);
+  const oneTimeExpenses = data.expenses.filter((expense) => !expense.recurring);
+  const recurringTotal = recurringExpenses.reduce(
+    (sum, expense) => sum + expense.amount,
+    0,
+  );
   const spendable = Math.max(data.salary - data.savingsGoal, 0);
   const remaining = data.salary - data.savingsGoal - spent;
   const usedPercent = spendable > 0 ? Math.min((spent / spendable) * 100, 100) : 0;
@@ -358,6 +372,30 @@ export default function Home() {
   const categoryLabel = (name: Category) => CATEGORY_LABELS[language][name];
   const expenseNoteLabel = (expense: Expense) =>
     expense.noteTranslations?.[language] ?? expense.note;
+  const expenseList = (expenses: Expense[]) => (
+    <ul className="expense-list">
+      {expenses.map((expense) => (
+        <li key={expense.id}>
+          <span className="expense-monogram" aria-hidden="true">
+            {categorySymbol(expense.category)}
+          </span>
+          <span className="expense-info">
+            <strong>{expenseNoteLabel(expense)}</strong>
+            <small>
+              {categoryLabel(expense.category)} ·{" "}
+              {expense.recurring ? `${copy.monthly} · ` : ""}
+              {sourceLabel(expense.source, language)} ·{" "}
+              {new Date(`${expense.date}T12:00:00`).toLocaleDateString(locale, {
+                day: "numeric",
+                month: "short",
+              })}
+            </small>
+          </span>
+          <strong className="expense-amount">−{euro.format(expense.amount)}</strong>
+        </li>
+      ))}
+    </ul>
+  );
   const rankedCategories = [...categoryTotals]
     .filter((item) => item.amount > 0)
     .sort((a, b) => b.amount - a.amount);
@@ -656,27 +694,40 @@ export default function Home() {
                 <p>{monthLabel}: {copy.emptyText}</p>
               </div>
             ) : (
-              <ul className="expense-list">
-                {data.expenses.map((expense) => (
-                  <li key={expense.id}>
-                    <span className="expense-monogram" aria-hidden="true">
-                      {categorySymbol(expense.category)}
-                    </span>
-                    <span className="expense-info">
-                      <strong>{expenseNoteLabel(expense)}</strong>
-                      <small>
-                        {categoryLabel(expense.category)} · {expense.recurring ? `${copy.monthly} · ` : ""}
-                        {sourceLabel(expense.source, language)} ·{" "}
-                        {new Date(`${expense.date}T12:00:00`).toLocaleDateString(locale, {
-                          day: "numeric",
-                          month: "short",
-                        })}
-                      </small>
-                    </span>
-                    <strong className="expense-amount">−{euro.format(expense.amount)}</strong>
-                  </li>
-                ))}
-              </ul>
+              <div className="expense-groups">
+                {recurringExpenses.length > 0 && (
+                  <section
+                    className="recurring-expenses"
+                    aria-labelledby="expected-monthly-title"
+                  >
+                    <div className="expense-group-heading">
+                      <div>
+                        <p className="eyebrow">{copy.expectedEyebrow}</p>
+                        <h3 id="expected-monthly-title">{copy.expectedMonthly}</h3>
+                      </div>
+                      <span>{recurringExpenses.length} {copy.items}</span>
+                    </div>
+                    {expenseList(recurringExpenses)}
+                    <footer className="recurring-total">
+                      <span>{copy.expectedMonthlyTotal}</span>
+                      <strong>{euro.format(recurringTotal)}</strong>
+                    </footer>
+                  </section>
+                )}
+
+                {oneTimeExpenses.length > 0 && (
+                  <section
+                    className="one-time-expenses"
+                    aria-labelledby="one-time-title"
+                  >
+                    <div className="expense-group-heading compact">
+                      <h3 id="one-time-title">{copy.oneTimeExpenses}</h3>
+                      <span>{oneTimeExpenses.length} {copy.items}</span>
+                    </div>
+                    {expenseList(oneTimeExpenses)}
+                  </section>
+                )}
+              </div>
             )}
           </div>
 

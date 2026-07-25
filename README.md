@@ -117,6 +117,8 @@ Edit the existing record instead of adding a duplicate. Preserve its amount, dat
 
 Store each recurring charge as a normal expense with `recurring: true` and `frequency: "monthly"`. When opening a new month, carry recurring records forward with new month-specific IDs and dates, then apply any user-requested cancellations or amount changes.
 
+Render every expense marked `recurring: true` inside the visually distinct expected-monthly-expenses wrapper. Keep one-time expenses in their own group. The recurring wrapper footer must always calculate and display the sum of the recurring records in the selected salary cycle.
+
 ## Supported categories
 
 Internal values must remain exactly:

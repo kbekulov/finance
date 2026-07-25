@@ -25,6 +25,10 @@ const TRANSLATIONS = {
     whereMoneyGoes: "Where your money goes",
     ledger: "THE LEDGER",
     recentExpenses: "Recent expenses",
+    expectedEyebrow: "EXPECTED",
+    expectedMonthly: "Expected monthly expenses",
+    expectedMonthlyTotal: "Expected monthly total",
+    oneTimeExpenses: "One-time expenses",
     quickEntry: "QUICK ENTRY",
     addExpense: "Add expense",
     formIntro: "Log something now, or simply send the amount in our chat.",
@@ -93,6 +97,10 @@ const TRANSLATIONS = {
     whereMoneyGoes: "Куда уходят деньги",
     ledger: "ЖУРНАЛ",
     recentExpenses: "Последние расходы",
+    expectedEyebrow: "ОЖИДАЕТСЯ",
+    expectedMonthly: "Ожидаемые ежемесячные расходы",
+    expectedMonthlyTotal: "Всего ожидается в месяц",
+    oneTimeExpenses: "Разовые расходы",
     quickEntry: "БЫСТРОЕ ДОБАВЛЕНИЕ",
     addExpense: "Добавить расход",
     formIntro: "Добавьте расход здесь или просто отправьте сумму в чате.",
@@ -444,25 +452,10 @@ function renderBreakdown() {
   );
 }
 
-function renderLedger() {
-  const container = element("ledger");
-  container.replaceChildren();
-  element("ledger-count").textContent = `${data.expenses.length} ${t("items")}`;
-
-  if (!data.expenses.length) {
-    container.innerHTML = `
-      <div class="empty-state">
-        <span aria-hidden="true">○</span>
-        <h3>${t("nothingSpent")}</h3>
-        <p>${t("monthEmpty", { month: formatMonth(selectedMonth.month) })}</p>
-      </div>
-    `;
-    return;
-  }
-
+function createExpenseList(expenses) {
   const list = document.createElement("ul");
   list.className = "expense-list";
-  data.expenses.forEach((expense) => {
+  expenses.forEach((expense) => {
     const [code] = categoryCode(expense.category);
     const date = new Date(`${expense.date}T12:00:00`).toLocaleDateString(locale(), {
       day: "numeric",
@@ -480,7 +473,74 @@ function renderLedger() {
     item.querySelector(".expense-info strong").textContent = expenseNoteLabel(expense);
     list.append(item);
   });
-  container.append(list);
+  return list;
+}
+
+function renderLedger() {
+  const container = element("ledger");
+  container.replaceChildren();
+  element("ledger-count").textContent = `${data.expenses.length} ${t("items")}`;
+
+  if (!data.expenses.length) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <span aria-hidden="true">○</span>
+        <h3>${t("nothingSpent")}</h3>
+        <p>${t("monthEmpty", { month: formatMonth(selectedMonth.month) })}</p>
+      </div>
+    `;
+    return;
+  }
+
+  const recurringExpenses = data.expenses.filter((expense) => expense.recurring);
+  const oneTimeExpenses = data.expenses.filter((expense) => !expense.recurring);
+  const groups = document.createElement("div");
+  groups.className = "expense-groups";
+
+  if (recurringExpenses.length) {
+    const recurring = document.createElement("section");
+    recurring.className = "recurring-expenses";
+    recurring.setAttribute("aria-labelledby", "expected-monthly-title");
+    recurring.innerHTML = `
+      <div class="expense-group-heading">
+        <div>
+          <p class="eyebrow">${t("expectedEyebrow")}</p>
+          <h3 id="expected-monthly-title">${t("expectedMonthly")}</h3>
+        </div>
+        <span>${recurringExpenses.length} ${t("items")}</span>
+      </div>
+    `;
+    recurring.append(createExpenseList(recurringExpenses));
+
+    const footer = document.createElement("footer");
+    footer.className = "recurring-total";
+    const recurringTotal = recurringExpenses.reduce(
+      (sum, expense) => sum + safeNumber(expense.amount),
+      0,
+    );
+    footer.innerHTML = `
+      <span>${t("expectedMonthlyTotal")}</span>
+      <strong>${formatEuro(recurringTotal)}</strong>
+    `;
+    recurring.append(footer);
+    groups.append(recurring);
+  }
+
+  if (oneTimeExpenses.length) {
+    const oneTime = document.createElement("section");
+    oneTime.className = "one-time-expenses";
+    oneTime.setAttribute("aria-labelledby", "one-time-title");
+    oneTime.innerHTML = `
+      <div class="expense-group-heading compact">
+        <h3 id="one-time-title">${t("oneTimeExpenses")}</h3>
+        <span>${oneTimeExpenses.length} ${t("items")}</span>
+      </div>
+    `;
+    oneTime.append(createExpenseList(oneTimeExpenses));
+    groups.append(oneTime);
+  }
+
+  container.append(groups);
 }
 
 function render() {

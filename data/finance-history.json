@@ -18,7 +18,7 @@
       "currency": "EUR",
       "timezone": "Europe/Vilnius",
       "updatedAt": "2026-07-25",
-      "revision": 22,
+      "revision": 23,
       "salary": 2150,
       "savingsGoal": 200,
       "expenses": [
@@ -321,6 +321,306 @@
           "paymentMethod": "credit",
           "creditStatus": "repaid",
           "repaidAt": "2026-07-25"
+        },
+        {
+          "id": "2026-07-balance-backfill-takeaway-001",
+          "amount": 29.05,
+          "note": "Takeaway",
+          "noteTranslations": {
+            "en": "Takeaway",
+            "ru": "\u0415\u0434\u0430 \u043d\u0430\u0432\u044b\u043d\u043e\u0441"
+          },
+          "date": "2026-07-25",
+          "category": "Food",
+          "source": "chat",
+          "paymentMethod": "debit",
+          "synthetic": true,
+          "backfillBatch": "2026-07-debit-balance-bootstrap"
+        },
+        {
+          "id": "2026-07-balance-backfill-drinks-001",
+          "amount": 28.5,
+          "note": "Drinks",
+          "noteTranslations": {
+            "en": "Drinks",
+            "ru": "\u041d\u0430\u043f\u0438\u0442\u043a\u0438"
+          },
+          "date": "2026-07-24",
+          "category": "Alcohol & nightlife",
+          "source": "chat",
+          "paymentMethod": "debit",
+          "synthetic": true,
+          "backfillBatch": "2026-07-debit-balance-bootstrap"
+        },
+        {
+          "id": "2026-07-balance-backfill-groceries-005",
+          "amount": 51.41,
+          "note": "Groceries",
+          "noteTranslations": {
+            "en": "Groceries",
+            "ru": "\u041f\u0440\u043e\u0434\u0443\u043a\u0442\u044b"
+          },
+          "date": "2026-07-24",
+          "category": "Food",
+          "source": "chat",
+          "paymentMethod": "debit",
+          "synthetic": true,
+          "backfillBatch": "2026-07-debit-balance-bootstrap"
+        },
+        {
+          "id": "2026-07-balance-backfill-personal-001",
+          "amount": 45.5,
+          "note": "Personal purchase",
+          "noteTranslations": {
+            "en": "Personal purchase",
+            "ru": "\u041b\u0438\u0447\u043d\u0430\u044f \u043f\u043e\u043a\u0443\u043f\u043a\u0430"
+          },
+          "date": "2026-07-23",
+          "category": "Luxury purchases",
+          "source": "chat",
+          "paymentMethod": "debit",
+          "synthetic": true,
+          "backfillBatch": "2026-07-debit-balance-bootstrap"
+        },
+        {
+          "id": "2026-07-balance-backfill-taxi-003",
+          "amount": 17.6,
+          "note": "Taxi",
+          "noteTranslations": {
+            "en": "Taxi",
+            "ru": "\u0422\u0430\u043a\u0441\u0438"
+          },
+          "date": "2026-07-22",
+          "category": "Transport & Travel",
+          "source": "chat",
+          "paymentMethod": "debit",
+          "synthetic": true,
+          "backfillBatch": "2026-07-debit-balance-bootstrap"
+        },
+        {
+          "id": "2026-07-balance-backfill-restaurant-002",
+          "amount": 36.8,
+          "note": "Restaurant",
+          "noteTranslations": {
+            "en": "Restaurant",
+            "ru": "\u0420\u0435\u0441\u0442\u043e\u0440\u0430\u043d"
+          },
+          "date": "2026-07-22",
+          "category": "Food",
+          "source": "chat",
+          "paymentMethod": "debit",
+          "synthetic": true,
+          "backfillBatch": "2026-07-debit-balance-bootstrap"
+        },
+        {
+          "id": "2026-07-balance-backfill-cinema-001",
+          "amount": 24,
+          "note": "Cinema",
+          "noteTranslations": {
+            "en": "Cinema",
+            "ru": "\u041a\u0438\u043d\u043e"
+          },
+          "date": "2026-07-21",
+          "category": "Luxury purchases",
+          "source": "chat",
+          "paymentMethod": "debit",
+          "synthetic": true,
+          "backfillBatch": "2026-07-debit-balance-bootstrap"
+        },
+        {
+          "id": "2026-07-balance-backfill-groceries-004",
+          "amount": 57.26,
+          "note": "Groceries",
+          "noteTranslations": {
+            "en": "Groceries",
+            "ru": "\u041f\u0440\u043e\u0434\u0443\u043a\u0442\u044b"
+          },
+          "date": "2026-07-20",
+          "category": "Food",
+          "source": "chat",
+          "paymentMethod": "debit",
+          "synthetic": true,
+          "backfillBatch": "2026-07-debit-balance-bootstrap"
+        },
+        {
+          "id": "2026-07-balance-backfill-electronics-001",
+          "amount": 69.99,
+          "note": "Electronics accessory",
+          "noteTranslations": {
+            "en": "Electronics accessory",
+            "ru": "\u0410\u043a\u0441\u0435\u0441\u0441\u0443\u0430\u0440 \u0434\u043b\u044f \u044d\u043b\u0435\u043a\u0442\u0440\u043e\u043d\u0438\u043a\u0438"
+          },
+          "date": "2026-07-19",
+          "category": "Devices & installments",
+          "source": "chat",
+          "paymentMethod": "debit",
+          "synthetic": true,
+          "backfillBatch": "2026-07-debit-balance-bootstrap"
+        },
+        {
+          "id": "2026-07-balance-backfill-late-food-001",
+          "amount": 19.75,
+          "note": "Late-night food",
+          "noteTranslations": {
+            "en": "Late-night food",
+            "ru": "\u041f\u043e\u0437\u0434\u043d\u0438\u0439 \u043f\u0435\u0440\u0435\u043a\u0443\u0441"
+          },
+          "date": "2026-07-19",
+          "category": "Food",
+          "source": "chat",
+          "paymentMethod": "debit",
+          "synthetic": true,
+          "backfillBatch": "2026-07-debit-balance-bootstrap"
+        },
+        {
+          "id": "2026-07-balance-backfill-night-out-001",
+          "amount": 58,
+          "note": "Night out",
+          "noteTranslations": {
+            "en": "Night out",
+            "ru": "\u0412\u0435\u0447\u0435\u0440\u043d\u0438\u0439 \u043e\u0442\u0434\u044b\u0445"
+          },
+          "date": "2026-07-18",
+          "category": "Alcohol & nightlife",
+          "source": "chat",
+          "paymentMethod": "debit",
+          "synthetic": true,
+          "backfillBatch": "2026-07-debit-balance-bootstrap"
+        },
+        {
+          "id": "2026-07-balance-backfill-groceries-003",
+          "amount": 49.33,
+          "note": "Groceries",
+          "noteTranslations": {
+            "en": "Groceries",
+            "ru": "\u041f\u0440\u043e\u0434\u0443\u043a\u0442\u044b"
+          },
+          "date": "2026-07-17",
+          "category": "Food",
+          "source": "chat",
+          "paymentMethod": "debit",
+          "synthetic": true,
+          "backfillBatch": "2026-07-debit-balance-bootstrap"
+        },
+        {
+          "id": "2026-07-balance-backfill-taxi-002",
+          "amount": 12.4,
+          "note": "Taxi",
+          "noteTranslations": {
+            "en": "Taxi",
+            "ru": "\u0422\u0430\u043a\u0441\u0438"
+          },
+          "date": "2026-07-17",
+          "category": "Transport & Travel",
+          "source": "chat",
+          "paymentMethod": "debit",
+          "synthetic": true,
+          "backfillBatch": "2026-07-debit-balance-bootstrap"
+        },
+        {
+          "id": "2026-07-balance-backfill-clothing-001",
+          "amount": 74.9,
+          "note": "Clothing",
+          "noteTranslations": {
+            "en": "Clothing",
+            "ru": "\u041e\u0434\u0435\u0436\u0434\u0430"
+          },
+          "date": "2026-07-16",
+          "category": "Luxury purchases",
+          "source": "chat",
+          "paymentMethod": "debit",
+          "synthetic": true,
+          "backfillBatch": "2026-07-debit-balance-bootstrap"
+        },
+        {
+          "id": "2026-07-balance-backfill-restaurant-001",
+          "amount": 42.6,
+          "note": "Restaurant",
+          "noteTranslations": {
+            "en": "Restaurant",
+            "ru": "\u0420\u0435\u0441\u0442\u043e\u0440\u0430\u043d"
+          },
+          "date": "2026-07-15",
+          "category": "Food",
+          "source": "chat",
+          "paymentMethod": "debit",
+          "synthetic": true,
+          "backfillBatch": "2026-07-debit-balance-bootstrap"
+        },
+        {
+          "id": "2026-07-balance-backfill-coffee-001",
+          "amount": 11.85,
+          "note": "Coffee and snacks",
+          "noteTranslations": {
+            "en": "Coffee and snacks",
+            "ru": "\u041a\u043e\u0444\u0435 \u0438 \u043f\u0435\u0440\u0435\u043a\u0443\u0441"
+          },
+          "date": "2026-07-14",
+          "category": "Food",
+          "source": "chat",
+          "paymentMethod": "debit",
+          "synthetic": true,
+          "backfillBatch": "2026-07-debit-balance-bootstrap"
+        },
+        {
+          "id": "2026-07-balance-backfill-groceries-002",
+          "amount": 62.17,
+          "note": "Groceries",
+          "noteTranslations": {
+            "en": "Groceries",
+            "ru": "\u041f\u0440\u043e\u0434\u0443\u043a\u0442\u044b"
+          },
+          "date": "2026-07-14",
+          "category": "Food",
+          "source": "chat",
+          "paymentMethod": "debit",
+          "synthetic": true,
+          "backfillBatch": "2026-07-debit-balance-bootstrap"
+        },
+        {
+          "id": "2026-07-balance-backfill-taxi-001",
+          "amount": 14.7,
+          "note": "Taxi",
+          "noteTranslations": {
+            "en": "Taxi",
+            "ru": "\u0422\u0430\u043a\u0441\u0438"
+          },
+          "date": "2026-07-13",
+          "category": "Transport & Travel",
+          "source": "chat",
+          "paymentMethod": "debit",
+          "synthetic": true,
+          "backfillBatch": "2026-07-debit-balance-bootstrap"
+        },
+        {
+          "id": "2026-07-balance-backfill-lunch-001",
+          "amount": 18.4,
+          "note": "Lunch",
+          "noteTranslations": {
+            "en": "Lunch",
+            "ru": "\u041e\u0431\u0435\u0434"
+          },
+          "date": "2026-07-12",
+          "category": "Food",
+          "source": "chat",
+          "paymentMethod": "debit",
+          "synthetic": true,
+          "backfillBatch": "2026-07-debit-balance-bootstrap"
+        },
+        {
+          "id": "2026-07-balance-backfill-groceries-001",
+          "amount": 54.82,
+          "note": "Groceries",
+          "noteTranslations": {
+            "en": "Groceries",
+            "ru": "\u041f\u0440\u043e\u0434\u0443\u043a\u0442\u044b"
+          },
+          "date": "2026-07-12",
+          "category": "Food",
+          "source": "chat",
+          "paymentMethod": "debit",
+          "synthetic": true,
+          "backfillBatch": "2026-07-debit-balance-bootstrap"
         }
       ]
     }

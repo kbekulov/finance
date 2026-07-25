@@ -47,7 +47,21 @@ test("server-renders the current finance tracker", async () => {
   assert.match(html, /Apple Devices/);
   assert.match(html, /iPad/);
   assert.match(html, /Updated 25 July 2026/);
-  assert.match(html, /Today<!-- --> · <!-- -->25 Jul/);
+  const vilniusDateParts = Object.fromEntries(
+    new Intl.DateTimeFormat("en-GB", {
+      timeZone: "Europe/Vilnius",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    })
+      .formatToParts(new Date())
+      .filter(({ type }) => ["year", "month", "day"].includes(type))
+      .map(({ type, value }) => [type, Number(value)]),
+  );
+  assert.match(
+    html,
+    new RegExp(`Today<!-- --> · <!-- -->${vilniusDateParts.day} Jul`),
+  );
   assert.match(html, /10 Jul/i);
   assert.match(html, /11 Aug/i);
   assert.match(html, /YOUR SALARY CYCLE AT A GLANCE/);
@@ -66,7 +80,7 @@ test("server-renders the current finance tracker", async () => {
   assert.match(html, /<details[^>]*class="expense-table recurring-expenses"/);
   assert.match(html, /<summary class="expense-table-summary"/);
   assert.match(html, /One-time expenses/);
-  assert.match(html, /€14\.99/);
+  assert.match(html, /€794\.02/);
   assert.match(html, /Expected monthly expenses/);
   assert.equal((html.match(/Expected monthly expenses/g) ?? []).length, 1);
   assert.doesNotMatch(html, /Expected monthly total/);
@@ -81,10 +95,24 @@ test("server-renders the current finance tracker", async () => {
   assert.match(html, /Keturi vėjai 0\.4 l/);
   assert.match(html, /Shelton&#x27;s pear cider/);
   assert.match(html, /Alcohol &amp; nightlife/);
-  assert.match(html, /€951\.46/);
-  assert.match(html, /€998\.54/);
-  assert.match(html, /49%<!-- --> <!-- -->SPENT|49% SPENT/);
-  assert.match(html, /€59<!-- --> <!-- -->\/ day|€59 \/ day/);
+  assert.match(html, /€1,730\.49/);
+  assert.match(html, /€219\.51/);
+  assert.match(html, /89%<!-- --> <!-- -->SPENT|89% SPENT/);
+  const todayUtc = Date.UTC(
+    vilniusDateParts.year,
+    vilniusDateParts.month - 1,
+    vilniusDateParts.day,
+  );
+  const cycleEndUtc = Date.UTC(2026, 7, 11);
+  const renderedRemainingDays = Math.max(
+    Math.round((cycleEndUtc - todayUtc) / 86400000),
+    1,
+  );
+  const renderedDailyPace = Math.round(219.51 / renderedRemainingDays);
+  assert.match(
+    html,
+    new RegExp(`€${renderedDailyPace}(?:<!-- --> <!-- -->)?/ day`),
+  );
   assert.match(html, /Beer/);
   assert.match(html, /Ice cream/);
   assert.match(html, /class="stat-card salary salary-locked"/);
@@ -123,8 +151,10 @@ test("keeps database history and translations aligned", async () => {
   assert.match(manual, /salary cycle whose inclusive `period\.start` through `period\.end` contains the chosen receipt date/);
   assert.match(manual, /use the actual current `Europe\/Vilnius` calendar day and add the expense to the current salary cycle/);
   assert.match(manual, /never misdate it into the current cycle/);
+  assert.match(manual, /Synthetic expense history is exceptional/);
+  assert.match(manual, /`synthetic: true` and a stable shared `backfillBatch` identifier/);
   assert.equal(current.updatedAt, "2026-07-25");
-  assert.equal(current.revision, 22);
+  assert.equal(current.revision, 23);
   assert.equal(current.savingsGoal, 200);
   const supportedCategories = new Set([
     "Food",
@@ -155,7 +185,10 @@ test("keeps database history and translations aligned", async () => {
       assert.ok(!expenseIds.has(expense.id));
       expenseIds.add(expense.id);
       assert.ok(Number.isFinite(expense.amount) && expense.amount > 0);
-      assert.equal(Math.round(expense.amount * 100), expense.amount * 100);
+      assert.ok(
+        Math.abs(Math.round(expense.amount * 100) - expense.amount * 100) <
+          1e-8,
+      );
       assert.ok(supportedCategories.has(expense.category));
       assert.ok(["chat", "site", "receipt"].includes(expense.source));
       assert.ok(["debit", "credit"].includes(expense.paymentMethod));
@@ -419,11 +452,25 @@ test("keeps database history and translations aligned", async () => {
   const spentCents = sumCents(current.expenses);
   const recurringCents = sumCents(current.expenses.filter((expense) => expense.recurring));
   const oneTimeCents = sumCents(current.expenses.filter((expense) => !expense.recurring));
-  assert.equal(spentCents, 95146);
+  const syntheticBackfill = current.expenses.filter(
+    (expense) => expense.backfillBatch === "2026-07-debit-balance-bootstrap",
+  );
+  assert.equal(syntheticBackfill.length, 20);
+  assert.equal(sumCents(syntheticBackfill), 77903);
+  assert.equal(new Set(syntheticBackfill.map((expense) => expense.date)).size, 14);
+  for (const expense of syntheticBackfill) {
+    assert.equal(expense.synthetic, true);
+    assert.equal(expense.source, "chat");
+    assert.equal(expense.paymentMethod, "debit");
+    assert.equal(expense.recurring, undefined);
+    assert.ok(expense.date >= "2026-07-12");
+    assert.ok(expense.date <= "2026-07-25");
+  }
+  assert.equal(spentCents, 173049);
   assert.equal(recurringCents, 93647);
-  assert.equal(oneTimeCents, 1499);
+  assert.equal(oneTimeCents, 79402);
   assert.equal(recurringCents + oneTimeCents, spentCents);
-  assert.equal(current.salary * 100 - current.savingsGoal * 100 - spentCents, 99854);
+  assert.equal(current.salary * 100 - current.savingsGoal * 100 - spentCents, 21951);
   const calendarDay = (dateKey) => {
     const [year, month, day] = dateKey.split("-").map(Number);
     return Date.UTC(year, month - 1, day) / 86400000;
@@ -434,17 +481,17 @@ test("keeps database history and translations aligned", async () => {
   assert.equal(totalCycleDays, 33);
   assert.equal(elapsedCycleDays, 16);
   assert.equal(remainingDaysAfterToday, 17);
-  assert.equal(Math.round((99854 / 100) / remainingDaysAfterToday), 59);
-  assert.equal(Math.round((spentCents / (current.salary * 100 - current.savingsGoal * 100)) * 100), 49);
+  assert.equal(Math.round((21951 / 100) / remainingDaysAfterToday), 13);
+  assert.equal(Math.round((spentCents / (current.salary * 100 - current.savingsGoal * 100)) * 100), 89);
 
   const salaryHistoryScenario = [
-    { salary: 2150, savingsGoal: 200, spent: 951.46 },
-    { salary: 2750, savingsGoal: 200, spent: 951.46 },
+    { salary: 2150, savingsGoal: 200, spent: 1730.49 },
+    { salary: 2750, savingsGoal: 200, spent: 1730.49 },
   ].map((cycle) => ({
     remaining: Math.round((cycle.salary - cycle.savingsGoal - cycle.spent) * 100) / 100,
     usedPercent: (cycle.spent / Math.max(cycle.salary - cycle.savingsGoal, 0)) * 100,
   }));
-  assert.deepEqual(salaryHistoryScenario.map(({ remaining }) => remaining), [998.54, 1598.54]);
+  assert.deepEqual(salaryHistoryScenario.map(({ remaining }) => remaining), [219.51, 819.51]);
   assert.ok(salaryHistoryScenario[1].usedPercent < salaryHistoryScenario[0].usedPercent);
   for (const expense of current.expenses) {
     assert.equal(typeof expense.noteTranslations?.en, "string");

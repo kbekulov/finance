@@ -94,6 +94,17 @@ A message whose financial intent is simply a number means: add that amount in eu
 - Do not mark it recurring unless the user says it repeats.
 - If the purpose is genuinely unknown, use a neutral note such as `Unspecified expense`; do not fabricate a merchant.
 
+### Synthetic balance backfill
+
+Synthetic expense history is exceptional and may be added only when the user explicitly requests a one-time balance reconciliation or demo-data bootstrap. It must never be inferred from a stated card balance or created as part of routine expense entry.
+
+- Reconcile in integer cents so the resulting calculated balance matches the user-supplied target exactly.
+- Keep every synthetic record inside the date range and salary cycle explicitly requested by the user, using `Europe/Vilnius` calendar dates.
+- Use generic, plausible expense names and existing broad categories without inventing merchants, receipts, transaction times, or other evidence.
+- Set `source: "chat"` and use the normal debit or credit rule.
+- Mark every generated record with `synthetic: true` and a stable shared `backfillBatch` identifier so the entire batch remains auditable and removable.
+- Do not carry synthetic one-time expenses into a future salary cycle.
+
 ### Receipt image
 
 Read the final amount actually paid, not subtotal, tax, savings, balance due before payment, or a single line item.

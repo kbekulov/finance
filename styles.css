@@ -28,6 +28,8 @@
     "Helvetica Neue", sans-serif;
   --display-font: var(--font-family);
   --banner-fade: #050506;
+  --chart-accent: #5ac8fa;
+  --chart-glow: #0a84ff;
 }
 
 :root[data-theme="nier-automata"] {
@@ -59,6 +61,8 @@
   --font-family: "Helvetica Neue", Arial, sans-serif;
   --display-font: Georgia, "Times New Roman", serif;
   --banner-fade: #e7eff1;
+  --chart-accent: #526f78;
+  --chart-glow: #8eabb3;
 }
 
 :root[data-theme="tohsaka-rin"] {
@@ -85,6 +89,8 @@
   --shadow-glass: 0 14px 40px rgba(62, 0, 42, 0.38);
   --display-font: Georgia, "Times New Roman", serif;
   --banner-fade: #080713;
+  --chart-accent: #ff5b82;
+  --chart-glow: #e52a55;
 }
 
 * {
@@ -901,8 +907,9 @@ main::before {
 
 .daily-expense-chart {
   width: calc(100% + 16px);
-  min-height: 250px;
-  margin: -2px -8px 22px;
+  height: 84px;
+  min-height: 84px;
+  margin: -2px -8px 16px;
   overflow: hidden;
 }
 
@@ -2142,9 +2149,10 @@ footer p {
   }
 
   .daily-expense-chart {
-    min-height: 205px;
-    margin-top: -8px;
-    margin-bottom: 14px;
+    height: 84px;
+    min-height: 84px;
+    margin-top: -4px;
+    margin-bottom: 12px;
   }
 
   .timeline-copy {

@@ -470,9 +470,9 @@ test("keeps database history and translations aligned", async () => {
     assert.doesNotMatch(source, /const TODAY\s*=/);
   }
   assert.match(index, /id="theme-select"/);
-  assert.match(index, /styles\.css\?v=24/);
+  assert.match(index, /styles\.css\?v=25/);
   assert.match(index, /public\/vendor\/apexcharts\.min\.js\?v=21/);
-  assert.match(index, /script\.js\?v=24/);
+  assert.match(index, /script\.js\?v=25/);
   assert.match(index, /data-current-theme="kinance"/);
   assert.match(index, /id="credit-alert"[^>]*hidden/);
   assert.match(index, /id="payment-method"/);
@@ -496,7 +496,14 @@ test("keeps database history and translations aligned", async () => {
   assert.match(styles, /\.theme-banner img\s*\{[^}]*object-fit:\s*cover/s);
   assert.match(styles, /\.theme-banner\s*\{[^}]*background:\s*transparent/s);
   assert.doesNotMatch(styles, /\.daily-chart-panel\s*\{/);
-  assert.match(styles, /\.daily-expense-chart\s*\{[^}]*min-height:\s*250px/s);
+  assert.match(styles, /\.daily-expense-chart\s*\{[^}]*height:\s*84px[^}]*min-height:\s*84px/s);
+  assert.match(styles, /--chart-accent:\s*#5ac8fa/);
+  assert.match(styles, /:root\[data-theme="nier-automata"\][^{]*\{[^}]*--chart-accent:\s*#526f78/s);
+  assert.match(styles, /:root\[data-theme="tohsaka-rin"\][^{]*\{[^}]*--chart-accent:\s*#ff5b82/s);
+  assert.match(script, /height:\s*84/);
+  assert.match(script, /stroke:\s*\{\s*curve:\s*"smooth",\s*width:\s*2\.25/);
+  assert.match(page, /height:\s*84/);
+  assert.match(page, /stroke:\s*\{\s*curve:\s*"smooth",\s*width:\s*2\.25/);
   assert.match(styles, /\.salary-locked\s*\{/);
   assert.match(styles, /\.stat-card\.salary-locked\s*\{[^}]*align-self:\s*start/s);
   assert.match(styles, /\.stat-card\.salary-locked\s*\{[^}]*min-height:\s*0/s);
@@ -511,7 +518,7 @@ test("keeps database history and translations aligned", async () => {
     assert.match(source, /type:\s*"datetime"/);
     assert.match(source, /sparkline:\s*\{\s*enabled:\s*true/);
     assert.match(source, /tooltip:\s*\{\s*enabled:\s*false/);
-    assert.match(source, /opacityFrom:\s*0\.68/);
+    assert.match(source, /opacityFrom:\s*0\.52/);
     assert.match(source, /dropShadow:\s*\{\s*enabled:\s*true/);
     assert.match(source, /data\.expenses\.filter\(\(expense\) => !expense\.recurring\)/);
     assert.match(source, /creditStatus !== "repaid"/);

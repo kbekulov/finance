@@ -687,22 +687,19 @@ export default function Home() {
     const draw = async () => {
       const { default: ApexCharts } = await import("apexcharts");
       if (!active) return;
-      const accent =
-        theme === "nier-automata"
-          ? "#168ac0"
-          : theme === "tohsaka-rin"
-            ? "#ff2d55"
-            : "#0a84ff";
+      const themeStyles = getComputedStyle(document.documentElement);
+      const accent = themeStyles.getPropertyValue("--chart-accent").trim() || "#5ac8fa";
+      const glow = themeStyles.getPropertyValue("--chart-glow").trim() || accent;
 
       chart = new ApexCharts(container, {
         chart: {
           type: "area",
-          height: 250,
+          height: 84,
           background: "transparent",
           fontFamily: getComputedStyle(document.documentElement).getPropertyValue("--font-family"),
           animations: { enabled: !window.matchMedia("(prefers-reduced-motion: reduce)").matches },
           sparkline: { enabled: true },
-          dropShadow: { enabled: true, top: 5, left: 0, blur: 8, color: accent, opacity: 0.34 },
+          dropShadow: { enabled: true, top: 2, left: 0, blur: 5, color: glow, opacity: 0.28 },
           toolbar: { show: false },
           zoom: { enabled: false },
         },
@@ -715,19 +712,19 @@ export default function Home() {
           ),
         }],
         colors: [accent],
-        stroke: { curve: "straight", width: 4.5, lineCap: "round" },
+        stroke: { curve: "smooth", width: 2.25, lineCap: "round" },
         fill: {
           type: "gradient",
           gradient: {
-            shadeIntensity: 0.18,
-            opacityFrom: 0.68,
-            opacityTo: 0.12,
-            stops: [0, 72, 100],
+            shadeIntensity: 0.12,
+            opacityFrom: 0.52,
+            opacityTo: 0.04,
+            stops: [0, 68, 100],
           },
         },
         markers: { size: 0 },
         dataLabels: { enabled: false },
-        grid: { show: false, padding: { left: 3, right: 3, top: 18, bottom: 4 } },
+        grid: { show: false, padding: { left: 3, right: 3, top: 8, bottom: 1 } },
         xaxis: { type: "datetime" },
         yaxis: { min: 0 },
         tooltip: { enabled: false },

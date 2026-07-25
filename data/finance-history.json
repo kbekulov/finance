@@ -18,7 +18,7 @@
       "currency": "EUR",
       "timezone": "Europe/Vilnius",
       "updatedAt": "2026-07-25",
-      "revision": 13,
+      "revision": 14,
       "salary": 2150,
       "savingsGoal": 200,
       "expenses": [
@@ -94,7 +94,7 @@
         },
         {
           "id": "2026-07-laptop",
-          "amount": 49,
+          "amount": 79,
           "note": "Gaming laptop",
           "noteTranslations": {
             "en": "Gaming laptop",
@@ -206,7 +206,7 @@
         },
         {
           "id": "2026-07-buses",
-          "amount": 40,
+          "amount": 38,
           "note": "Buses",
           "noteTranslations": {
             "en": "Buses",

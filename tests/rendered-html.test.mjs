@@ -77,10 +77,11 @@ test("server-renders the current finance tracker", async () => {
 });
 
 test("keeps database history and translations aligned", async () => {
-  const [databaseText, page, script] = await Promise.all([
+  const [databaseText, page, script, styles] = await Promise.all([
     readFile(new URL("../data/finance-history.json", import.meta.url), "utf8"),
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../script.js", import.meta.url), "utf8"),
+    readFile(new URL("../styles.css", import.meta.url), "utf8"),
   ]);
   const database = JSON.parse(databaseText);
   const current = database.months.at(-1);
@@ -316,4 +317,8 @@ test("keeps database history and translations aligned", async () => {
     assert.match(source, /spendingLess/);
     assert.match(source, /selectedIndex - 3/);
   }
+  assert.match(styles, /\.workspace\s*\{[^}]*align-items:\s*start/s);
+  assert.match(styles, /\.ledger-stack\s*\{[^}]*grid-auto-rows:\s*max-content/s);
+  assert.match(styles, /\.ledger-stack\s*\{[^}]*align-content:\s*start/s);
+  assert.match(styles, /\.expense-table\s*\{[^}]*align-self:\s*start/s);
 });

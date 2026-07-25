@@ -971,6 +971,7 @@ h1 em {
 .workspace {
   display: grid;
   grid-template-columns: minmax(0, 1.48fr) minmax(310px, 0.72fr);
+  align-items: start;
   gap: 12px;
   margin-top: 12px;
 }
@@ -994,11 +995,14 @@ h1 em {
 
 .ledger-stack {
   display: grid;
+  grid-auto-rows: max-content;
+  align-content: start;
   min-width: 0;
   gap: 18px;
 }
 
 .expense-table {
+  align-self: start;
   overflow: hidden;
   min-width: 0;
   border: 1px solid rgba(255, 255, 255, 0.08);

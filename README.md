@@ -119,6 +119,8 @@ Store each recurring charge as a normal expense with `recurring: true` and `freq
 
 Render every expense marked `recurring: true` inside a standalone expected-monthly-expenses table. Render one-time expenses in a separate sibling table. Never nest either table inside the other or inside a shared ledger card. Both tables must be independently collapsible, open by default, keyboard accessible, and show the localized table name on the left and that table’s calculated total on the right while collapsed. The recurring table footer must always calculate and display the sum of the recurring records in the selected salary cycle.
 
+On desktop, the ledger grid must size both tables to their content instead of stretching them to the adjacent expense form. A collapsed table must remain only as tall as its summary row at every responsive breakpoint.
+
 ## Supported categories
 
 Internal values must remain exactly:

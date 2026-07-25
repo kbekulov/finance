@@ -362,6 +362,8 @@ test("keeps database history and translations aligned", async () => {
     assert.match(source, /creditStatus: "outstanding"/);
   }
   assert.match(index, /id="theme-select"/);
+  assert.match(index, /styles\.css\?v=20/);
+  assert.match(index, /script\.js\?v=20/);
   assert.match(index, /data-current-theme="kinance"/);
   assert.match(index, /id="credit-alert"[^>]*hidden/);
   assert.match(index, /id="payment-method"/);

@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "maxMonths": 12,
+  "months": [
+    {
+      "month": "2026-07",
+      "label": "July 2026",
+      "updatedAt": "2026-07-25",
+      "salary": 2150,
+      "savingsGoal": 0,
+      "expenses": []
+    }
+  ]
+}

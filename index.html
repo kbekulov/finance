@@ -13,9 +13,9 @@
     <meta property="og:image" content="https://finance.bekulov.com/public/og.png" />
     <title>Kinance</title>
     <link rel="icon" type="image/jpeg" href="/kinance-favicon.jpg" />
-    <link rel="stylesheet" href="/styles.css?v=29" />
+    <link rel="stylesheet" href="/styles.css?v=30" />
     <script src="/public/vendor/apexcharts.min.js?v=21" defer></script>
-    <script src="/script.js?v=29" defer></script>
+    <script src="/script.js?v=30" defer></script>
   </head>
   <body>
     <main>
@@ -111,15 +111,28 @@
             <div class="balance-main">
               <div>
                 <strong id="remaining">€0.00</strong>
-                <span class="balance-caption" data-i18n="leftForMonth">left until next salary</span>
+                <span class="balance-caption" data-i18n="leftForMonth">on card until next salary</span>
+                <span class="balance-safe-caption">
+                  <b id="safe-remaining">€0.00</b>
+                  <span data-i18n="afterSavings">after protecting savings</span>
+                </span>
               </div>
               <div class="progress-ring" id="progress-ring">
                 <span id="ring-percent">0%</span>
               </div>
             </div>
             <div class="pace-row">
-              <span data-i18n="dailyPace">Comfortable daily pace</span>
-              <strong id="daily-pace">€0 / day</strong>
+              <span class="pace-heading" data-i18n="dailyPace">DAILY LIMITS</span>
+              <div class="pace-values">
+                <span class="pace-limit pace-limit-all">
+                  <small data-i18n="allFunds">All funds</small>
+                  <strong id="daily-pace-all">€0 / day</strong>
+                </span>
+                <span class="pace-limit pace-limit-safe">
+                  <small data-i18n="savingsSafe">Savings safe</small>
+                  <strong id="daily-pace-safe">€0 / day</strong>
+                </span>
+              </div>
             </div>
           </div>
         </section>

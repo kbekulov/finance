@@ -82,10 +82,13 @@ const COPY = {
     headlineLead: "Every euro has",
     headlineEnd: "a place.",
     intro: "A calm, honest view of what came in, what went out, and what you’re keeping for yourself.",
-    available: "AVAILABLE AFTER PLAN",
+    available: "DEBIT BALANCE",
     spent: "SPENT",
-    left: "left until next salary",
-    pace: "Comfortable daily pace",
+    left: "on card until next salary",
+    afterSavings: "after protecting savings",
+    pace: "DAILY LIMITS",
+    allFunds: "All funds",
+    savingsSafe: "Savings safe",
     day: "/ day",
     salary: "SALARY THIS CYCLE",
     salaryLocked: "Locked to this salary cycle",
@@ -150,6 +153,7 @@ const COPY = {
     monthlyPlanLabel: "Salary cycle plan balance",
     monthlyTotalsLabel: "Salary cycle totals",
     budgetUsed: "{percent}% of spending budget used",
+    salaryAllocation: "{spent}% of salary spent; {savings}% reserved for savings",
     noSpendingBudget: "NO SPENDING BUDGET",
     savingsEuroLabel: "Monthly savings requirement in euros",
   },
@@ -158,10 +162,13 @@ const COPY = {
     headlineLead: "У каждого евро",
     headlineEnd: "своё место.",
     intro: "Спокойный и честный взгляд на доходы, расходы и деньги, которые вы сохраняете для себя.",
-    available: "ДОСТУПНО ПОСЛЕ ПЛАНА",
+    available: "БАЛАНС ДЕБЕТОВОЙ КАРТЫ",
     spent: "ПОТРАЧЕНО",
-    left: "до следующей зарплаты",
-    pace: "Комфортный дневной лимит",
+    left: "на карте до следующей зарплаты",
+    afterSavings: "после защиты накоплений",
+    pace: "ДНЕВНЫЕ ЛИМИТЫ",
+    allFunds: "Все средства",
+    savingsSafe: "Сохранить накопления",
     day: "/ день",
     salary: "ДОХОД В ЭТОМ ЦИКЛЕ",
     salaryLocked: "Зафиксировано для этого цикла зарплаты",
@@ -226,6 +233,7 @@ const COPY = {
     monthlyPlanLabel: "Баланс цикла зарплаты",
     monthlyTotalsLabel: "Итоги цикла зарплаты",
     budgetUsed: "Использовано {percent}% бюджета на расходы",
+    salaryAllocation: "Потрачено {spent}% зарплаты; {savings}% отведено на накопления",
     noSpendingBudget: "НЕТ БЮДЖЕТА НА РАСХОДЫ",
     savingsEuroLabel: "Цель ежемесячных накоплений в евро",
   },
@@ -499,10 +507,13 @@ export default function Home() {
   const outstandingCreditTotal = sumExpenses(outstandingCreditExpenses);
   const salary = safeMoney(data.salary);
   const savings = safeMoney(data.savingsGoal);
-  const spendable = roundMoney(Math.max(salary - savings, 0));
-  const remaining = roundMoney(salary - savings - spent);
-  const usedPercent = spendable > 0 ? (spent / spendable) * 100 : spent > 0 ? null : 0;
-  const visualPercent = usedPercent === null ? 100 : Math.min(usedPercent, 100);
+  const cashRemaining = roundMoney(salary - spent);
+  const safeRemaining = roundMoney(cashRemaining - savings);
+  const spentPercent = salary > 0 ? (spent / salary) * 100 : spent > 0 ? null : 0;
+  const visualSpentPercent = spentPercent === null ? 100 : Math.min(spentPercent, 100);
+  const savingsPercent = salary > 0 ? Math.min((savings / salary) * 100, 100) : savings > 0 ? 100 : 0;
+  const savingsStartDegrees = (100 - savingsPercent) * 3.6;
+  const spentEndDegrees = Math.min(visualSpentPercent * 3.6, savingsStartDegrees);
   const [year, month] = selectedMonth.month.split("-").map(Number);
   const { start: cycleStart, end: cycleEnd } = salaryCycleDates(selectedMonth.month);
   const todayKey = todayInVilnius();
@@ -514,8 +525,9 @@ export default function Home() {
     Math.max(inclusiveDayCount(cycleStart, markerDate), 1),
     totalCycleDays,
   );
-  const dailyPace =
-    Math.max(remaining, 0) / Math.max(totalCycleDays - elapsedCycleDays, 1);
+  const daysRemaining = Math.max(totalCycleDays - elapsedCycleDays, 1);
+  const allFundsDailyPace = Math.max(cashRemaining, 0) / daysRemaining;
+  const savingsSafeDailyPace = Math.max(safeRemaining, 0) / daysRemaining;
   const locale = language === "ru" ? "ru-RU" : "en-GB";
   const euro = useMemo(
     () => new Intl.NumberFormat(locale, {
@@ -929,33 +941,49 @@ export default function Home() {
             <div className="balance-topline">
               <span>{copy.available}</span>
               <span>
-                {usedPercent === null
+                {spentPercent === null
                   ? copy.noSpendingBudget
-                  : `${Math.round(usedPercent)}% ${copy.spent}`}
+                  : `${Math.round(spentPercent)}% ${copy.spent}`}
               </span>
             </div>
             <div className="balance-main">
               <div>
-                <strong>{euro.format(remaining)}</strong>
+                <strong>{euro.format(cashRemaining)}</strong>
                 <span className="balance-caption">{copy.left}</span>
+                <span className="balance-safe-caption">
+                  <b>{euro.format(safeRemaining)}</b> {copy.afterSavings}
+                </span>
               </div>
               <div
                 className="progress-ring"
-                style={{ "--progress": `${visualPercent * 3.6}deg` } as React.CSSProperties}
+                style={{
+                  "--spent-end": `${spentEndDegrees}deg`,
+                  "--savings-start": `${savingsStartDegrees}deg`,
+                } as React.CSSProperties}
                 aria-label={
-                  usedPercent === null
+                  spentPercent === null
                     ? copy.noSpendingBudget
-                    : fillTemplate(copy.budgetUsed, {
-                        percent: Math.round(usedPercent),
+                    : fillTemplate(copy.salaryAllocation, {
+                        spent: Math.round(spentPercent),
+                        savings: Math.round(savingsPercent),
                       })
                 }
               >
-                <span>{usedPercent === null ? "!" : `${Math.round(usedPercent)}%`}</span>
+                <span>{spentPercent === null ? "!" : `${Math.round(spentPercent)}%`}</span>
               </div>
             </div>
             <div className="pace-row">
-              <span>{copy.pace}</span>
-              <strong>{compactEuro.format(dailyPace)} {copy.day}</strong>
+              <span className="pace-heading">{copy.pace}</span>
+              <div className="pace-values">
+                <span className="pace-limit pace-limit-all">
+                  <small>{copy.allFunds}</small>
+                  <strong>{compactEuro.format(allFundsDailyPace)} {copy.day}</strong>
+                </span>
+                <span className="pace-limit pace-limit-safe">
+                  <small>{copy.savingsSafe}</small>
+                  <strong>{compactEuro.format(savingsSafeDailyPace)} {copy.day}</strong>
+                </span>
+              </div>
             </div>
           </div>
         </section>

@@ -908,7 +908,7 @@ main::before {
   width: calc(100% + 16px);
   height: 84px;
   min-height: 84px;
-  margin: -42px -8px 18px;
+  margin: -68px -8px 18px;
   overflow: hidden;
   filter: drop-shadow(0 4px 8px var(--chart-glow));
 }
@@ -1034,8 +1034,21 @@ h1 em {
   font-size: 13px;
 }
 
+.balance-safe-caption {
+  display: block;
+  margin-top: 7px;
+  color: var(--secondary);
+  font-size: 12px;
+}
+
+.balance-safe-caption b {
+  color: var(--green);
+  font-weight: 760;
+}
+
 .progress-ring {
-  --progress: 0deg;
+  --spent-end: 0deg;
+  --savings-start: 360deg;
   position: relative;
   display: grid;
   flex: 0 0 auto;
@@ -1043,7 +1056,11 @@ h1 em {
   height: 86px;
   place-items: center;
   border-radius: 50%;
-  background: conic-gradient(var(--green) var(--progress), rgba(118, 118, 128, 0.28) 0);
+  background: conic-gradient(
+    var(--green) 0 var(--spent-end),
+    rgba(118, 118, 128, 0.28) var(--spent-end) var(--savings-start),
+    var(--red) var(--savings-start) 360deg
+  );
   box-shadow: 0 0 30px rgba(48, 209, 88, 0.08);
 }
 
@@ -1072,10 +1089,43 @@ h1 em {
   font-size: 12px;
 }
 
-.pace-row strong {
-  color: var(--green);
+.pace-heading {
+  font-size: 10px;
+  font-weight: 720;
+  letter-spacing: 0.11em;
+}
+
+.pace-values {
+  display: flex;
+  gap: 18px;
+  align-items: flex-end;
+}
+
+.pace-limit {
+  display: grid;
+  gap: 3px;
+  text-align: right;
+}
+
+.pace-limit small {
+  color: var(--secondary);
+  font-size: 9px;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.pace-limit strong {
   font-size: 13px;
   font-weight: 700;
+}
+
+.pace-limit-all strong {
+  color: var(--red);
+}
+
+.pace-limit-safe strong {
+  color: var(--green);
 }
 
 /* Summary and category cards */
@@ -2076,7 +2126,7 @@ footer p {
   .daily-expense-chart {
     height: 84px;
     min-height: 84px;
-    margin-top: -34px;
+    margin-top: -50px;
     margin-bottom: 12px;
   }
 
@@ -2116,6 +2166,20 @@ footer p {
 
   .balance-main {
     padding: 26px 0 23px;
+  }
+
+  .pace-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .pace-values {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .pace-limit:first-child {
+    text-align: left;
   }
 
   .balance-main strong {

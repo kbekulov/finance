@@ -99,6 +99,7 @@ A message whose financial intent is simply a number means: add that amount in eu
 Synthetic expense history is exceptional and may be added only when the user explicitly requests a one-time balance reconciliation or demo-data bootstrap. It must never be inferred from a stated card balance or created as part of routine expense entry.
 
 - Reconcile in integer cents so the resulting calculated balance matches the user-supplied target exactly.
+- When the user states an actual debit-card or cash balance, reconcile it to `cashRemaining = salary - spent`. Never subtract `savingsGoal` before matching a real account balance. The savings requirement is an allocation inside that cash balance, not money held outside the account unless the user explicitly says it has already been transferred elsewhere.
 - Keep every synthetic record inside the date range and salary cycle explicitly requested by the user, using `Europe/Vilnius` calendar dates.
 - Use generic, plausible expense names and existing broad categories without inventing merchants, receipts, transaction times, or other evidence.
 - Set `source: "chat"` and use the normal debit or credit rule.
@@ -125,7 +126,7 @@ Read the final amount actually paid, not subtotal, tax, savings, balance due bef
 
 ### Salary
 
-Salary is cycle-specific historical source data. Every month record keeps its own `salary`, and all spendable balance, remaining balance, used percentage, and daily-pace calculations for a selected cycle must use that cycle’s value. The July 2026 cycle is currently €2,150; do not interpret that as a permanent global salary.
+Salary is cycle-specific historical source data. Every month record keeps its own `salary`, and all cash balance, savings-safe balance, spent percentage, and daily-pace calculations for a selected cycle must use that cycle’s value. The July 2026 cycle is currently €2,150; do not interpret that as a permanent global salary.
 
 When the user states a salary for a named month or says that one specific month was higher or lower, update only that salary cycle’s `salary`, `updatedAt`, and `revision`. Never propagate a one-off salary adjustment into earlier or later cycles. When the user says the new salary applies from now on, update the current cycle and use it as the starting salary carried into newly created future cycles, while preserving all existing historical salaries. If the intended cycle is genuinely ambiguous, resolve it from the conversation and current Vilnius salary cycle before editing rather than assuming a calendar month.
 
@@ -224,7 +225,7 @@ The warning is guidance derived from current data, not financial or legal advice
 
 - The current cycle shows the actual current day and positions the marker across its inclusive `period.start` to `period.end` range.
 - Historical cycles show their cycle end.
-- Daily pace divides non-negative remaining money by the days after today through `period.end`; it must not use calendar-month end.
+- The all-funds daily pace divides non-negative `cashRemaining` by the days after today through `period.end`; the savings-safe pace divides non-negative `safeRemaining` by the same day count. Neither pace may use calendar-month end.
 - The salary balance resets on `period.start`, including when the nominal 12th moves to the preceding Friday.
 - `updatedAt` and its visible label describe the latest canonical-data revision; they must not drive the live timeline or daily pace.
 - Derive the live timeline, chart cutoff, and daily pace from the actual `Europe/Vilnius` calendar day at render time. Never hard-code today or treat future cycle days as zero-spend observations.
@@ -251,13 +252,15 @@ After each finance-data update, verify:
 
 - `spent = sum(expense.amount)` using integer cents for aggregation
 - every displayed cycle reads `salary` from that exact month record, allowing salaries to differ across history without cross-cycle leakage
-- `spendable = max(salary - savingsGoal, 0)`
-- `remaining = salary - savingsGoal - spent`
-- used percentage is based on `spent / spendable`; show the real percentage above 100% while capping only the ring graphic at 100%
-- when `spendable` is zero and spending is positive, show a no-spending-budget state instead of a false `0%`
+- `cashRemaining = salary - spent`; this is the real debit balance when canonical expenses have been reconciled to the user's stated account balance
+- `safeRemaining = cashRemaining - savingsGoal`; this is what may still be spent without touching protected savings
+- spent percentage is based on `spent / salary`; show the real percentage above 100% while capping only the ring graphic at 100%
+- the ring uses one salary-wide scale: green shows spent salary, red permanently marks the `savingsGoal / salary` zone, and the neutral gap between them is `safeRemaining`
+- when salary is zero and spending is positive, show a no-spending-budget state instead of a false `0%`
 - category totals sum exactly to `spent`
 - breakdown segment widths are proportional to category totals
-- daily pace uses non-negative remaining money divided by remaining salary-cycle days
+- all-funds daily pace uses non-negative `cashRemaining` divided by remaining salary-cycle days and is styled red because following it consumes the savings reserve
+- savings-safe daily pace uses non-negative `safeRemaining` divided by remaining salary-cycle days and is styled green
 - expense count equals the current salary cycle’s array length
 - warning amount/share match the same category totals
 - savings and spending comparisons use the average of up to the three salary cycles immediately before the selected cycle
@@ -286,7 +289,7 @@ Theme selection is a device-local preference stored as `kinance:theme`. Keep the
 
 Every expense row uses a category-specific transparent Fate/stay night chibi PNG from `public/category-icons/` instead of a letter monogram. Keep the category-to-icon map complete and identical in JavaScript and React whenever categories change. Treat the image as decorative because the localized category name remains visible in text, preserve the original square aspect ratio, and use a borderless cutout with a restrained shadow rather than another badge or card. The current cast is Sakura Matou for Food, Tohsaka Rin for Subscriptions & services, Gilgamesh for Luxury purchases, Shirou Emiya for Debt & repayments, Illyasviel von Einzbern for Devices & installments, Saber for Transport & Travel, and Rider for Alcohol & nightlife.
 
-The daily-expense area chart overlaps only the lower edge of the character artwork and uses ApexCharts in both implementations. Keep the overlap smaller on mobile so the graph never obscures the banner's primary character composition. Aggregate non-recurring expenses by their actual `date`; do not plot recurring expected expenses on the day they happened to be recorded because that would falsely imply they were paid that day. Include zero-value points from the selected salary cycle start only through the actual Vilnius date for a current cycle, or through `period.end` for a historical cycle. Keep the x-axis as a datetime axis and recalculate on cycle, theme, or expense changes. Render it as a compact 84-pixel-tall borderless sparkline with a smooth 2.25-pixel stroke and no visible title, totals, axes, labels, grid, legend, markers, or tooltip. Its only visual content is a high-contrast movement stroke with a clearly visible translucent gradient area and restrained glow. Define the theme-aware chart accent and glow through `--chart-accent` and `--chart-glow` so every theme can style the chart without chart-logic conditionals. Disable chart animation when reduced motion is requested, while preserving a localized accessible label for screen readers.
+The daily-expense area chart overlaps the lower portion of the character artwork by 68 pixels on desktop and 50 pixels on mobile, without obscuring the banner's primary character composition. It uses ApexCharts in both implementations. Aggregate non-recurring expenses by their actual `date`; do not plot recurring expected expenses on the day they happened to be recorded because that would falsely imply they were paid that day. Include zero-value points from the selected salary cycle start only through the actual Vilnius date for a current cycle, or through `period.end` for a historical cycle. Keep the x-axis as a datetime axis and recalculate on cycle, theme, or expense changes. Render it as a compact 84-pixel-tall borderless sparkline with a smooth 2.25-pixel stroke and no visible title, totals, axes, labels, grid, legend, markers, or tooltip. Its only visual content is a high-contrast movement stroke with a clearly visible translucent gradient area and restrained glow. Define the theme-aware chart accent and glow through `--chart-accent` and `--chart-glow` so every theme can style the chart without chart-logic conditionals. Disable chart animation when reduced motion is requested, while preserving a localized accessible label for screen readers.
 
 The built-in themes are:
 

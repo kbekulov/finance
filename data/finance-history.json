@@ -17,8 +17,8 @@
       },
       "currency": "EUR",
       "timezone": "Europe/Vilnius",
-      "updatedAt": "2026-07-25",
-      "revision": 23,
+      "updatedAt": "2026-07-26",
+      "revision": 24,
       "salary": 2150,
       "savingsGoal": 200,
       "expenses": [
@@ -324,7 +324,7 @@
         },
         {
           "id": "2026-07-balance-backfill-takeaway-001",
-          "amount": 29.05,
+          "amount": 39.05,
           "note": "Takeaway",
           "noteTranslations": {
             "en": "Takeaway",
@@ -339,7 +339,7 @@
         },
         {
           "id": "2026-07-balance-backfill-drinks-001",
-          "amount": 28.5,
+          "amount": 38.5,
           "note": "Drinks",
           "noteTranslations": {
             "en": "Drinks",
@@ -354,7 +354,7 @@
         },
         {
           "id": "2026-07-balance-backfill-groceries-005",
-          "amount": 51.41,
+          "amount": 61.41,
           "note": "Groceries",
           "noteTranslations": {
             "en": "Groceries",
@@ -369,7 +369,7 @@
         },
         {
           "id": "2026-07-balance-backfill-personal-001",
-          "amount": 45.5,
+          "amount": 55.5,
           "note": "Personal purchase",
           "noteTranslations": {
             "en": "Personal purchase",
@@ -384,7 +384,7 @@
         },
         {
           "id": "2026-07-balance-backfill-taxi-003",
-          "amount": 17.6,
+          "amount": 27.6,
           "note": "Taxi",
           "noteTranslations": {
             "en": "Taxi",
@@ -399,7 +399,7 @@
         },
         {
           "id": "2026-07-balance-backfill-restaurant-002",
-          "amount": 36.8,
+          "amount": 46.8,
           "note": "Restaurant",
           "noteTranslations": {
             "en": "Restaurant",
@@ -414,7 +414,7 @@
         },
         {
           "id": "2026-07-balance-backfill-cinema-001",
-          "amount": 24,
+          "amount": 34,
           "note": "Cinema",
           "noteTranslations": {
             "en": "Cinema",
@@ -429,7 +429,7 @@
         },
         {
           "id": "2026-07-balance-backfill-groceries-004",
-          "amount": 57.26,
+          "amount": 67.26,
           "note": "Groceries",
           "noteTranslations": {
             "en": "Groceries",
@@ -444,7 +444,7 @@
         },
         {
           "id": "2026-07-balance-backfill-electronics-001",
-          "amount": 69.99,
+          "amount": 79.99,
           "note": "Electronics accessory",
           "noteTranslations": {
             "en": "Electronics accessory",
@@ -459,7 +459,7 @@
         },
         {
           "id": "2026-07-balance-backfill-late-food-001",
-          "amount": 19.75,
+          "amount": 29.75,
           "note": "Late-night food",
           "noteTranslations": {
             "en": "Late-night food",
@@ -474,7 +474,7 @@
         },
         {
           "id": "2026-07-balance-backfill-night-out-001",
-          "amount": 58,
+          "amount": 68,
           "note": "Night out",
           "noteTranslations": {
             "en": "Night out",
@@ -489,7 +489,7 @@
         },
         {
           "id": "2026-07-balance-backfill-groceries-003",
-          "amount": 49.33,
+          "amount": 59.33,
           "note": "Groceries",
           "noteTranslations": {
             "en": "Groceries",
@@ -504,7 +504,7 @@
         },
         {
           "id": "2026-07-balance-backfill-taxi-002",
-          "amount": 12.4,
+          "amount": 22.4,
           "note": "Taxi",
           "noteTranslations": {
             "en": "Taxi",
@@ -519,7 +519,7 @@
         },
         {
           "id": "2026-07-balance-backfill-clothing-001",
-          "amount": 74.9,
+          "amount": 84.9,
           "note": "Clothing",
           "noteTranslations": {
             "en": "Clothing",
@@ -534,7 +534,7 @@
         },
         {
           "id": "2026-07-balance-backfill-restaurant-001",
-          "amount": 42.6,
+          "amount": 52.6,
           "note": "Restaurant",
           "noteTranslations": {
             "en": "Restaurant",
@@ -549,7 +549,7 @@
         },
         {
           "id": "2026-07-balance-backfill-coffee-001",
-          "amount": 11.85,
+          "amount": 21.85,
           "note": "Coffee and snacks",
           "noteTranslations": {
             "en": "Coffee and snacks",
@@ -564,7 +564,7 @@
         },
         {
           "id": "2026-07-balance-backfill-groceries-002",
-          "amount": 62.17,
+          "amount": 72.17,
           "note": "Groceries",
           "noteTranslations": {
             "en": "Groceries",
@@ -579,7 +579,7 @@
         },
         {
           "id": "2026-07-balance-backfill-taxi-001",
-          "amount": 14.7,
+          "amount": 24.7,
           "note": "Taxi",
           "noteTranslations": {
             "en": "Taxi",
@@ -594,7 +594,7 @@
         },
         {
           "id": "2026-07-balance-backfill-lunch-001",
-          "amount": 18.4,
+          "amount": 28.4,
           "note": "Lunch",
           "noteTranslations": {
             "en": "Lunch",
@@ -609,7 +609,7 @@
         },
         {
           "id": "2026-07-balance-backfill-groceries-001",
-          "amount": 54.82,
+          "amount": 64.82,
           "note": "Groceries",
           "noteTranslations": {
             "en": "Groceries",

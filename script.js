@@ -29,9 +29,12 @@ const TRANSLATIONS = {
     monthGlance: "YOUR SALARY CYCLE AT A GLANCE",
     headline: "Every euro has<br><em>a place.</em>",
     intro: "A calm, honest view of what came in, what went out, and what you’re keeping for yourself.",
-    availableAfterPlan: "AVAILABLE AFTER PLAN",
-    leftForMonth: "left until next salary",
-    dailyPace: "Comfortable daily pace",
+    availableAfterPlan: "DEBIT BALANCE",
+    leftForMonth: "on card until next salary",
+    afterSavings: "after protecting savings",
+    dailyPace: "DAILY LIMITS",
+    allFunds: "All funds",
+    savingsSafe: "Savings safe",
     monthlySalary: "SALARY THIS CYCLE",
     salaryLocked: "Locked to this salary cycle",
     dailySpendingEyebrow: "DAILY RHYTHM",
@@ -100,6 +103,7 @@ const TRANSLATIONS = {
     monthlyPlanLabel: "Salary cycle plan balance",
     monthlyTotalsLabel: "Salary cycle totals",
     budgetUsed: "{percent}% of spending budget used",
+    salaryAllocation: "{spent}% of salary spent; {savings}% reserved for savings",
     noSpendingBudget: "NO SPENDING BUDGET",
     historyUnavailable: "History unavailable",
     refresh: "Please refresh the page in a moment.",
@@ -117,9 +121,12 @@ const TRANSLATIONS = {
     monthGlance: "ВАШ ЦИКЛ ЗАРПЛАТЫ В ЦИФРАХ",
     headline: "У каждого евро<br><em>своё место.</em>",
     intro: "Спокойный и честный взгляд на доходы, расходы и деньги, которые вы сохраняете для себя.",
-    availableAfterPlan: "ДОСТУПНО ПОСЛЕ ПЛАНА",
-    leftForMonth: "до следующей зарплаты",
-    dailyPace: "Комфортный дневной лимит",
+    availableAfterPlan: "БАЛАНС ДЕБЕТОВОЙ КАРТЫ",
+    leftForMonth: "на карте до следующей зарплаты",
+    afterSavings: "после защиты накоплений",
+    dailyPace: "ДНЕВНЫЕ ЛИМИТЫ",
+    allFunds: "Все средства",
+    savingsSafe: "Сохранить накопления",
     monthlySalary: "ДОХОД В ЭТОМ ЦИКЛЕ",
     salaryLocked: "Зафиксировано для этого цикла зарплаты",
     dailySpendingEyebrow: "ДНЕВНОЙ РИТМ",
@@ -188,6 +195,7 @@ const TRANSLATIONS = {
     monthlyPlanLabel: "Баланс цикла зарплаты",
     monthlyTotalsLabel: "Итоги цикла зарплаты",
     budgetUsed: "Использовано {percent}% бюджета на расходы",
+    salaryAllocation: "Потрачено {spent}% зарплаты; {savings}% отведено на накопления",
     noSpendingBudget: "НЕТ БЮДЖЕТА НА РАСХОДЫ",
     historyUnavailable: "История недоступна",
     refresh: "Обновите страницу через несколько секунд.",
@@ -840,10 +848,13 @@ function render() {
   const spent = sumExpenses(data.expenses);
   const salary = safeNumber(data.salary);
   const savings = safeNumber(data.savingsGoal);
-  const spendable = roundMoney(Math.max(salary - savings, 0));
-  const remaining = roundMoney(salary - savings - spent);
-  const usedPercent = spendable > 0 ? (spent / spendable) * 100 : spent > 0 ? null : 0;
-  const visualPercent = usedPercent === null ? 100 : Math.min(usedPercent, 100);
+  const cashRemaining = roundMoney(salary - spent);
+  const safeRemaining = roundMoney(cashRemaining - savings);
+  const spentPercent = salary > 0 ? (spent / salary) * 100 : spent > 0 ? null : 0;
+  const visualSpentPercent = spentPercent === null ? 100 : Math.min(spentPercent, 100);
+  const savingsPercent = salary > 0 ? Math.min((savings / salary) * 100, 100) : savings > 0 ? 100 : 0;
+  const savingsStartDegrees = (100 - savingsPercent) * 3.6;
+  const spentEndDegrees = Math.min(visualSpentPercent * 3.6, savingsStartDegrees);
   const timeline = renderTimeline();
   const daysLeft = Math.max(timeline.totalDays - timeline.elapsedDays, 1);
 
@@ -869,20 +880,26 @@ function render() {
   spendingComparisonElement.hidden = !spendingComparison;
   spendingComparisonElement.textContent = spendingComparison?.text ?? "";
   spendingComparisonElement.className = `stat-comparison ${spendingComparison?.tone ?? "neutral"}`;
-  element("remaining").textContent = formatEuro(remaining);
-  const usedLabel = usedPercent === null
+  element("remaining").textContent = formatEuro(cashRemaining);
+  element("safe-remaining").textContent = formatEuro(safeRemaining);
+  const usedLabel = spentPercent === null
     ? t("noSpendingBudget")
-    : `${Math.round(usedPercent)}% ${t("spent")}`;
+    : `${Math.round(spentPercent)}% ${t("spent")}`;
   element("spent-percent").textContent = usedLabel;
-  element("ring-percent").textContent = usedPercent === null ? "!" : `${Math.round(usedPercent)}%`;
-  element("progress-ring").style.setProperty("--progress", `${visualPercent * 3.6}deg`);
+  element("ring-percent").textContent = spentPercent === null ? "!" : `${Math.round(spentPercent)}%`;
+  element("progress-ring").style.setProperty("--spent-end", `${spentEndDegrees}deg`);
+  element("progress-ring").style.setProperty("--savings-start", `${savingsStartDegrees}deg`);
   element("progress-ring").setAttribute(
     "aria-label",
-    usedPercent === null
+    spentPercent === null
       ? t("noSpendingBudget")
-      : t("budgetUsed", { percent: Math.round(usedPercent) }),
+      : t("salaryAllocation", {
+          spent: Math.round(spentPercent),
+          savings: Math.round(savingsPercent),
+        }),
   );
-  element("daily-pace").textContent = `${formatEuro(Math.max(remaining, 0) / daysLeft, true)} ${t("perDay")}`;
+  element("daily-pace-all").textContent = `${formatEuro(Math.max(cashRemaining, 0) / daysLeft, true)} ${t("perDay")}`;
+  element("daily-pace-safe").textContent = `${formatEuro(Math.max(safeRemaining, 0) / daysLeft, true)} ${t("perDay")}`;
 
   applyTranslations();
   renderDailyExpenseChart();

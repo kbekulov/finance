@@ -14,8 +14,8 @@ export async function generateMetadata(): Promise<Metadata> {
     description:
       "A private, responsive salary-cycle finance tracker for expenses, salary and savings goals.",
     icons: {
-      icon: "/favicon.svg",
-      shortcut: "/favicon.svg",
+      icon: { url: "/kinance-favicon.jpg", type: "image/jpeg" },
+      shortcut: "/kinance-favicon.jpg",
     },
     openGraph: {
       title: "Kinance — Every euro has a place.",

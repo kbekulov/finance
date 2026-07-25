@@ -30,6 +30,7 @@ test("server-renders the current finance tracker", async () => {
 
   const html = await response.text();
   assert.match(html, /<title>Kinance — Your salary-cycle money, clearly<\/title>/i);
+  assert.match(html, /kinance-favicon\.jpg/i);
   assert.match(html, />kinance<\/span>/i);
   assert.doesNotMatch(html, />euroscope<\/span>/i);
   assert.match(html, /class="spending-alert"/);

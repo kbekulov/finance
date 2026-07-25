@@ -18,7 +18,7 @@
       "currency": "EUR",
       "timezone": "Europe/Vilnius",
       "updatedAt": "2026-07-25",
-      "revision": 19,
+      "revision": 20,
       "salary": 2150,
       "savingsGoal": 200,
       "expenses": [
@@ -291,6 +291,20 @@
             }
           ],
           "receiptPaymentDescription": "Contactless debit Mastercard"
+        },
+        {
+          "id": "2026-07-beer-credit-001",
+          "amount": 5,
+          "note": "Beer",
+          "noteTranslations": {
+            "en": "Beer",
+            "ru": "Пиво"
+          },
+          "date": "2026-07-25",
+          "category": "Alcohol & nightlife",
+          "source": "chat",
+          "paymentMethod": "credit",
+          "creditStatus": "outstanding"
         }
       ]
     }

@@ -9,9 +9,9 @@ const CATEGORIES = [
 ];
 
 const THEMES = [
-  { id: "kinance", label: "Kinance", banner: "/theme-banners/kinance.png" },
-  { id: "nier-automata", label: "NieR:Automata", banner: "/theme-banners/nier-automata.png" },
-  { id: "tohsaka-rin", label: "Tohsaka Rin", banner: "/theme-banners/tohsaka-rin.png" },
+  { id: "kinance", label: "Kinance", banner: "/public/theme-banners/kinance.png" },
+  { id: "nier-automata", label: "NieR:Automata", banner: "/public/theme-banners/nier-automata.png" },
+  { id: "tohsaka-rin", label: "Tohsaka Rin", banner: "/public/theme-banners/tohsaka-rin.png" },
 ];
 
 const TRANSLATIONS = {

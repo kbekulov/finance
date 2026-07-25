@@ -38,8 +38,12 @@ test("server-renders the current finance tracker", async () => {
   assert.match(html, />kinance<\/span>/i);
   assert.doesNotMatch(html, />euroscope<\/span>/i);
   assert.match(html, /class="spending-alert"/);
-  assert.doesNotMatch(html, /class="credit-alert"/);
+  assert.match(html, /class="credit-alert"/);
+  assert.match(html, /Outstanding credit/);
+  assert.match(html, /Credit spending is awaiting repayment/);
+  assert.match(html, /class="credit-alert-total"[^>]*>€5\.00/);
   assert.match(html, /class="payment-badge debit"/);
+  assert.match(html, /class="payment-badge credit-outstanding"/);
   assert.match(html, /Spending alert/);
   assert.match(html, /Debt &amp; repayments is your largest cost at €555\.00/);
   assert.match(html, /Apple Devices/);
@@ -65,7 +69,7 @@ test("server-renders the current finance tracker", async () => {
   assert.match(html, /<details[^>]*class="expense-table recurring-expenses"/);
   assert.match(html, /<summary class="expense-table-summary"/);
   assert.match(html, /One-time expenses/);
-  assert.match(html, /€7\.99/);
+  assert.match(html, /€12\.99/);
   assert.match(html, /Expected monthly expenses/);
   assert.match(html, /Expected monthly total/);
   assert.match(html, /€936\.47/);
@@ -76,8 +80,9 @@ test("server-renders the current finance tracker", async () => {
   assert.match(html, /Keturi vėjai 0\.4 l/);
   assert.match(html, /Shelton&#x27;s pear cider/);
   assert.match(html, /Alcohol &amp; nightlife/);
-  assert.match(html, /€944\.46/);
-  assert.match(html, /€1,005\.54/);
+  assert.match(html, /€949\.46/);
+  assert.match(html, /€1,000\.54/);
+  assert.match(html, /Beer/);
   assert.doesNotMatch(html, /Your site is taking shape|Building your site/);
 });
 
@@ -102,7 +107,7 @@ test("keeps database history and translations aligned", async () => {
   assert.equal(database.currency, "EUR");
   assert.equal(database.timezone, "Europe/Vilnius");
   assert.equal(current.updatedAt, "2026-07-25");
-  assert.equal(current.revision, 19);
+  assert.equal(current.revision, 20);
   assert.equal(current.savingsGoal, 200);
   assert.deepEqual(current.period, {
     start: "2026-07-10",
@@ -128,8 +133,13 @@ test("keeps database history and translations aligned", async () => {
   for (const expense of current.expenses) {
     assert.ok(expense.date >= current.period.start);
     assert.ok(expense.date <= current.period.end);
-    assert.equal(expense.paymentMethod, "debit");
-    assert.equal(expense.creditStatus, undefined);
+    if (expense.id === "2026-07-beer-credit-001") {
+      assert.equal(expense.paymentMethod, "credit");
+      assert.equal(expense.creditStatus, "outstanding");
+    } else {
+      assert.equal(expense.paymentMethod, "debit");
+      assert.equal(expense.creditStatus, undefined);
+    }
   }
   assert.equal(
     current.expenses.find((expense) => expense.id === "2026-07-apple-devices")
@@ -303,6 +313,20 @@ test("keeps database history and translations aligned", async () => {
       ],
     },
   );
+  assert.deepEqual(
+    current.expenses.find((expense) => expense.id === "2026-07-beer-credit-001"),
+    {
+      id: "2026-07-beer-credit-001",
+      amount: 5,
+      note: "Beer",
+      noteTranslations: { en: "Beer", ru: "Пиво" },
+      date: "2026-07-25",
+      category: "Alcohol & nightlife",
+      source: "chat",
+      paymentMethod: "credit",
+      creditStatus: "outstanding",
+    },
+  );
   for (const expense of current.expenses) {
     assert.equal(typeof expense.noteTranslations?.en, "string");
     assert.equal(typeof expense.noteTranslations?.ru, "string");
@@ -344,8 +368,11 @@ test("keeps database history and translations aligned", async () => {
   assert.match(index, /option value="debit"/);
   assert.match(index, /option value="credit"/);
   assert.match(index, /id="theme-banner-image"/);
-  assert.match(index, /theme-banners\/kinance\.png/);
-  for (const source of [page, script]) {
+  assert.match(index, /public\/theme-banners\/kinance\.png/);
+  assert.match(script, /public\/theme-banners\/kinance\.png/);
+  assert.match(script, /public\/theme-banners\/nier-automata\.png/);
+  assert.match(script, /public\/theme-banners\/tohsaka-rin\.png/);
+  for (const source of [page]) {
     assert.match(source, /themeBannerLabel/);
     assert.match(source, /theme-banners\/kinance\.png/);
     assert.match(source, /theme-banners\/nier-automata\.png/);

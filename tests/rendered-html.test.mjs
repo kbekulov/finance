@@ -29,13 +29,17 @@ test("server-renders the current finance tracker", async () => {
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
 
   const html = await response.text();
-  assert.match(html, /<title>Euroscope — Your monthly money, clearly<\/title>/i);
+  assert.match(html, /<title>Euroscope — Your salary-cycle money, clearly<\/title>/i);
   assert.match(html, /class="spending-alert"/);
   assert.match(html, /Spending alert/);
   assert.match(html, /Debt &amp; repayments is your largest cost at €555\.00/);
   assert.match(html, /Apple Devices/);
   assert.match(html, /Updated 25 July 2026/);
-  assert.match(html, /Today<!-- --> · <!-- -->25/);
+  assert.match(html, /Today<!-- --> · <!-- -->25 Jul/);
+  assert.match(html, /10 Jul/i);
+  assert.match(html, /11 Aug/i);
+  assert.match(html, /YOUR SALARY CYCLE AT A GLANCE/);
+  assert.match(html, /left until next salary/);
   assert.match(html, /Buses/);
   assert.match(html, /Transport &amp; Travel/);
   assert.match(html, /iCloud\+/);
@@ -60,16 +64,42 @@ test("keeps database history and translations aligned", async () => {
   const current = database.months.at(-1);
 
   assert.equal(database.maxMonths, 12);
+  assert.equal(database.version, 4);
+  assert.deepEqual(database.salarySchedule, {
+    dayOfMonth: 12,
+    weekendRule: "previousFriday",
+  });
   assert.ok(database.months.length <= database.maxMonths);
   assert.equal(database.currency, "EUR");
   assert.equal(database.timezone, "Europe/Vilnius");
   assert.equal(current.updatedAt, "2026-07-25");
-  assert.equal(current.revision, 11);
+  assert.equal(current.revision, 12);
   assert.equal(current.savingsGoal, 200);
   assert.deepEqual(current.period, {
-    start: "2026-07-01",
-    end: "2026-07-31",
+    start: "2026-07-10",
+    end: "2026-08-11",
   });
+  const effectiveSalaryDate = (year, monthIndex) => {
+    const date = new Date(year, monthIndex, database.salarySchedule.dayOfMonth, 12);
+    if (date.getDay() === 6) date.setDate(date.getDate() - 1);
+    if (date.getDay() === 0) date.setDate(date.getDate() - 2);
+    return date;
+  };
+  const [periodYear, periodMonth] = current.month.split("-").map(Number);
+  const expectedStart = effectiveSalaryDate(periodYear, periodMonth - 1);
+  const expectedNextStart = effectiveSalaryDate(periodYear, periodMonth);
+  const expectedEnd = new Date(expectedNextStart);
+  expectedEnd.setDate(expectedEnd.getDate() - 1);
+  const isoDate = (date) => date.toISOString().slice(0, 10);
+  assert.equal(isoDate(expectedStart), current.period.start);
+  assert.equal(isoDate(expectedEnd), current.period.end);
+  assert.equal(expectedStart.getDay(), 5);
+  assert.equal(isoDate(expectedStart), "2026-07-10");
+  assert.equal(isoDate(expectedNextStart), "2026-08-12");
+  for (const expense of current.expenses) {
+    assert.ok(expense.date >= current.period.start);
+    assert.ok(expense.date <= current.period.end);
+  }
   assert.equal(
     current.expenses.find((expense) => expense.id === "2026-07-apple-devices")
       ?.note,
@@ -217,5 +247,8 @@ test("keeps database history and translations aligned", async () => {
     assert.match(source, /Транспорт и путешествия/);
     assert.match(source, /Alcohol & nightlife/);
     assert.match(source, /Алкоголь и ночная жизнь/);
+    assert.match(source, /effectiveSalaryDate/);
+    assert.match(source, /previousFriday/);
+    assert.match(source, /SALARY CYCLE|Salary cycle/);
   }
 });

@@ -6,12 +6,12 @@
     <meta name="theme-color" content="#000000" />
     <meta
       name="description"
-      content="Euroscope — a clear monthly view of expenses, income, and savings."
+      content="Euroscope — a clear salary-cycle view of expenses, income, and savings."
     />
     <meta property="og:title" content="Euroscope — Every euro has a place." />
-    <meta property="og:description" content="Monthly money, clearly." />
+    <meta property="og:description" content="Salary-cycle money, clearly." />
     <meta property="og:image" content="https://finance.bekulov.com/public/og.png" />
-    <title>Euroscope — Monthly money, clearly</title>
+    <title>Euroscope — Salary-cycle money, clearly</title>
     <link rel="icon" href="/public/favicon.svg" />
     <link rel="stylesheet" href="/styles.css" />
     <script src="/script.js" defer></script>
@@ -23,7 +23,7 @@
           <span class="spending-alert-icon" aria-hidden="true">!</span>
           <div>
             <strong id="spending-alert-title">Spending alert</strong>
-            <p id="spending-alert-detail">Reviewing this month’s spending…</p>
+            <p id="spending-alert-detail">Reviewing this salary cycle’s spending…</p>
           </div>
         </section>
 
@@ -40,18 +40,18 @@
             </div>
             <div class="month-pill">
               <span class="month-dot" aria-hidden="true"></span>
-              <span id="month-label">Current month</span>
+              <span id="month-label">Current salary cycle</span>
             </div>
           </div>
         </header>
 
-        <nav class="month-history" id="month-history" aria-label="Finance history" data-i18n-aria-label="financeHistoryLabel"></nav>
+        <nav class="month-history" id="month-history" aria-label="Salary cycle history" data-i18n-aria-label="financeHistoryLabel"></nav>
 
-        <section class="month-timeline" aria-label="Monthly timeline" data-i18n-aria-label="monthlyTimelineLabel">
+        <section class="month-timeline" aria-label="Salary cycle timeline" data-i18n-aria-label="monthlyTimelineLabel">
           <div class="timeline-copy">
             <span id="timeline-start">01</span>
             <strong id="timeline-current">Today</strong>
-            <span id="timeline-end">Month end</span>
+            <span id="timeline-end">Cycle end</span>
           </div>
           <div class="timeline-track">
             <span id="timeline-progress"></span>
@@ -61,7 +61,7 @@
 
         <section class="hero" id="top" aria-labelledby="page-title">
           <div class="hero-copy">
-            <p class="eyebrow" data-i18n="monthGlance">YOUR MONTH AT A GLANCE</p>
+            <p class="eyebrow" data-i18n="monthGlance">YOUR SALARY CYCLE AT A GLANCE</p>
             <h1 id="page-title" data-i18n-html="headline">Every euro has<br /><em>a place.</em></h1>
             <p class="hero-intro" data-i18n="intro">
               A calm, honest view of what came in, what went out, and what
@@ -69,7 +69,7 @@
             </p>
           </div>
 
-          <div class="balance-card" aria-label="Monthly plan balance" data-i18n-aria-label="monthlyPlanLabel">
+          <div class="balance-card" aria-label="Salary cycle plan balance" data-i18n-aria-label="monthlyPlanLabel">
             <div class="balance-topline">
               <span data-i18n="availableAfterPlan">AVAILABLE AFTER PLAN</span>
               <span id="spent-percent">0% SPENT</span>
@@ -77,7 +77,7 @@
             <div class="balance-main">
               <div>
                 <strong id="remaining">€0.00</strong>
-                <span class="balance-caption" data-i18n="leftForMonth">left for the month</span>
+                <span class="balance-caption" data-i18n="leftForMonth">left until next salary</span>
               </div>
               <div class="progress-ring" id="progress-ring">
                 <span id="ring-percent">0%</span>
@@ -90,7 +90,7 @@
           </div>
         </section>
 
-        <section class="stat-grid" aria-label="Monthly totals" data-i18n-aria-label="monthlyTotalsLabel">
+        <section class="stat-grid" aria-label="Salary cycle totals" data-i18n-aria-label="monthlyTotalsLabel">
           <article class="stat-card">
             <span class="stat-icon" aria-hidden="true">↗</span>
             <p data-i18n="monthlySalary">MONTHLY SALARY</p>
@@ -115,7 +115,7 @@
 
           <article class="stat-card">
             <span class="stat-icon" aria-hidden="true">↓</span>
-            <p data-i18n="spentThisMonth">SPENT THIS MONTH</p>
+            <p data-i18n="spentThisMonth">SPENT THIS SALARY CYCLE</p>
             <strong id="spent-total">€0.00</strong>
             <small id="expense-count">0 recorded expenses</small>
           </article>
@@ -192,6 +192,6 @@
         </footer>
       </div>
     </main>
-    <noscript>This tracker requires JavaScript to read your monthly finance history.</noscript>
+    <noscript>This tracker requires JavaScript to read your salary-cycle finance history.</noscript>
   </body>
 </html>

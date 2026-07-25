@@ -10,17 +10,17 @@ const CATEGORIES = [
 
 const TRANSLATIONS = {
   en: {
-    monthGlance: "YOUR MONTH AT A GLANCE",
+    monthGlance: "YOUR SALARY CYCLE AT A GLANCE",
     headline: "Every euro has<br><em>a place.</em>",
     intro: "A calm, honest view of what came in, what went out, and what you’re keeping for yourself.",
     availableAfterPlan: "AVAILABLE AFTER PLAN",
-    leftForMonth: "left for the month",
+    leftForMonth: "left until next salary",
     dailyPace: "Comfortable daily pace",
     monthlySalary: "MONTHLY SALARY",
     tapToEdit: "Tap the amount to edit",
     savingsRequirement: "SAVINGS REQUIREMENT",
     protectedSpending: "Protected from spending",
-    spentThisMonth: "SPENT THIS MONTH",
+    spentThisMonth: "SPENT THIS SALARY CYCLE",
     spendingMix: "SPENDING MIX",
     whereMoneyGoes: "Where your money goes",
     ledger: "THE LEDGER",
@@ -35,7 +35,7 @@ const TRANSLATIONS = {
     chatHint: "In chat, send a number or receipt photo and it will be added and categorised here.",
     footer: "Private by design. Clear by default.",
     today: "Today",
-    monthEnd: "Month end",
+    monthEnd: "Cycle end",
     updated: "Updated",
     spent: "SPENT",
     total: "total",
@@ -50,7 +50,7 @@ const TRANSLATIONS = {
     savingsEuroLabel: "Monthly savings requirement in euros",
     recordedExpenses: "{count} recorded expense{plural}",
     perDay: "/ day",
-    monthsSaved: "{count} / 12 months saved",
+    monthsSaved: "{count} / 12 cycles saved",
     noExpenses: "No expenses recorded",
     spendingAlert: "Spending alert",
     spendingClear: "No spending pressure yet. Keep logging expenses to receive current guidance.",
@@ -59,10 +59,10 @@ const TRANSLATIONS = {
     spendingSame: "Pause new spending in this category until the balance improves.",
     euroscopeHome: "Euroscope home",
     languageLabel: "Language",
-    financeHistoryLabel: "Finance history",
-    monthlyTimelineLabel: "Monthly timeline",
-    monthlyPlanLabel: "Monthly plan balance",
-    monthlyTotalsLabel: "Monthly totals",
+    financeHistoryLabel: "Salary cycle history",
+    monthlyTimelineLabel: "Salary cycle timeline",
+    monthlyPlanLabel: "Salary cycle plan balance",
+    monthlyTotalsLabel: "Salary cycle totals",
     expenseCategoriesLabel: "Expense categories",
     budgetUsed: "{percent}% of spending budget used",
     historyUnavailable: "History unavailable",
@@ -78,17 +78,17 @@ const TRANSLATIONS = {
     },
   },
   ru: {
-    monthGlance: "ВАШ МЕСЯЦ В ЦИФРАХ",
+    monthGlance: "ВАШ ЦИКЛ ЗАРПЛАТЫ В ЦИФРАХ",
     headline: "Каждому евро —<br><em>своё место.</em>",
     intro: "Спокойный и честный взгляд на доходы, расходы и деньги, которые вы сохраняете для себя.",
     availableAfterPlan: "ДОСТУПНО ПОСЛЕ ПЛАНА",
-    leftForMonth: "осталось на месяц",
+    leftForMonth: "до следующей зарплаты",
     dailyPace: "Комфортный дневной лимит",
     monthlySalary: "МЕСЯЧНЫЙ ДОХОД",
     tapToEdit: "Нажмите на сумму, чтобы изменить",
     savingsRequirement: "ЦЕЛЬ НАКОПЛЕНИЙ",
     protectedSpending: "Защищено от расходов",
-    spentThisMonth: "ПОТРАЧЕНО В ЭТОМ МЕСЯЦЕ",
+    spentThisMonth: "ПОТРАЧЕНО В ЭТОМ ЦИКЛЕ",
     spendingMix: "СТРУКТУРА РАСХОДОВ",
     whereMoneyGoes: "Куда уходят деньги",
     ledger: "ЖУРНАЛ",
@@ -103,7 +103,7 @@ const TRANSLATIONS = {
     chatHint: "Отправьте в чат сумму или фото чека — расход будет добавлен и распределён по категории.",
     footer: "Приватность по замыслу. Ясность по умолчанию.",
     today: "Сегодня",
-    monthEnd: "Конец месяца",
+    monthEnd: "Конец цикла",
     updated: "Обновлено",
     spent: "ПОТРАЧЕНО",
     total: "всего",
@@ -118,7 +118,7 @@ const TRANSLATIONS = {
     savingsEuroLabel: "Цель ежемесячных накоплений в евро",
     recordedExpenses: "Записано расходов: {count}",
     perDay: "/ день",
-    monthsSaved: "Сохранено месяцев: {count} из 12",
+    monthsSaved: "Сохранено циклов: {count} из 12",
     noExpenses: "Расходов нет",
     spendingAlert: "Контроль расходов",
     spendingClear: "Пока нет признаков перерасхода. Продолжайте добавлять расходы для актуальных рекомендаций.",
@@ -127,10 +127,10 @@ const TRANSLATIONS = {
     spendingSame: "Не добавляйте новые траты в этой категории, пока баланс не улучшится.",
     euroscopeHome: "Главная Euroscope",
     languageLabel: "Язык",
-    financeHistoryLabel: "История финансов",
-    monthlyTimelineLabel: "Шкала месяца",
-    monthlyPlanLabel: "Баланс месячного плана",
-    monthlyTotalsLabel: "Итоги месяца",
+    financeHistoryLabel: "История циклов зарплаты",
+    monthlyTimelineLabel: "Шкала цикла зарплаты",
+    monthlyPlanLabel: "Баланс цикла зарплаты",
+    monthlyTotalsLabel: "Итоги цикла зарплаты",
     expenseCategoriesLabel: "Категории расходов",
     budgetUsed: "Использовано {percent}% бюджета на расходы",
     historyUnavailable: "История недоступна",
@@ -150,6 +150,7 @@ const TRANSLATIONS = {
 let history = [];
 let selectedMonth = null;
 let data = null;
+let salarySchedule = { dayOfMonth: 12, weekendRule: "previousFriday" };
 let language = localStorage.getItem("euroscope:language") === "ru" ? "ru" : "en";
 
 function t(key, replacements = {}) {
@@ -222,6 +223,43 @@ function element(id) {
 function safeNumber(value) {
   const number = Number(value);
   return Number.isFinite(number) ? Math.max(number, 0) : 0;
+}
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+function effectiveSalaryDate(year, monthIndex) {
+  const date = new Date(year, monthIndex, salarySchedule.dayOfMonth, 12);
+
+  if (salarySchedule.weekendRule === "previousFriday") {
+    if (date.getDay() === 6) date.setDate(date.getDate() - 1);
+    if (date.getDay() === 0) date.setDate(date.getDate() - 2);
+  }
+
+  return date;
+}
+
+function salaryCycleDates(monthKey) {
+  const [year, month] = monthKey.split("-").map(Number);
+  const start = effectiveSalaryDate(year, month - 1);
+  const nextStart = effectiveSalaryDate(year, month);
+  const end = new Date(nextStart);
+  end.setDate(end.getDate() - 1);
+  return { start, end };
+}
+
+function calendarDayNumber(date) {
+  return Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) / DAY_MS;
+}
+
+function inclusiveDayCount(start, end) {
+  return calendarDayNumber(end) - calendarDayNumber(start) + 1;
+}
+
+function formatShortDate(date) {
+  return new Intl.DateTimeFormat(locale(), {
+    day: "numeric",
+    month: "short",
+  }).format(date);
 }
 
 function categoryCode(category) {
@@ -323,27 +361,24 @@ function renderHistory() {
 }
 
 function renderTimeline() {
-  const [year, month] = selectedMonth.month.split("-").map(Number);
-  const daysInMonth = new Date(year, month, 0).getDate();
+  const { start, end } = salaryCycleDates(selectedMonth.month);
   const updated = new Date(`${selectedMonth.updatedAt}T12:00:00`);
-  const isCurrentMonth =
-    updated.getFullYear() === year && updated.getMonth() + 1 === month;
-  const day = isCurrentMonth ? Math.min(updated.getDate(), daysInMonth) : daysInMonth;
-  const shortMonth = new Intl.DateTimeFormat(locale(), { month: "short" })
-    .format(new Date(year, month - 1, 1))
-    .replace(".", "");
-  const position = `${(day / daysInMonth) * 100}%`;
-  const dayLabel = new Intl.DateTimeFormat(locale(), {
-    day: "numeric",
-    month: "short",
-  }).format(new Date(year, month - 1, day));
+  const isCurrentCycle = updated >= start && updated <= end;
+  const markerDate = isCurrentCycle ? updated : end;
+  const totalDays = inclusiveDayCount(start, end);
+  const elapsedDays = Math.min(
+    Math.max(inclusiveDayCount(start, markerDate), 1),
+    totalDays,
+  );
+  const position = `${(elapsedDays / totalDays) * 100}%`;
 
-  element("timeline-start").textContent = `01 ${shortMonth.toUpperCase()}`;
-  element("timeline-current").textContent = `${isCurrentMonth ? t("today") : t("monthEnd")} · ${dayLabel}`;
-  element("timeline-end").textContent = `${daysInMonth} ${shortMonth.toUpperCase()}`;
+  element("timeline-start").textContent = formatShortDate(start).toUpperCase();
+  element("timeline-current").textContent =
+    `${isCurrentCycle ? t("today") : t("monthEnd")} · ${formatShortDate(markerDate)}`;
+  element("timeline-end").textContent = formatShortDate(end).toUpperCase();
   element("timeline-progress").style.width = position;
   element("timeline-marker").style.left = position;
-  return { daysInMonth, day };
+  return { totalDays, elapsedDays };
 }
 
 function renderCategories() {
@@ -448,7 +483,7 @@ function render() {
   const remaining = salary - savings - spent;
   const percent = spendable > 0 ? Math.min((spent / spendable) * 100, 100) : 0;
   const timeline = renderTimeline();
-  const daysLeft = Math.max(timeline.daysInMonth - timeline.day, 1);
+  const daysLeft = Math.max(timeline.totalDays - timeline.elapsedDays, 1);
 
   element("month-label").textContent = formatMonth(selectedMonth.month);
   element("updated-label").textContent = `${t("updated")} ${new Date(
@@ -527,6 +562,7 @@ async function start() {
     const response = await fetch("/data/finance-history.json", { cache: "no-store" });
     if (!response.ok) throw new Error(`History request failed: ${response.status}`);
     const financeHistory = await response.json();
+    salarySchedule = financeHistory.salarySchedule ?? salarySchedule;
     history = financeHistory.months.slice(-12);
     if (!history.length) throw new Error("Finance history is empty.");
     bindControls();

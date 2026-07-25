@@ -1,6 +1,6 @@
 # Operating Manual for AI Maintainers
 
-This repository is a personal monthly finance tracker maintained through chat. This file is for an LLM/AI taking over maintenance. Do not replace it with a conventional project README, marketing copy, screenshots, or end-user setup instructions.
+This repository is a personal salary-cycle finance tracker maintained through chat. This file is for an LLM/AI taking over maintenance. Do not replace it with a conventional project README, marketing copy, screenshots, or end-user setup instructions.
 
 ## Non-negotiable behavior
 
@@ -8,8 +8,8 @@ Treat each user message as a possible finance or product update. When it changes
 
 1. inspect the current `dev` branch and remote state;
 2. update the canonical JSON and both website implementations;
-3. set the current month’s visible update date to the actual current date;
-4. increment the current month’s `revision` for every canonical finance-data change;
+3. set the current salary cycle’s visible update date to the actual current date;
+4. increment the current salary cycle’s `revision` for every canonical finance-data change;
 5. check English/Russian parity for every visible or accessible string;
 6. validate JSON, static JavaScript, calculations, responsive behavior, and the production build;
 7. commit intentionally and push `dev`;
@@ -41,13 +41,15 @@ Root fields:
 - `maxMonths`: must remain `12`
 - `currency`: `EUR`
 - `timezone`: `Europe/Vilnius`
+- `salarySchedule.dayOfMonth`: nominal monthly salary day, currently `12`
+- `salarySchedule.weekendRule`: `previousFriday`; when the nominal salary day is Saturday or Sunday, use the Friday immediately before that weekend
 - `months`: chronological array, oldest first, newest last, containing no more than 12 records
 
 Every month record must contain:
 
-- `month`: unique `YYYY-MM` key
+- `month`: unique `YYYY-MM` key for the nominal salary month
 - `label`: human-readable English label
-- `period.start` and `period.end`: exact inclusive calendar boundaries
+- `period.start` and `period.end`: exact inclusive salary-cycle boundaries
 - `currency`: `EUR`
 - `timezone`: `Europe/Vilnius`
 - `updatedAt`: actual date of the latest committed code/data update affecting that month, `YYYY-MM-DD`
@@ -76,7 +78,7 @@ Do not store derived totals in JSON. Total spent, remaining balance, category to
 
 ### Plain number
 
-A message whose financial intent is simply a number means: add that amount in euros as a new expense for the current calendar month.
+A message whose financial intent is simply a number means: add that amount in euros as a new expense for the current salary cycle.
 
 - Use a new stable ID.
 - Add both English and Russian `noteTranslations`; never leave a canonical expense name untranslated.
@@ -99,11 +101,13 @@ Read the final amount actually paid, not subtotal, tax, savings, balance due bef
 
 ### Salary
 
-When the user states a monthly salary, replace the current month’s `salary`. Salary is the base from which savings and expenses are deducted. Current canonical salary is €2,150 until changed.
+When the user states a monthly salary, replace the current salary cycle’s `salary`. Salary is the base from which savings and expenses are deducted. Current canonical salary is €2,150 until changed.
+
+Salary is nominally paid on the 12th of every month. If the 12th is Saturday or Sunday, the effective salary and reset date is the Friday immediately before that weekend. A cycle starts on that effective salary date and ends one calendar day before the next effective salary date. Use `Europe/Vilnius` dates and calculate this rule for each month; never hard-code a permanent day-of-week assumption.
 
 ### Savings requirement
 
-When the user changes the monthly savings requirement, replace the current month’s `savingsGoal`. Current canonical savings requirement is at least €200 per month until changed.
+When the user changes the monthly savings requirement, replace the current salary cycle’s `savingsGoal`. Current canonical savings requirement is at least €200 per cycle until changed.
 
 ### Rename or correct an expense
 
@@ -138,20 +142,21 @@ Receipt evaluation may introduce a genuinely necessary new category. Treat that 
 
 Keep the static and React implementations equivalent, use one stable English internal key everywhere, and do not ship an uncategorized fallback or an untranslated visible category.
 
-## Rolling 12-month history
+## Rolling 12-cycle history
 
-At the first update in a new calendar month:
+At the first update on or after a new effective salary date:
 
-1. create the new month record using exact month boundaries;
-2. set `updatedAt` to the current date and `revision` to `1`;
-3. carry forward salary, savings requirement, and active recurring expenses;
-4. assign new month-specific expense IDs and dates;
-5. do not copy one-time expenses;
-6. keep records ordered oldest to newest;
-7. if the array exceeds 12 records, remove only the oldest record;
-8. verify navigation, totals, timeline, and warnings for both current and historical months.
+1. calculate the effective salary date for the nominal month using the 12th/previous-Friday rule;
+2. create the new cycle record with `period.start` on that effective salary date and `period.end` one day before the following effective salary date;
+3. set `updatedAt` to the current date and `revision` to `1`;
+4. carry forward salary, savings requirement, and active recurring expenses;
+5. assign new cycle-specific expense IDs and dates;
+6. do not copy one-time expenses;
+7. keep records ordered oldest to newest;
+8. if the array exceeds 12 records, remove only the oldest record;
+9. verify navigation, totals, timeline, and warnings for both current and historical cycles.
 
-Never silently rewrite a historical month when the user is clearly talking about the current month.
+Never silently rewrite a historical cycle when the user is clearly talking about the current cycle.
 
 ## Spending warning strip
 
@@ -169,8 +174,10 @@ The warning is guidance derived from current data, not financial or legal advice
 
 ## Timeline and date rules
 
-- The current month shows the actual current day and positions the marker using that month’s true number of days.
-- Historical months show month end.
+- The current cycle shows the actual current day and positions the marker across its inclusive `period.start` to `period.end` range.
+- Historical cycles show their cycle end.
+- Daily pace divides non-negative remaining money by the days after today through `period.end`; it must not use calendar-month end.
+- The salary balance resets on `period.start`, including when the nominal 12th moves to the preceding Friday.
 - `updatedAt`, the visible updated label, and current timeline must be aligned whenever code or canonical data changes.
 - The connected React implementation currently uses a deterministic `TODAY` date for consistent builds; update it to the actual current date whenever the site changes.
 - Month names and short dates must follow the active locale.
@@ -198,8 +205,8 @@ After each finance-data update, verify:
 - used percentage is based on `spent / spendable` and visually capped at 100%
 - category totals sum exactly to `spent`
 - breakdown segment widths are proportional to category totals
-- daily pace uses non-negative remaining money divided by remaining calendar days
-- expense count equals the current month’s array length
+- daily pace uses non-negative remaining money divided by remaining salary-cycle days
+- expense count equals the current salary cycle’s array length
 - warning amount/share match the same category totals
 
 Do not change monetary totals when only renaming an expense.

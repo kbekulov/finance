@@ -1,20 +1,24 @@
 {
-  "version": 3,
+  "version": 4,
   "maxMonths": 12,
   "currency": "EUR",
   "timezone": "Europe/Vilnius",
+  "salarySchedule": {
+    "dayOfMonth": 12,
+    "weekendRule": "previousFriday"
+  },
   "months": [
     {
       "month": "2026-07",
       "label": "July 2026",
       "period": {
-        "start": "2026-07-01",
-        "end": "2026-07-31"
+        "start": "2026-07-10",
+        "end": "2026-08-11"
       },
       "currency": "EUR",
       "timezone": "Europe/Vilnius",
       "updatedAt": "2026-07-25",
-      "revision": 11,
+      "revision": 12,
       "salary": 2150,
       "savingsGoal": 200,
       "expenses": [

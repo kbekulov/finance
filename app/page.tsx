@@ -56,20 +56,20 @@ const CATEGORIES: Category[] = [
 
 const COPY = {
   en: {
-    monthGlance: "YOUR MONTH AT A GLANCE",
+    monthGlance: "YOUR SALARY CYCLE AT A GLANCE",
     headlineLead: "Every euro has",
     headlineEnd: "a place.",
     intro: "A calm, honest view of what came in, what went out, and what you’re keeping for yourself.",
     available: "AVAILABLE AFTER PLAN",
     spent: "SPENT",
-    left: "left for the month",
+    left: "left until next salary",
     pace: "Comfortable daily pace",
     day: "/ day",
     salary: "MONTHLY SALARY",
     edit: "Tap the amount to edit",
     savings: "SAVINGS REQUIREMENT",
     protected: "Protected from spending",
-    spentMonth: "SPENT THIS MONTH",
+    spentMonth: "SPENT THIS SALARY CYCLE",
     recorded: "recorded expenses",
     mix: "SPENDING MIX",
     where: "Where your money goes",
@@ -93,9 +93,9 @@ const COPY = {
     hint: "In chat, send a number or a receipt photo and it will be added and categorised here.",
     footer: "Private by design. Clear by default.",
     today: "Today",
-    monthEnd: "Month end",
+    monthEnd: "Cycle end",
     updated: "Updated",
-    monthsSaved: "months saved",
+    monthsSaved: "cycles saved",
     spendingAlert: "Spending alert",
     spendingClear: "No spending pressure yet. Keep logging expenses to receive current guidance.",
     spendingLargest: "{category} is your largest cost at {amount} ({percent}% of spending).",
@@ -103,29 +103,29 @@ const COPY = {
     spendingSame: "Pause new spending in this category until the balance improves.",
     euroscopeHome: "Euroscope home",
     languageLabel: "Language",
-    financeHistoryLabel: "Finance history",
-    monthlyPlanLabel: "Monthly plan balance",
-    monthlyTotalsLabel: "Monthly totals",
+    financeHistoryLabel: "Salary cycle history",
+    monthlyPlanLabel: "Salary cycle plan balance",
+    monthlyTotalsLabel: "Salary cycle totals",
     expenseCategoriesLabel: "Expense categories",
     budgetUsed: "{percent}% of spending budget used",
     salaryEuroLabel: "Monthly salary in euros",
     savingsEuroLabel: "Monthly savings requirement in euros",
   },
   ru: {
-    monthGlance: "ВАШ МЕСЯЦ В ЦИФРАХ",
+    monthGlance: "ВАШ ЦИКЛ ЗАРПЛАТЫ В ЦИФРАХ",
     headlineLead: "Каждому евро —",
     headlineEnd: "своё место.",
     intro: "Спокойный и честный взгляд на доходы, расходы и деньги, которые вы сохраняете для себя.",
     available: "ДОСТУПНО ПОСЛЕ ПЛАНА",
     spent: "ПОТРАЧЕНО",
-    left: "осталось на месяц",
+    left: "до следующей зарплаты",
     pace: "Комфортный дневной лимит",
     day: "/ день",
     salary: "МЕСЯЧНЫЙ ДОХОД",
     edit: "Нажмите на сумму, чтобы изменить",
     savings: "ЦЕЛЬ НАКОПЛЕНИЙ",
     protected: "Защищено от расходов",
-    spentMonth: "ПОТРАЧЕНО В ЭТОМ МЕСЯЦЕ",
+    spentMonth: "ПОТРАЧЕНО В ЭТОМ ЦИКЛЕ",
     recorded: "расходов записано",
     mix: "СТРУКТУРА РАСХОДОВ",
     where: "Куда уходят деньги",
@@ -149,9 +149,9 @@ const COPY = {
     hint: "Отправьте в чат сумму или фото чека — расход будет добавлен и распределён по категории.",
     footer: "Приватность по замыслу. Ясность по умолчанию.",
     today: "Сегодня",
-    monthEnd: "Конец месяца",
+    monthEnd: "Конец цикла",
     updated: "Обновлено",
-    monthsSaved: "месяцев сохранено",
+    monthsSaved: "циклов сохранено",
     spendingAlert: "Контроль расходов",
     spendingClear: "Пока нет признаков перерасхода. Продолжайте добавлять расходы для актуальных рекомендаций.",
     spendingLargest: "Самая крупная статья — {category}: {amount} ({percent}% всех расходов).",
@@ -159,9 +159,9 @@ const COPY = {
     spendingSame: "Не добавляйте новые траты в этой категории, пока баланс не улучшится.",
     euroscopeHome: "Главная Euroscope",
     languageLabel: "Язык",
-    financeHistoryLabel: "История финансов",
-    monthlyPlanLabel: "Баланс месячного плана",
-    monthlyTotalsLabel: "Итоги месяца",
+    financeHistoryLabel: "История циклов зарплаты",
+    monthlyPlanLabel: "Баланс цикла зарплаты",
+    monthlyTotalsLabel: "Итоги цикла зарплаты",
     expenseCategoriesLabel: "Категории расходов",
     budgetUsed: "Использовано {percent}% бюджета на расходы",
     salaryEuroLabel: "Месячный доход в евро",
@@ -194,6 +194,8 @@ const CATEGORY_LABELS: Record<Language, Record<Category, string>> = {
 const HISTORY = (financeHistoryJson.months as unknown as MonthRecord[]).slice(-12);
 const INITIAL_MONTH = HISTORY[HISTORY.length - 1];
 const TODAY = new Date("2026-07-25T12:00:00");
+const SALARY_SCHEDULE = financeHistoryJson.salarySchedule;
+const DAY_MS = 24 * 60 * 60 * 1000;
 
 const euro = new Intl.NumberFormat("en-IE", {
   style: "currency",
@@ -211,6 +213,34 @@ function sourceLabel(source: Expense["source"], language: Language) {
   if (source === "receipt") return COPY[language].receipt;
   if (source === "chat") return COPY[language].chat;
   return COPY[language].here;
+}
+
+function effectiveSalaryDate(year: number, monthIndex: number) {
+  const date = new Date(year, monthIndex, SALARY_SCHEDULE.dayOfMonth, 12);
+
+  if (SALARY_SCHEDULE.weekendRule === "previousFriday") {
+    if (date.getDay() === 6) date.setDate(date.getDate() - 1);
+    if (date.getDay() === 0) date.setDate(date.getDate() - 2);
+  }
+
+  return date;
+}
+
+function salaryCycleDates(monthKey: string) {
+  const [year, month] = monthKey.split("-").map(Number);
+  const start = effectiveSalaryDate(year, month - 1);
+  const nextStart = effectiveSalaryDate(year, month);
+  const end = new Date(nextStart);
+  end.setDate(end.getDate() - 1);
+  return { start, end };
+}
+
+function calendarDayNumber(date: Date) {
+  return Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) / DAY_MS;
+}
+
+function inclusiveDayCount(start: Date, end: Date) {
+  return calendarDayNumber(end) - calendarDayNumber(start) + 1;
 }
 
 function categorySymbol(category: Category) {
@@ -297,24 +327,27 @@ export default function Home() {
   const remaining = data.salary - data.savingsGoal - spent;
   const usedPercent = spendable > 0 ? Math.min((spent / spendable) * 100, 100) : 0;
   const [year, month] = selectedMonth.month.split("-").map(Number);
-  const daysInMonth = new Date(year, month, 0).getDate();
-  const isCurrentMonth =
-    year === TODAY.getFullYear() && month === TODAY.getMonth() + 1;
-  const dayOfMonth = isCurrentMonth ? TODAY.getDate() : daysInMonth;
-  const dailyPace = Math.max(remaining, 0) / Math.max(daysInMonth - dayOfMonth, 1);
+  const { start: cycleStart, end: cycleEnd } = salaryCycleDates(selectedMonth.month);
+  const isCurrentCycle = TODAY >= cycleStart && TODAY <= cycleEnd;
+  const markerDate = isCurrentCycle ? TODAY : cycleEnd;
+  const totalCycleDays = inclusiveDayCount(cycleStart, cycleEnd);
+  const elapsedCycleDays = Math.min(
+    Math.max(inclusiveDayCount(cycleStart, markerDate), 1),
+    totalCycleDays,
+  );
+  const dailyPace =
+    Math.max(remaining, 0) / Math.max(totalCycleDays - elapsedCycleDays, 1);
   const locale = language === "ru" ? "ru-RU" : "en-GB";
   const copy = COPY[language];
   const monthLabel = new Intl.DateTimeFormat(locale, {
     month: "long",
     year: "numeric",
   }).format(new Date(year, month - 1, 1));
-  const shortMonth = new Intl.DateTimeFormat(locale, { month: "short" })
-    .format(new Date(year, month - 1, 1))
-    .replace(".", "");
-  const timelineDayLabel = new Intl.DateTimeFormat(locale, {
+  const shortDate = (date: Date) => new Intl.DateTimeFormat(locale, {
     day: "numeric",
     month: "short",
-  }).format(new Date(year, month - 1, dayOfMonth));
+  }).format(date);
+  const timelineDayLabel = shortDate(markerDate);
   const updatedLabel = `${copy.updated} ${new Date(
     `${selectedMonth.updatedAt}T12:00:00`,
   ).toLocaleDateString(locale, { day: "numeric", month: "long", year: "numeric" })}`;
@@ -436,18 +469,18 @@ export default function Home() {
 
         <section
           className="month-timeline"
-          aria-label={`${monthLabel}, ${dayOfMonth}`}
+          aria-label={`${shortDate(cycleStart)} – ${shortDate(cycleEnd)}`}
         >
           <div className="timeline-copy">
-            <span>01 {shortMonth.toUpperCase()}</span>
+            <span>{shortDate(cycleStart).toUpperCase()}</span>
             <strong>
-              {isCurrentMonth ? copy.today : copy.monthEnd} · {timelineDayLabel}
+              {isCurrentCycle ? copy.today : copy.monthEnd} · {timelineDayLabel}
             </strong>
-            <span>{daysInMonth} {shortMonth.toUpperCase()}</span>
+            <span>{shortDate(cycleEnd).toUpperCase()}</span>
           </div>
           <div className="timeline-track">
-            <span style={{ width: `${(dayOfMonth / daysInMonth) * 100}%` }} />
-            <i style={{ left: `${(dayOfMonth / daysInMonth) * 100}%` }} />
+            <span style={{ width: `${(elapsedCycleDays / totalCycleDays) * 100}%` }} />
+            <i style={{ left: `${(elapsedCycleDays / totalCycleDays) * 100}%` }} />
           </div>
         </section>
 

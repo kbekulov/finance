@@ -872,7 +872,7 @@ main::before {
   aspect-ratio: 3 / 1;
   min-height: 230px;
   overflow: hidden;
-  margin: 24px calc(var(--banner-bleed) * -1) 30px;
+  margin: 24px calc(var(--banner-bleed) * -1) 0;
   background: transparent;
 }
 
@@ -903,11 +903,14 @@ main::before {
 /* Borderless daily spending pulse */
 
 .daily-expense-chart {
+  position: relative;
+  z-index: 3;
   width: calc(100% + 16px);
   height: 84px;
   min-height: 84px;
-  margin: -2px -8px 16px;
+  margin: -42px -8px 18px;
   overflow: hidden;
+  filter: drop-shadow(0 4px 8px var(--chart-glow));
 }
 
 /* Hero */
@@ -1203,15 +1206,20 @@ h1 em {
   font-size: 8px;
 }
 
-.expense-monogram {
-  display: grid;
-  flex: 0 0 34px;
-  width: 34px;
-  height: 34px;
-  place-items: center;
-  border-radius: 11px;
-  font-size: 12px;
-  font-weight: 750;
+.expense-category-icon {
+  display: block;
+  flex: 0 0 48px;
+  width: 48px;
+  height: 48px;
+  align-self: center;
+  filter: drop-shadow(0 5px 8px rgba(0, 0, 0, 0.2));
+}
+
+.expense-category-icon img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .food,
@@ -1633,11 +1641,6 @@ h1 em {
 
 .expense-list li:first-child {
   border-top: 0;
-}
-
-.expense-monogram {
-  background: rgba(118, 118, 128, 0.14);
-  color: var(--secondary);
 }
 
 .expense-info {
@@ -2063,7 +2066,7 @@ footer p {
     min-height: 0;
     height: clamp(150px, 42vw, 190px);
     margin-top: 14px;
-    margin-bottom: 24px;
+    margin-bottom: 0;
   }
 
   .theme-banner img {
@@ -2073,8 +2076,14 @@ footer p {
   .daily-expense-chart {
     height: 84px;
     min-height: 84px;
-    margin-top: -4px;
+    margin-top: -34px;
     margin-bottom: 12px;
+  }
+
+  .expense-category-icon {
+    flex-basis: 44px;
+    width: 44px;
+    height: 44px;
   }
 
   .timeline-copy {

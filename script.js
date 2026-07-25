@@ -8,6 +8,16 @@ const CATEGORIES = [
   "Alcohol & nightlife",
 ];
 
+const CATEGORY_ICONS = {
+  Food: "/public/category-icons/food.png",
+  "Subscriptions & services": "/public/category-icons/subscriptions-services.png",
+  "Luxury purchases": "/public/category-icons/luxury-purchases.png",
+  "Debt & repayments": "/public/category-icons/debt-repayments.png",
+  "Devices & installments": "/public/category-icons/devices-installments.png",
+  "Transport & Travel": "/public/category-icons/transport-travel.png",
+  "Alcohol & nightlife": "/public/category-icons/alcohol-nightlife.png",
+};
+
 const THEMES = [
   { id: "kinance", label: "Kinance", banner: "/public/theme-banners/kinance.png" },
   { id: "nier-automata", label: "NieR:Automata", banner: "/public/theme-banners/nier-automata.png" },
@@ -650,7 +660,7 @@ function createExpenseList(expenses) {
   const list = document.createElement("ul");
   list.className = "expense-list";
   expenses.forEach((expense) => {
-    const [code] = categoryCode(expense.category);
+    const categoryIcon = CATEGORY_ICONS[expense.category];
     const date = new Date(`${expense.date}T12:00:00`).toLocaleDateString(locale(), {
       day: "numeric",
       month: "short",
@@ -664,7 +674,9 @@ function createExpenseList(expenses) {
           : "credit-outstanding"
         : "debit";
     item.innerHTML = `
-      <span class="expense-monogram" aria-hidden="true">${code}</span>
+      <span class="expense-category-icon" aria-hidden="true">
+        <img src="${categoryIcon}" alt="" width="256" height="256" loading="lazy" decoding="async">
+      </span>
       <span class="expense-info">
         <span class="expense-title-row">
           <strong></strong>

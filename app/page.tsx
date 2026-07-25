@@ -66,6 +66,16 @@ const CATEGORIES: Category[] = [
   "Alcohol & nightlife",
 ];
 
+const CATEGORY_ICONS: Record<Category, string> = {
+  Food: "/category-icons/food.png",
+  "Subscriptions & services": "/category-icons/subscriptions-services.png",
+  "Luxury purchases": "/category-icons/luxury-purchases.png",
+  "Debt & repayments": "/category-icons/debt-repayments.png",
+  "Devices & installments": "/category-icons/devices-installments.png",
+  "Transport & Travel": "/category-icons/transport-travel.png",
+  "Alcohol & nightlife": "/category-icons/alcohol-nightlife.png",
+};
+
 const COPY = {
   en: {
     monthGlance: "YOUR SALARY CYCLE AT A GLANCE",
@@ -280,16 +290,6 @@ function calendarDayNumber(date: Date) {
 
 function inclusiveDayCount(start: Date, end: Date) {
   return calendarDayNumber(end) - calendarDayNumber(start) + 1;
-}
-
-function categorySymbol(category: Category) {
-  if (category === "Food") return "F";
-  if (category === "Subscriptions & services") return "S";
-  if (category === "Luxury purchases") return "L";
-  if (category === "Debt & repayments") return "D";
-  if (category === "Devices & installments") return "I";
-  if (category === "Transport & Travel") return "T";
-  return "A";
 }
 
 function categoryClass(category: Category) {
@@ -621,8 +621,17 @@ export default function Home() {
     <ul className="expense-list">
       {expenses.map((expense) => (
         <li key={expense.id}>
-          <span className="expense-monogram" aria-hidden="true">
-            {categorySymbol(expense.category)}
+          <span className="expense-category-icon" aria-hidden="true">
+            {/* Category art is decorative because the localized category name follows in text. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={CATEGORY_ICONS[expense.category]}
+              alt=""
+              width={256}
+              height={256}
+              loading="lazy"
+              decoding="async"
+            />
           </span>
           <span className="expense-info">
             <span className="expense-title-row">

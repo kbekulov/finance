@@ -121,6 +121,9 @@ test("server-renders the current finance tracker", async () => {
   assert.doesNotMatch(html, /Monthly salary in euros[^<]*<\/span>\s*<span[^>]*>€<\/span>\s*<input/s);
   assert.doesNotMatch(html, /class="daily-chart-panel"/);
   assert.match(html, /class="daily-expense-chart"/);
+  assert.match(html, /class="expense-category-icon"/);
+  assert.match(html, /category-icons\/debt-repayments\.png/);
+  assert.doesNotMatch(html, /class="expense-monogram"/);
   assert.match(html, /aria-label="Daily non-recurring expense movement"/);
   assert.doesNotMatch(html, /Your site is taking shape|Building your site/);
 });
@@ -153,6 +156,8 @@ test("keeps database history and translations aligned", async () => {
   assert.match(manual, /never misdate it into the current cycle/);
   assert.match(manual, /Synthetic expense history is exceptional/);
   assert.match(manual, /`synthetic: true` and a stable shared `backfillBatch` identifier/);
+  assert.match(manual, /category-specific transparent Tohsaka Rin chibi PNG/);
+  assert.match(manual, /overlaps only the lower edge of the character artwork/);
   assert.equal(current.updatedAt, "2026-07-25");
   assert.equal(current.revision, 23);
   assert.equal(current.savingsGoal, 200);
@@ -538,9 +543,9 @@ test("keeps database history and translations aligned", async () => {
     assert.doesNotMatch(source, /const TODAY\s*=/);
   }
   assert.match(index, /id="theme-select"/);
-  assert.match(index, /styles\.css\?v=27/);
+  assert.match(index, /styles\.css\?v=28/);
   assert.match(index, /public\/vendor\/apexcharts\.min\.js\?v=21/);
-  assert.match(index, /script\.js\?v=27/);
+  assert.match(index, /script\.js\?v=28/);
   assert.match(index, /data-current-theme="kinance"/);
   assert.match(index, /id="credit-alert"[^>]*hidden/);
   assert.match(index, /id="payment-method"/);
@@ -551,11 +556,29 @@ test("keeps database history and translations aligned", async () => {
   assert.match(script, /public\/theme-banners\/kinance\.png/);
   assert.match(script, /public\/theme-banners\/nier-automata\.png/);
   assert.match(script, /public\/theme-banners\/tohsaka-rin\.png/);
+  assert.match(script, /public\/category-icons\/food\.png/);
+  assert.match(script, /public\/category-icons\/alcohol-nightlife\.png/);
   for (const source of [page]) {
     assert.match(source, /themeBannerLabel/);
     assert.match(source, /theme-banners\/kinance\.png/);
     assert.match(source, /theme-banners\/nier-automata\.png/);
     assert.match(source, /theme-banners\/tohsaka-rin\.png/);
+    assert.match(source, /category-icons\/food\.png/);
+    assert.match(source, /category-icons\/alcohol-nightlife\.png/);
+  }
+  for (const filename of [
+    "food.png",
+    "subscriptions-services.png",
+    "luxury-purchases.png",
+    "debt-repayments.png",
+    "devices-installments.png",
+    "transport-travel.png",
+    "alcohol-nightlife.png",
+  ]) {
+    const icon = await readFile(
+      new URL(`../public/category-icons/${filename}`, import.meta.url),
+    );
+    assert.equal(icon.subarray(1, 4).toString("ascii"), "PNG");
   }
   assert.match(styles, /\.theme-banner\s*\{/);
   assert.match(styles, /@keyframes credit-alert-pulse/);
@@ -565,6 +588,9 @@ test("keeps database history and translations aligned", async () => {
   assert.match(styles, /\.theme-banner\s*\{[^}]*background:\s*transparent/s);
   assert.doesNotMatch(styles, /\.daily-chart-panel\s*\{/);
   assert.match(styles, /\.daily-expense-chart\s*\{[^}]*height:\s*84px[^}]*min-height:\s*84px/s);
+  assert.match(styles, /\.daily-expense-chart\s*\{[^}]*margin:\s*-42px -8px 18px/s);
+  assert.match(styles, /\.expense-category-icon\s*\{[^}]*width:\s*48px[^}]*height:\s*48px/s);
+  assert.doesNotMatch(styles, /\.expense-monogram/);
   assert.match(styles, /--chart-accent:\s*#5ac8fa/);
   assert.match(styles, /:root\[data-theme="nier-automata"\][^{]*\{[^}]*--chart-accent:\s*#526f78/s);
   assert.match(styles, /:root\[data-theme="tohsaka-rin"\][^{]*\{[^}]*--chart-accent:\s*#ff5b82/s);

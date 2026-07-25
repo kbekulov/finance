@@ -34,7 +34,6 @@ const TRANSLATIONS = {
     savingsRequirement: "SAVINGS REQUIREMENT",
     protectedSpending: "Protected from spending",
     spentThisMonth: "SPENT THIS SALARY CYCLE",
-    comparisonUnavailable: "Past 3-cycle comparison appears when history is available",
     savingsMore: "Planned savings are {difference} above the prior {count}-cycle average of {average}",
     savingsLess: "Planned savings are {difference} below the prior {count}-cycle average of {average}",
     savingsSame: "Planned savings match the prior {count}-cycle average of {average}",
@@ -43,11 +42,8 @@ const TRANSLATIONS = {
     spendingSame: "Matches the prior {count}-cycle spending average of {average}",
     spendingMix: "SPENDING MIX",
     whereMoneyGoes: "Where your money goes",
-    ledger: "THE LEDGER",
     recentExpenses: "Recent expenses",
-    expectedEyebrow: "EXPECTED",
     expectedMonthly: "Expected monthly expenses",
-    expectedMonthlyTotal: "Expected monthly total",
     oneTimeExpenses: "One-time expenses",
     quickEntry: "QUICK ENTRY",
     addExpense: "Add expense",
@@ -72,7 +68,6 @@ const TRANSLATIONS = {
     items: "ITEMS",
     nothingSpent: "Nothing spent yet",
     monthEmpty: "Your {month} expenses will appear here as you add them.",
-    monthly: "Monthly",
     receipt: "Receipt",
     chat: "Added in chat",
     here: "Added here",
@@ -95,7 +90,6 @@ const TRANSLATIONS = {
     monthlyTimelineLabel: "Salary cycle timeline",
     monthlyPlanLabel: "Salary cycle plan balance",
     monthlyTotalsLabel: "Salary cycle totals",
-    expenseCategoriesLabel: "Expense categories",
     budgetUsed: "{percent}% of spending budget used",
     noSpendingBudget: "NO SPENDING BUDGET",
     historyUnavailable: "History unavailable",
@@ -129,7 +123,6 @@ const TRANSLATIONS = {
     savingsRequirement: "ЦЕЛЬ НАКОПЛЕНИЙ",
     protectedSpending: "Защищено от расходов",
     spentThisMonth: "ПОТРАЧЕНО В ЭТОМ ЦИКЛЕ",
-    comparisonUnavailable: "Сравнение с 3 прошлыми циклами появится, когда будет доступна история",
     savingsMore: "План накоплений на {difference} выше среднего за {count} прошлых цикла: {average}",
     savingsLess: "План накоплений на {difference} ниже среднего за {count} прошлых цикла: {average}",
     savingsSame: "План накоплений совпадает со средним за {count} прошлых цикла: {average}",
@@ -138,11 +131,8 @@ const TRANSLATIONS = {
     spendingSame: "На уровне средних расходов за {count} прошлых цикла: {average}",
     spendingMix: "СТРУКТУРА РАСХОДОВ",
     whereMoneyGoes: "Куда уходят деньги",
-    ledger: "ЖУРНАЛ",
     recentExpenses: "Последние расходы",
-    expectedEyebrow: "ОЖИДАЕТСЯ",
     expectedMonthly: "Ожидаемые ежемесячные расходы",
-    expectedMonthlyTotal: "Всего ожидается в месяц",
     oneTimeExpenses: "Разовые расходы",
     quickEntry: "БЫСТРОЕ ДОБАВЛЕНИЕ",
     addExpense: "Добавить расход",
@@ -167,7 +157,6 @@ const TRANSLATIONS = {
     items: "ЗАПИСЕЙ",
     nothingSpent: "Расходов пока нет",
     monthEmpty: "Расходы за {month} появятся здесь после добавления.",
-    monthly: "Ежемесячно",
     receipt: "Чек",
     chat: "Добавлено в чате",
     here: "Добавлено здесь",
@@ -190,7 +179,6 @@ const TRANSLATIONS = {
     monthlyTimelineLabel: "Шкала цикла зарплаты",
     monthlyPlanLabel: "Баланс цикла зарплаты",
     monthlyTotalsLabel: "Итоги цикла зарплаты",
-    expenseCategoriesLabel: "Категории расходов",
     budgetUsed: "Использовано {percent}% бюджета на расходы",
     noSpendingBudget: "НЕТ БЮДЖЕТА НА РАСХОДЫ",
     historyUnavailable: "История недоступна",
@@ -378,9 +366,7 @@ function priorCycles() {
 
 function comparisonFor(kind, currentValue, elapsedDays) {
   const previous = priorCycles();
-  if (!previous.length) {
-    return { text: t("comparisonUnavailable"), tone: "neutral" };
-  }
+  if (!previous.length) return null;
 
   const values = previous.map((month) =>
     kind === "savings"
@@ -569,6 +555,8 @@ function save() {
 function renderHistory() {
   const nav = element("month-history");
   nav.replaceChildren();
+  nav.hidden = history.length < 2;
+  if (nav.hidden) return;
   history.forEach((month) => {
     const button = document.createElement("button");
     button.type = "button";
@@ -603,20 +591,6 @@ function renderTimeline() {
   element("timeline-progress").style.width = position;
   element("timeline-marker").style.left = position;
   return { totalDays, elapsedDays };
-}
-
-function renderCategories() {
-  const container = element("category-strip");
-  container.replaceChildren();
-  categoryTotals().forEach(({ category, amount }) => {
-    const [code, className] = categoryCode(category);
-    const article = document.createElement("article");
-    article.innerHTML = `
-      <span class="category-symbol ${className}" aria-hidden="true">${code}</span>
-      <span><small>${categoryLabel(category)}</small><strong>${formatEuro(amount)}</strong></span>
-    `;
-    container.append(article);
-  });
 }
 
 function renderBreakdown() {
@@ -681,7 +655,7 @@ function createExpenseList(expenses) {
           <strong></strong>
           <span class="payment-badge ${paymentClass}">${paymentLabel(expense)}</span>
         </span>
-        <small>${categoryLabel(expense.category)} · ${expense.recurring ? `${t("monthly")} · ` : ""}${sourceLabel(expense.source)} · ${date}</small>
+        <small>${categoryLabel(expense.category)} · ${sourceLabel(expense.source)} · ${date}</small>
       </span>
       <strong class="expense-amount">−${formatEuro(safeNumber(expense.amount))}</strong>
     `;
@@ -710,7 +684,6 @@ function renderLedger() {
       </summary>
       <div class="expense-table-body">
         <div class="expense-table-meta">
-          <p class="eyebrow">${t("expectedEyebrow")}</p>
           <span>${recurringExpenses.length} ${t("items")}</span>
         </div>
       </div>
@@ -718,13 +691,6 @@ function renderLedger() {
     const recurringBody = recurring.querySelector(".expense-table-body");
     recurringBody.append(createExpenseList(recurringExpenses));
 
-    const footer = document.createElement("footer");
-    footer.className = "recurring-total";
-    footer.innerHTML = `
-      <span>${t("expectedMonthlyTotal")}</span>
-      <strong>${formatEuro(recurringTotal)}</strong>
-    `;
-    recurringBody.append(footer);
     container.append(recurring);
   }
 
@@ -739,7 +705,6 @@ function renderLedger() {
     </summary>
     <div class="expense-table-body">
       <div class="expense-table-meta">
-        <p class="eyebrow">${t("ledger")}</p>
         <span>${oneTimeExpenses.length} ${t("items")}</span>
       </div>
     </div>
@@ -869,10 +834,14 @@ function render() {
     });
   const savingsComparison = comparisonFor("savings", savings, timeline.elapsedDays);
   const spendingComparison = comparisonFor("spending", spent, timeline.elapsedDays);
-  element("savings-comparison").textContent = savingsComparison.text;
-  element("savings-comparison").className = `stat-comparison ${savingsComparison.tone}`;
-  element("spending-comparison").textContent = spendingComparison.text;
-  element("spending-comparison").className = `stat-comparison ${spendingComparison.tone}`;
+  const savingsComparisonElement = element("savings-comparison");
+  savingsComparisonElement.hidden = !savingsComparison;
+  savingsComparisonElement.textContent = savingsComparison?.text ?? "";
+  savingsComparisonElement.className = `stat-comparison ${savingsComparison?.tone ?? "neutral"}`;
+  const spendingComparisonElement = element("spending-comparison");
+  spendingComparisonElement.hidden = !spendingComparison;
+  spendingComparisonElement.textContent = spendingComparison?.text ?? "";
+  spendingComparisonElement.className = `stat-comparison ${spendingComparison?.tone ?? "neutral"}`;
   element("remaining").textContent = formatEuro(remaining);
   const usedLabel = usedPercent === null
     ? t("noSpendingBudget")
@@ -893,7 +862,6 @@ function render() {
   renderCreditAlert();
   renderSpendingAlert();
   renderHistory();
-  renderCategories();
   renderBreakdown();
   renderLedger();
 }

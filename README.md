@@ -136,7 +136,7 @@ Every expense row must display a localized payment badge: Debit, Credit, or Cred
 
 Store each recurring charge as a normal expense with `recurring: true` and `frequency: "monthly"`. When opening a new month, carry recurring records forward with new month-specific IDs and dates, then apply any user-requested cancellations or amount changes.
 
-Render every expense marked `recurring: true` inside a standalone expected-monthly-expenses table. Render one-time expenses in a separate sibling table. Never nest either table inside the other or inside a shared ledger card. Both tables must be independently collapsible, open by default, keyboard accessible, and show the localized table name on the left and that table’s calculated total on the right while collapsed. The recurring table footer must always calculate and display the sum of the recurring records in the selected salary cycle.
+Render every expense marked `recurring: true` inside a standalone expected-monthly-expenses table. Render one-time expenses in a separate sibling table. Never nest either table inside the other or inside a shared ledger card. Both tables must be independently collapsible, open by default, keyboard accessible, and show the localized table name on the left and that table’s calculated total on the right in their persistent summary row. Do not repeat a table total in its expanded body or footer. Keep the item count in the expanded body, but do not repeat `Monthly` on every recurring row because the table heading already establishes that context.
 
 On desktop, the ledger grid must size both tables to their content instead of stretching them to the adjacent expense form. A collapsed table must remain only as tall as its summary row at every responsive breakpoint.
 
@@ -178,6 +178,8 @@ At the first update on or after a new effective salary date:
 7. keep records ordered oldest to newest;
 8. if the array exceeds 12 records, remove only the oldest record;
 9. verify navigation, totals, timeline, and warnings for both current and historical cycles.
+
+Hide the cycle-history navigation while only one cycle exists because it merely repeats the current month already shown in the header. Render it automatically once at least two cycles are available.
 
 Never silently rewrite a historical cycle when the user is clearly talking about the current cycle.
 
@@ -237,7 +239,7 @@ After each finance-data update, verify:
 - savings and spending comparisons use the average of up to the three salary cycles immediately before the selected cycle
 - savings comparisons are explicitly described as planned savings and use each cycle's `savingsGoal`
 - spending comparisons use only expenses through the same elapsed cycle day in each prior cycle, avoiding partial-to-full-cycle comparisons
-- comparisons state how many prior cycles were available and show a neutral history-unavailable message when none exist
+- comparisons state how many prior cycles were available; hide comparison rows entirely when no prior cycle exists instead of repeating unavailable-state copy
 
 Do not change monetary totals when only renaming an expense.
 
@@ -249,7 +251,7 @@ Preserve the dark iOS-inspired system:
 - Apple system font stack;
 - translucent blur, subtle hairlines, soft shadows, and restrained system colors;
 - large rounded touch targets and readable mobile layouts;
-- SSD-style proportional colored spending bar with text legend;
+- one proportional colored spending bar with a text legend as the single category breakdown; do not repeat the same category amounts in a separate card strip;
 - visible keyboard focus, semantic structure, sufficient contrast, and reduced-motion support.
 
 Do not introduce heavy libraries for behavior that plain TypeScript/JavaScript/CSS already handles.

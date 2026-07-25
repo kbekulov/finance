@@ -87,7 +87,6 @@ const COPY = {
     savings: "SAVINGS REQUIREMENT",
     protected: "Protected from spending",
     spentMonth: "SPENT THIS SALARY CYCLE",
-    comparisonUnavailable: "Past 3-cycle comparison appears when history is available",
     savingsMore: "Planned savings are {difference} above the prior {count}-cycle average of {average}",
     savingsLess: "Planned savings are {difference} below the prior {count}-cycle average of {average}",
     savingsSame: "Planned savings match the prior {count}-cycle average of {average}",
@@ -98,16 +97,12 @@ const COPY = {
     mix: "SPENDING MIX",
     where: "Where your money goes",
     total: "total",
-    ledger: "THE LEDGER",
     recent: "Recent expenses",
     items: "ITEMS",
-    expectedEyebrow: "EXPECTED",
     expectedMonthly: "Expected monthly expenses",
-    expectedMonthlyTotal: "Expected monthly total",
     oneTimeExpenses: "One-time expenses",
     empty: "Nothing spent yet",
     emptyText: "expenses will appear here as you add them.",
-    monthly: "Monthly",
     receipt: "Receipt",
     chat: "Added in chat",
     here: "Added here",
@@ -142,7 +137,6 @@ const COPY = {
     financeHistoryLabel: "Salary cycle history",
     monthlyPlanLabel: "Salary cycle plan balance",
     monthlyTotalsLabel: "Salary cycle totals",
-    expenseCategoriesLabel: "Expense categories",
     budgetUsed: "{percent}% of spending budget used",
     noSpendingBudget: "NO SPENDING BUDGET",
     salaryEuroLabel: "Monthly salary in euros",
@@ -170,7 +164,6 @@ const COPY = {
     savings: "ЦЕЛЬ НАКОПЛЕНИЙ",
     protected: "Защищено от расходов",
     spentMonth: "ПОТРАЧЕНО В ЭТОМ ЦИКЛЕ",
-    comparisonUnavailable: "Сравнение с 3 прошлыми циклами появится, когда будет доступна история",
     savingsMore: "План накоплений на {difference} выше среднего за {count} прошлых цикла: {average}",
     savingsLess: "План накоплений на {difference} ниже среднего за {count} прошлых цикла: {average}",
     savingsSame: "План накоплений совпадает со средним за {count} прошлых цикла: {average}",
@@ -181,16 +174,12 @@ const COPY = {
     mix: "СТРУКТУРА РАСХОДОВ",
     where: "Куда уходят деньги",
     total: "всего",
-    ledger: "ЖУРНАЛ",
     recent: "Последние расходы",
     items: "ЗАПИСЕЙ",
-    expectedEyebrow: "ОЖИДАЕТСЯ",
     expectedMonthly: "Ожидаемые ежемесячные расходы",
-    expectedMonthlyTotal: "Всего ожидается в месяц",
     oneTimeExpenses: "Разовые расходы",
     empty: "Расходов пока нет",
     emptyText: "расходы появятся здесь после добавления.",
-    monthly: "Ежемесячно",
     receipt: "Чек",
     chat: "Добавлено в чате",
     here: "Добавлено здесь",
@@ -225,7 +214,6 @@ const COPY = {
     financeHistoryLabel: "История циклов зарплаты",
     monthlyPlanLabel: "Баланс цикла зарплаты",
     monthlyTotalsLabel: "Итоги цикла зарплаты",
-    expenseCategoriesLabel: "Категории расходов",
     budgetUsed: "Использовано {percent}% бюджета на расходы",
     noSpendingBudget: "НЕТ БЮДЖЕТА НА РАСХОДЫ",
     salaryEuroLabel: "Месячный доход в евро",
@@ -547,9 +535,7 @@ export default function Home() {
       ? HISTORY.slice(Math.max(0, selectedIndex - 3), selectedIndex)
       : [];
   const comparisonFor = (kind: "savings" | "spending", currentValue: number) => {
-    if (!previousCycles.length) {
-      return { text: copy.comparisonUnavailable, tone: "neutral" };
-    }
+    if (!previousCycles.length) return null;
 
     const values = previousCycles.map((record) =>
       kind === "savings"
@@ -632,7 +618,6 @@ export default function Home() {
             </span>
             <small>
               {categoryLabel(expense.category)} ·{" "}
-              {expense.recurring ? `${copy.monthly} · ` : ""}
               {sourceLabel(expense.source, language)} ·{" "}
               {new Date(`${expense.date}T12:00:00`).toLocaleDateString(locale, {
                 day: "numeric",
@@ -838,21 +823,23 @@ export default function Home() {
           </div>
         </header>
 
-        <nav className="month-history" aria-label={copy.financeHistoryLabel}>
-          {HISTORY.map((record) => (
-            <button
-              type="button"
-              key={record.month}
-              className={record.month === selectedMonth.month ? "active" : ""}
-              aria-current={record.month === selectedMonth.month ? "date" : undefined}
-              onClick={() => setSelectedMonth(record)}
-            >
-              {new Intl.DateTimeFormat(locale, { month: "long", year: "numeric" })
-                .format(new Date(`${record.month}-01T12:00:00`))}
-            </button>
-          ))}
-          <span>{HISTORY.length} / 12 {copy.monthsSaved}</span>
-        </nav>
+        {HISTORY.length > 1 && (
+          <nav className="month-history" aria-label={copy.financeHistoryLabel}>
+            {HISTORY.map((record) => (
+              <button
+                type="button"
+                key={record.month}
+                className={record.month === selectedMonth.month ? "active" : ""}
+                aria-current={record.month === selectedMonth.month ? "date" : undefined}
+                onClick={() => setSelectedMonth(record)}
+              >
+                {new Intl.DateTimeFormat(locale, { month: "long", year: "numeric" })
+                  .format(new Date(`${record.month}-01T12:00:00`))}
+              </button>
+            ))}
+            <span>{HISTORY.length} / 12 {copy.monthsSaved}</span>
+          </nav>
+        )}
 
         <section
           className="month-timeline"
@@ -970,9 +957,11 @@ export default function Home() {
               />
             </label>
             <small>{copy.protected}</small>
-            <div className={`stat-comparison ${savingsComparison.tone}`}>
-              {savingsComparison.text}
-            </div>
+            {savingsComparison && (
+              <div className={`stat-comparison ${savingsComparison.tone}`}>
+                {savingsComparison.text}
+              </div>
+            )}
           </article>
 
           <article className="stat-card expenses">
@@ -980,24 +969,12 @@ export default function Home() {
             <p>{copy.spentMonth}</p>
             <strong>{euro.format(spent)}</strong>
             <small>{data.expenses.length} {copy.recorded}</small>
-            <div className={`stat-comparison ${spendingComparison.tone}`}>
-              {spendingComparison.text}
-            </div>
+            {spendingComparison && (
+              <div className={`stat-comparison ${spendingComparison.tone}`}>
+                {spendingComparison.text}
+              </div>
+            )}
           </article>
-        </section>
-
-        <section className="category-strip" aria-label={copy.expenseCategoriesLabel}>
-          {categoryTotals.map((item) => (
-            <article key={item.name}>
-              <span className={`category-symbol category-${categorySymbol(item.name).toLowerCase()}`}>
-                {categorySymbol(item.name)}
-              </span>
-              <span>
-                <small>{categoryLabel(item.name)}</small>
-                <strong>{euro.format(item.amount)}</strong>
-              </span>
-            </article>
-          ))}
         </section>
 
         <section className="breakdown-panel" aria-labelledby="breakdown-title">
@@ -1066,14 +1043,9 @@ export default function Home() {
                 </summary>
                 <div className="expense-table-body">
                   <div className="expense-table-meta">
-                    <p className="eyebrow">{copy.expectedEyebrow}</p>
                     <span>{recurringExpenses.length} {copy.items}</span>
                   </div>
                   {expenseList(recurringExpenses)}
-                  <footer className="recurring-total">
-                    <span>{copy.expectedMonthlyTotal}</span>
-                    <strong>{euro.format(recurringTotal)}</strong>
-                  </footer>
                 </div>
               </details>
             )}
@@ -1091,7 +1063,6 @@ export default function Home() {
               </summary>
               <div className="expense-table-body">
                 <div className="expense-table-meta">
-                  <p className="eyebrow">{copy.ledger}</p>
                   <span>{oneTimeExpenses.length} {copy.items}</span>
                 </div>
                 {oneTimeExpenses.length > 0 ? (

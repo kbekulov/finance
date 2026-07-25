@@ -13,9 +13,9 @@
     <meta property="og:image" content="https://finance.bekulov.com/public/og.png" />
     <title>Kinance</title>
     <link rel="icon" type="image/jpeg" href="/kinance-favicon.jpg" />
-    <link rel="stylesheet" href="/styles.css?v=25" />
+    <link rel="stylesheet" href="/styles.css?v=26" />
     <script src="/public/vendor/apexcharts.min.js?v=21" defer></script>
-    <script src="/script.js?v=25" defer></script>
+    <script src="/script.js?v=26" defer></script>
   </head>
   <body>
     <main>
@@ -59,7 +59,7 @@
           </div>
         </header>
 
-        <nav class="month-history" id="month-history" aria-label="Salary cycle history" data-i18n-aria-label="financeHistoryLabel"></nav>
+        <nav class="month-history" id="month-history" aria-label="Salary cycle history" data-i18n-aria-label="financeHistoryLabel" hidden></nav>
 
         <section class="month-timeline" aria-label="Salary cycle timeline" data-i18n-aria-label="monthlyTimelineLabel">
           <div class="timeline-copy">
@@ -144,7 +144,7 @@
               <input id="savings" inputmode="decimal" value="0" />
             </label>
             <small data-i18n="protectedSpending">Protected from spending</small>
-            <div id="savings-comparison" class="stat-comparison neutral"></div>
+            <div id="savings-comparison" class="stat-comparison neutral" hidden></div>
           </article>
 
           <article class="stat-card">
@@ -152,11 +152,9 @@
             <p data-i18n="spentThisMonth">SPENT THIS SALARY CYCLE</p>
             <strong id="spent-total">€0.00</strong>
             <small id="expense-count">0 recorded expenses</small>
-            <div id="spending-comparison" class="stat-comparison neutral"></div>
+            <div id="spending-comparison" class="stat-comparison neutral" hidden></div>
           </article>
         </section>
-
-        <section class="category-strip" id="category-strip" aria-label="Expense categories" data-i18n-aria-label="expenseCategoriesLabel"></section>
 
         <section class="breakdown-panel" aria-labelledby="breakdown-title">
           <div class="breakdown-heading">

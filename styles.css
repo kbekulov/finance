@@ -491,7 +491,6 @@ main::before {
 :root[data-theme="nier-automata"] .breakdown-panel,
 :root[data-theme="nier-automata"] .expense-table,
 :root[data-theme="nier-automata"] .add-panel,
-:root[data-theme="nier-automata"] .category-strip article,
 :root[data-theme="nier-automata"] .breakdown-item,
 :root[data-theme="nier-automata"] .month-timeline {
   border-color: rgba(34, 52, 59, 0.14);
@@ -633,13 +632,11 @@ main::before {
 }
 
 :root[data-theme="nier-automata"] .expense-list li,
-:root[data-theme="nier-automata"] .expense-table[open] > .expense-table-summary,
-:root[data-theme="nier-automata"] .recurring-total {
+:root[data-theme="nier-automata"] .expense-table[open] > .expense-table-summary {
   border-color: rgba(34, 52, 59, 0.12);
 }
 
 :root[data-theme="nier-automata"] .expense-table-summary:hover,
-:root[data-theme="nier-automata"] .recurring-total,
 :root[data-theme="nier-automata"] .expense-table-meta > span {
   background: rgba(126, 164, 174, 0.11);
 }
@@ -1206,26 +1203,6 @@ h1 em {
   font-size: 8px;
 }
 
-.category-strip {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 10px;
-  margin-bottom: 12px;
-}
-
-.category-strip article {
-  display: flex;
-  align-items: center;
-  gap: 11px;
-  min-width: 0;
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 19px;
-  background: rgba(28, 28, 30, 0.72);
-  padding: 15px;
-  box-shadow: inset 0 1px rgba(255, 255, 255, 0.04);
-}
-
-.category-symbol,
 .expense-monogram {
   display: grid;
   flex: 0 0 34px;
@@ -1235,28 +1212,6 @@ h1 em {
   border-radius: 11px;
   font-size: 12px;
   font-weight: 750;
-}
-
-.category-strip article > span:last-child {
-  min-width: 0;
-}
-
-.category-strip small {
-  display: block;
-  overflow: hidden;
-  margin-bottom: 4px;
-  color: var(--tertiary);
-  font-size: 10px;
-  line-height: 1.2;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.category-strip strong {
-  display: block;
-  color: var(--label);
-  font-size: 14px;
-  font-weight: 690;
 }
 
 .food,
@@ -1638,17 +1593,13 @@ h1 em {
 }
 
 .expense-table-body {
-  padding: 0 20px;
-}
-
-.one-time-expenses-table .expense-table-body {
-  padding-bottom: 20px;
+  padding: 0 20px 20px;
 }
 
 .expense-table-meta {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 16px;
   margin: 14px 0 4px;
 }
@@ -1662,29 +1613,6 @@ h1 em {
   font-size: 9px;
   font-weight: 700;
   letter-spacing: 0.08em;
-}
-
-.recurring-total {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  margin: 3px -20px 0;
-  border-top: 1px solid rgba(10, 132, 255, 0.22);
-  background: rgba(10, 132, 255, 0.09);
-  padding: 16px 20px;
-}
-
-.recurring-total span {
-  color: var(--secondary);
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.recurring-total strong {
-  color: var(--label);
-  font-size: 18px;
-  letter-spacing: -0.02em;
 }
 
 .expense-list {
@@ -1974,7 +1902,6 @@ footer p {
 
 @media (hover: hover) {
   .stat-card,
-  .category-strip article,
   .breakdown-item {
     transition:
       border-color 180ms ease,
@@ -1982,8 +1909,7 @@ footer p {
       transform 180ms ease;
   }
 
-  .stat-card:hover,
-  .category-strip article:hover {
+  .stat-card:hover {
     border-color: rgba(255, 255, 255, 0.13);
     background-color: rgba(36, 36, 38, 0.9);
     transform: translateY(-2px);
@@ -2015,10 +1941,6 @@ footer p {
 
   .stat-card:last-child {
     grid-column: 1 / -1;
-  }
-
-  .category-strip {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .workspace {
@@ -2213,23 +2135,6 @@ footer p {
     padding: 21px;
   }
 
-  .category-strip {
-    display: flex;
-    gap: 9px;
-    overflow-x: auto;
-    margin-right: -12px;
-    padding-right: 12px;
-    scrollbar-width: none;
-  }
-
-  .category-strip::-webkit-scrollbar {
-    display: none;
-  }
-
-  .category-strip article {
-    flex: 0 0 190px;
-  }
-
   .breakdown-panel,
   .activity-panel,
   .add-panel {
@@ -2253,17 +2158,8 @@ footer p {
 
   .expense-table-body {
     padding-right: 16px;
-    padding-left: 16px;
-  }
-
-  .one-time-expenses-table .expense-table-body {
     padding-bottom: 16px;
-  }
-
-  .recurring-total {
-    margin-right: -16px;
-    margin-left: -16px;
-    padding: 15px 16px;
+    padding-left: 16px;
   }
 
   .expense-list li {

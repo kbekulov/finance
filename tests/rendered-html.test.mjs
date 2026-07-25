@@ -51,8 +51,7 @@ test("server-renders the current finance tracker", async () => {
   assert.match(html, /10 Jul/i);
   assert.match(html, /11 Aug/i);
   assert.match(html, /YOUR SALARY CYCLE AT A GLANCE/);
-  assert.match(html, /Past 3-cycle comparison appears when history is available/);
-  assert.match(html, /id="savings-comparison"|class="stat-comparison neutral"/);
+  assert.doesNotMatch(html, /Past 3-cycle comparison appears when history is available/);
   assert.match(html, /left until next salary/);
   assert.match(html, /Buses/);
   assert.match(html, /Transport &amp; Travel/);
@@ -69,7 +68,11 @@ test("server-renders the current finance tracker", async () => {
   assert.match(html, /One-time expenses/);
   assert.match(html, /€14\.99/);
   assert.match(html, /Expected monthly expenses/);
-  assert.match(html, /Expected monthly total/);
+  assert.equal((html.match(/Expected monthly expenses/g) ?? []).length, 1);
+  assert.doesNotMatch(html, /Expected monthly total/);
+  assert.doesNotMatch(html, /class="recurring-total"/);
+  assert.doesNotMatch(html, /class="category-strip"/);
+  assert.doesNotMatch(html, /class="month-history"/);
   assert.match(html, /€936\.47/);
   assert.match(html, /One-time expenses/);
   assert.match(html, /Gaming laptop/);
@@ -443,12 +446,11 @@ test("keeps database history and translations aligned", async () => {
     assert.match(source, /Алкоголь и ночная жизнь/);
     assert.match(source, /Expected monthly expenses/);
     assert.match(source, /Ожидаемые ежемесячные расходы/);
-    assert.match(source, /Expected monthly total/);
-    assert.match(source, /Всего ожидается в месяц/);
+    assert.doesNotMatch(source, /Expected monthly total/);
     assert.match(source, /effectiveSalaryDate/);
     assert.match(source, /previousFriday/);
     assert.match(source, /SALARY CYCLE|Salary cycle/);
-    assert.match(source, /comparisonUnavailable/);
+    assert.doesNotMatch(source, /comparisonUnavailable/);
     assert.match(source, /savingsMore/);
     assert.match(source, /spendingLess/);
     assert.match(source, /selectedIndex - 3/);
@@ -470,9 +472,9 @@ test("keeps database history and translations aligned", async () => {
     assert.doesNotMatch(source, /const TODAY\s*=/);
   }
   assert.match(index, /id="theme-select"/);
-  assert.match(index, /styles\.css\?v=25/);
+  assert.match(index, /styles\.css\?v=26/);
   assert.match(index, /public\/vendor\/apexcharts\.min\.js\?v=21/);
-  assert.match(index, /script\.js\?v=25/);
+  assert.match(index, /script\.js\?v=26/);
   assert.match(index, /data-current-theme="kinance"/);
   assert.match(index, /id="credit-alert"[^>]*hidden/);
   assert.match(index, /id="payment-method"/);
@@ -539,4 +541,9 @@ test("keeps database history and translations aligned", async () => {
   assert.match(styles, /\.ledger-stack\s*\{[^}]*grid-auto-rows:\s*max-content/s);
   assert.match(styles, /\.ledger-stack\s*\{[^}]*align-content:\s*start/s);
   assert.match(styles, /\.expense-table\s*\{[^}]*align-self:\s*start/s);
+  assert.doesNotMatch(styles, /\.category-strip/);
+  assert.doesNotMatch(styles, /\.recurring-total/);
+  assert.match(script, /nav\.hidden\s*=\s*history\.length\s*<\s*2/);
+  assert.doesNotMatch(script, /expense\.recurring\s*\?/);
+  assert.doesNotMatch(page, /expense\.recurring\s*\?/);
 });

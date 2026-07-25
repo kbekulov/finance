@@ -19,7 +19,7 @@ const CATEGORY_ICONS = {
 };
 
 const THEMES = [
-  { id: "kinance", label: "Kinance", banner: "/public/theme-banners/kinance.png" },
+  { id: "kinance", label: "Kinance", banner: "/public/theme-banners/kinance.png?v=2" },
   { id: "nier-automata", label: "NieR:Automata", banner: "/public/theme-banners/nier-automata.png" },
   { id: "tohsaka-rin", label: "Tohsaka Rin", banner: "/public/theme-banners/tohsaka-rin.png" },
 ];

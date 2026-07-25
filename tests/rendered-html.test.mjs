@@ -561,9 +561,9 @@ test("keeps database history and translations aligned", async () => {
     assert.doesNotMatch(source, /const TODAY\s*=/);
   }
   assert.match(index, /id="theme-select"/);
-  assert.match(index, /styles\.css\?v=30/);
+  assert.match(index, /styles\.css\?v=31/);
   assert.match(index, /public\/vendor\/apexcharts\.min\.js\?v=21/);
-  assert.match(index, /script\.js\?v=30/);
+  assert.match(index, /script\.js\?v=31/);
   assert.match(index, /data-current-theme="kinance"/);
   assert.match(index, /id="credit-alert"[^>]*hidden/);
   assert.match(index, /id="payment-method"/);
@@ -606,6 +606,8 @@ test("keeps database history and translations aligned", async () => {
   assert.match(styles, /prefers-reduced-motion[\s\S]*\.credit-alert[\s\S]*animation:\s*none/);
   assert.match(styles, /\.theme-banner img\s*\{[^}]*object-fit:\s*cover/s);
   assert.match(styles, /\.theme-banner\s*\{[^}]*background:\s*transparent/s);
+  assert.match(styles, /\.theme-banner\s*\{[^}]*left:\s*50%[^}]*width:\s*100vw/s);
+  assert.match(styles, /\.theme-banner\s*\{[^}]*transform:\s*translateX\(-50%\)/s);
   assert.doesNotMatch(styles, /\.daily-chart-panel\s*\{/);
   assert.match(styles, /\.daily-expense-chart\s*\{[^}]*height:\s*84px[^}]*min-height:\s*84px/s);
   assert.match(styles, /\.daily-expense-chart\s*\{[^}]*margin:\s*-68px -8px 18px/s);

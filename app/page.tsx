@@ -14,9 +14,9 @@ type Category =
 type Language = "en" | "ru";
 
 const THEMES = [
-  { id: "kinance", label: "Kinance" },
-  { id: "nier-automata", label: "NieR:Automata" },
-  { id: "tohsaka-rin", label: "Tohsaka Rin" },
+  { id: "kinance", label: "Kinance", banner: "/theme-banners/kinance.png" },
+  { id: "nier-automata", label: "NieR:Automata", banner: "/theme-banners/nier-automata.png" },
+  { id: "tohsaka-rin", label: "Tohsaka Rin", banner: "/theme-banners/tohsaka-rin.png" },
 ] as const;
 type ThemeId = (typeof THEMES)[number]["id"];
 
@@ -122,6 +122,7 @@ const COPY = {
     kinanceHome: "Kinance home",
     languageLabel: "Language",
     themeLabel: "Theme",
+    themeBannerLabel: "{theme} character banner",
     financeHistoryLabel: "Salary cycle history",
     monthlyPlanLabel: "Salary cycle plan balance",
     monthlyTotalsLabel: "Salary cycle totals",
@@ -190,6 +191,7 @@ const COPY = {
     kinanceHome: "Главная Kinance",
     languageLabel: "Язык",
     themeLabel: "Тема",
+    themeBannerLabel: "Баннер с персонажами темы {theme}",
     financeHistoryLabel: "История циклов зарплаты",
     monthlyPlanLabel: "Баланс цикла зарплаты",
     monthlyTotalsLabel: "Итоги цикла зарплаты",
@@ -396,6 +398,10 @@ export default function Home() {
     Math.max(remaining, 0) / Math.max(totalCycleDays - elapsedCycleDays, 1);
   const locale = language === "ru" ? "ru-RU" : "en-GB";
   const copy = COPY[language];
+  const selectedTheme = THEMES.find(({ id }) => id === theme) ?? THEMES[0];
+  const themeBannerLabel = fillTemplate(copy.themeBannerLabel, {
+    theme: selectedTheme.label,
+  });
   const monthLabel = new Intl.DateTimeFormat(locale, {
     month: "long",
     year: "numeric",
@@ -634,6 +640,23 @@ export default function Home() {
             <span style={{ width: `${(elapsedCycleDays / totalCycleDays) * 100}%` }} />
             <i style={{ left: `${(elapsedCycleDays / totalCycleDays) * 100}%` }} />
           </div>
+        </section>
+
+        <section className="theme-banner" aria-label={themeBannerLabel}>
+          {/* Theme artwork is served as a direct PNG so data-driven theme paths stay portable. */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            key={selectedTheme.id}
+            src={selectedTheme.banner}
+            alt={themeBannerLabel}
+            width={2048}
+            height={683}
+            fetchPriority="high"
+            decoding="async"
+            onError={(event) => {
+              event.currentTarget.hidden = true;
+            }}
+          />
         </section>
 
         <section className="hero" id="top" aria-labelledby="page-title">

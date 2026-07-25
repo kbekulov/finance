@@ -326,6 +326,16 @@ test("keeps database history and translations aligned", async () => {
   }
   assert.match(index, /id="theme-select"/);
   assert.match(index, /data-current-theme="kinance"/);
+  assert.match(index, /id="theme-banner-image"/);
+  assert.match(index, /theme-banners\/kinance\.png/);
+  for (const source of [page, script]) {
+    assert.match(source, /themeBannerLabel/);
+    assert.match(source, /theme-banners\/kinance\.png/);
+    assert.match(source, /theme-banners\/nier-automata\.png/);
+    assert.match(source, /theme-banners\/tohsaka-rin\.png/);
+  }
+  assert.match(styles, /\.theme-banner\s*\{/);
+  assert.match(styles, /\.theme-banner img\s*\{[^}]*object-fit:\s*cover/s);
   assert.match(styles, /:root\[data-theme="nier-automata"\]/);
   assert.match(styles, /:root\[data-theme="tohsaka-rin"\]/);
   assert.match(

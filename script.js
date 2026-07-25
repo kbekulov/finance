@@ -9,9 +9,9 @@ const CATEGORIES = [
 ];
 
 const THEMES = [
-  { id: "kinance", label: "Kinance" },
-  { id: "nier-automata", label: "NieR:Automata" },
-  { id: "tohsaka-rin", label: "Tohsaka Rin" },
+  { id: "kinance", label: "Kinance", banner: "/theme-banners/kinance.png" },
+  { id: "nier-automata", label: "NieR:Automata", banner: "/theme-banners/nier-automata.png" },
+  { id: "tohsaka-rin", label: "Tohsaka Rin", banner: "/theme-banners/tohsaka-rin.png" },
 ];
 
 const TRANSLATIONS = {
@@ -77,6 +77,7 @@ const TRANSLATIONS = {
     kinanceHome: "Kinance home",
     languageLabel: "Language",
     themeLabel: "Theme",
+    themeBannerLabel: "{theme} character banner",
     financeHistoryLabel: "Salary cycle history",
     monthlyTimelineLabel: "Salary cycle timeline",
     monthlyPlanLabel: "Salary cycle plan balance",
@@ -157,6 +158,7 @@ const TRANSLATIONS = {
     kinanceHome: "Главная Kinance",
     languageLabel: "Язык",
     themeLabel: "Тема",
+    themeBannerLabel: "Баннер с персонажами темы {theme}",
     financeHistoryLabel: "История циклов зарплаты",
     monthlyTimelineLabel: "Шкала цикла зарплаты",
     monthlyPlanLabel: "Баланс цикла зарплаты",
@@ -275,6 +277,12 @@ function applyTheme() {
   document.documentElement.dataset.theme = theme;
   element("theme-select").value = theme;
   document.querySelector(".theme-switcher").dataset.currentTheme = theme;
+  const selectedTheme = THEMES.find(({ id }) => id === theme) ?? THEMES[0];
+  const banner = element("theme-banner-image");
+  banner.hidden = false;
+  banner.src = selectedTheme.banner;
+  banner.alt = t("themeBannerLabel", { theme: selectedTheme.label });
+  banner.closest(".theme-banner").setAttribute("aria-label", banner.alt);
 }
 
 function safeNumber(value) {
@@ -694,6 +702,9 @@ function render() {
 }
 
 function bindControls() {
+  element("theme-banner-image").addEventListener("error", (event) => {
+    event.currentTarget.hidden = true;
+  });
   element("theme-select").addEventListener("change", (event) => {
     theme = THEMES.some(({ id }) => id === event.target.value)
       ? event.target.value
@@ -706,6 +717,7 @@ function bindControls() {
       language = button.dataset.language;
       localStorage.setItem("kinance:language", language);
       applyTranslations();
+      applyTheme();
       if (data) render();
     });
   });

@@ -235,7 +235,7 @@ Do not introduce heavy libraries for behavior that plain TypeScript/JavaScript/C
 
 ## Theme system
 
-Theme selection is a device-local preference stored as `kinance:theme`. Keep the switcher data-driven so the number of themes is not artificially limited. Every theme must have one stable ID and display label in the `THEMES` collection in both JavaScript and React, matching `data-theme` CSS selectors.
+Theme selection is a device-local preference stored as `kinance:theme`. Keep the switcher data-driven so the number of themes is not artificially limited. Every theme must have one stable ID, display label, and PNG banner path in the `THEMES` collection in both JavaScript and React, matching `data-theme` CSS selectors. Store theme banners in `public/theme-banners/`, use a wide composition with the important characters inside the central crop-safe area, and provide localized accessible alt text through `themeBannerLabel`.
 
 The built-in themes are:
 

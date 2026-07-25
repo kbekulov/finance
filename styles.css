@@ -602,7 +602,7 @@ h1 em {
 
 .stat-card {
   position: relative;
-  min-height: 174px;
+  min-height: 218px;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: var(--radius-card);
@@ -760,6 +760,47 @@ h1 em {
 .category-i {
   background: rgba(255, 214, 10, 0.13);
   color: var(--yellow);
+}
+
+.stat-comparison {
+  position: relative;
+  margin-top: 14px;
+  border-top: 1px solid var(--separator);
+  padding: 12px 0 0 16px;
+  color: var(--secondary);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.stat-comparison::before {
+  position: absolute;
+  top: 17px;
+  left: 1px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--secondary);
+  content: "";
+  box-shadow: 0 0 0 4px rgba(142, 142, 147, 0.12);
+}
+
+.stat-comparison.favorable {
+  color: var(--green);
+}
+
+.stat-comparison.favorable::before {
+  background: var(--green);
+  box-shadow: 0 0 0 4px rgba(48, 209, 88, 0.12);
+}
+
+.stat-comparison.unfavorable {
+  color: var(--orange);
+}
+
+.stat-comparison.unfavorable::before {
+  background: var(--orange);
+  box-shadow: 0 0 0 4px rgba(255, 159, 10, 0.12);
 }
 
 .transport,
@@ -1500,7 +1541,7 @@ footer p {
   .stat-card,
   .stat-card:last-child {
     grid-column: auto;
-    min-height: 156px;
+    min-height: 202px;
     padding: 21px;
   }
 

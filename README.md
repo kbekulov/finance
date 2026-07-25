@@ -212,6 +212,9 @@ After each finance-data update, verify:
 - daily pace uses non-negative remaining money divided by remaining salary-cycle days
 - expense count equals the current salary cycle’s array length
 - warning amount/share match the same category totals
+- savings and spending comparisons use the average of up to the three salary cycles immediately before the selected cycle
+- savings comparisons use each cycle's `savingsGoal`; spending comparisons use the sum of each cycle's expenses
+- comparisons state how many prior cycles were available and show a neutral history-unavailable message when none exist
 
 Do not change monetary totals when only renaming an expense.
 

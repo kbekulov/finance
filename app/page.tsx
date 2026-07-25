@@ -70,6 +70,13 @@ const COPY = {
     savings: "SAVINGS REQUIREMENT",
     protected: "Protected from spending",
     spentMonth: "SPENT THIS SALARY CYCLE",
+    comparisonUnavailable: "Past 3-cycle comparison appears when history is available",
+    savingsMore: "{difference} more saved than the prior {count}-cycle average of {average}",
+    savingsLess: "{difference} less saved than the prior {count}-cycle average of {average}",
+    savingsSame: "Matches the prior {count}-cycle savings average of {average}",
+    spendingMore: "{difference} more spent than the prior {count}-cycle average of {average}",
+    spendingLess: "{difference} less spent than the prior {count}-cycle average of {average}",
+    spendingSame: "Matches the prior {count}-cycle spending average of {average}",
     recorded: "recorded expenses",
     mix: "SPENDING MIX",
     where: "Where your money goes",
@@ -130,6 +137,13 @@ const COPY = {
     savings: "ЦЕЛЬ НАКОПЛЕНИЙ",
     protected: "Защищено от расходов",
     spentMonth: "ПОТРАЧЕНО В ЭТОМ ЦИКЛЕ",
+    comparisonUnavailable: "Сравнение с 3 прошлыми циклами появится, когда будет доступна история",
+    savingsMore: "Накоплено на {difference} больше среднего за {count} прошлых цикла: {average}",
+    savingsLess: "Накоплено на {difference} меньше среднего за {count} прошлых цикла: {average}",
+    savingsSame: "На уровне среднего накопления за {count} прошлых цикла: {average}",
+    spendingMore: "Потрачено на {difference} больше среднего за {count} прошлых цикла: {average}",
+    spendingLess: "Потрачено на {difference} меньше среднего за {count} прошлых цикла: {average}",
+    spendingSame: "На уровне средних расходов за {count} прошлых цикла: {average}",
     recorded: "расходов записано",
     mix: "СТРУКТУРА РАСХОДОВ",
     where: "Куда уходят деньги",
@@ -375,6 +389,58 @@ export default function Home() {
   const updatedLabel = `${copy.updated} ${new Date(
     `${selectedMonth.updatedAt}T12:00:00`,
   ).toLocaleDateString(locale, { day: "numeric", month: "long", year: "numeric" })}`;
+  const selectedIndex = HISTORY.findIndex(
+    (record) => record.month === selectedMonth.month,
+  );
+  const previousCycles =
+    selectedIndex > 0
+      ? HISTORY.slice(Math.max(0, selectedIndex - 3), selectedIndex)
+      : [];
+  const comparisonFor = (kind: "savings" | "spending", currentValue: number) => {
+    if (!previousCycles.length) {
+      return { text: copy.comparisonUnavailable, tone: "neutral" };
+    }
+
+    const values = previousCycles.map((record) =>
+      kind === "savings"
+        ? record.savingsGoal
+        : record.expenses.reduce((sum, expense) => sum + expense.amount, 0),
+    );
+    const average = values.reduce((sum, value) => sum + value, 0) / values.length;
+    const difference = currentValue - average;
+    const replacements = {
+      difference: euro.format(Math.abs(difference)),
+      average: euro.format(average),
+      count: previousCycles.length,
+    };
+
+    if (Math.abs(difference) < 0.005) {
+      return {
+        text: fillTemplate(
+          kind === "savings" ? copy.savingsSame : copy.spendingSame,
+          replacements,
+        ),
+        tone: "neutral",
+      };
+    }
+
+    const isMore = difference > 0;
+    const template =
+      kind === "savings"
+        ? isMore
+          ? copy.savingsMore
+          : copy.savingsLess
+        : isMore
+          ? copy.spendingMore
+          : copy.spendingLess;
+    const favorable = kind === "savings" ? isMore : !isMore;
+    return {
+      text: fillTemplate(template, replacements),
+      tone: favorable ? "favorable" : "unfavorable",
+    };
+  };
+  const savingsComparison = comparisonFor("savings", data.savingsGoal);
+  const spendingComparison = comparisonFor("spending", spent);
   const categoryLabel = (name: Category) => CATEGORY_LABELS[language][name];
   const expenseNoteLabel = (expense: Expense) =>
     expense.noteTranslations?.[language] ?? expense.note;
@@ -609,6 +675,9 @@ export default function Home() {
               />
             </label>
             <small>{copy.protected}</small>
+            <div className={`stat-comparison ${savingsComparison.tone}`}>
+              {savingsComparison.text}
+            </div>
           </article>
 
           <article className="stat-card expenses">
@@ -616,6 +685,9 @@ export default function Home() {
             <p>{copy.spentMonth}</p>
             <strong>{euro.format(spent)}</strong>
             <small>{data.expenses.length} {copy.recorded}</small>
+            <div className={`stat-comparison ${spendingComparison.tone}`}>
+              {spendingComparison.text}
+            </div>
           </article>
         </section>
 

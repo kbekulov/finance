@@ -21,6 +21,13 @@ const TRANSLATIONS = {
     savingsRequirement: "SAVINGS REQUIREMENT",
     protectedSpending: "Protected from spending",
     spentThisMonth: "SPENT THIS SALARY CYCLE",
+    comparisonUnavailable: "Past 3-cycle comparison appears when history is available",
+    savingsMore: "{difference} more saved than the prior {count}-cycle average of {average}",
+    savingsLess: "{difference} less saved than the prior {count}-cycle average of {average}",
+    savingsSame: "Matches the prior {count}-cycle savings average of {average}",
+    spendingMore: "{difference} more spent than the prior {count}-cycle average of {average}",
+    spendingLess: "{difference} less spent than the prior {count}-cycle average of {average}",
+    spendingSame: "Matches the prior {count}-cycle spending average of {average}",
     spendingMix: "SPENDING MIX",
     whereMoneyGoes: "Where your money goes",
     ledger: "THE LEDGER",
@@ -93,6 +100,13 @@ const TRANSLATIONS = {
     savingsRequirement: "ЦЕЛЬ НАКОПЛЕНИЙ",
     protectedSpending: "Защищено от расходов",
     spentThisMonth: "ПОТРАЧЕНО В ЭТОМ ЦИКЛЕ",
+    comparisonUnavailable: "Сравнение с 3 прошлыми циклами появится, когда будет доступна история",
+    savingsMore: "Накоплено на {difference} больше среднего за {count} прошлых цикла: {average}",
+    savingsLess: "Накоплено на {difference} меньше среднего за {count} прошлых цикла: {average}",
+    savingsSame: "На уровне среднего накопления за {count} прошлых цикла: {average}",
+    spendingMore: "Потрачено на {difference} больше среднего за {count} прошлых цикла: {average}",
+    spendingLess: "Потрачено на {difference} меньше среднего за {count} прошлых цикла: {average}",
+    spendingSame: "На уровне средних расходов за {count} прошлых цикла: {average}",
     spendingMix: "СТРУКТУРА РАСХОДОВ",
     whereMoneyGoes: "Куда уходят деньги",
     ledger: "ЖУРНАЛ",
@@ -235,6 +249,52 @@ function element(id) {
 function safeNumber(value) {
   const number = Number(value);
   return Number.isFinite(number) ? Math.max(number, 0) : 0;
+}
+
+function priorCycles() {
+  const selectedIndex = history.findIndex(
+    (month) => month.month === selectedMonth.month,
+  );
+  if (selectedIndex <= 0) return [];
+  return history.slice(Math.max(0, selectedIndex - 3), selectedIndex);
+}
+
+function comparisonFor(kind, currentValue) {
+  const previous = priorCycles();
+  if (!previous.length) {
+    return { text: t("comparisonUnavailable"), tone: "neutral" };
+  }
+
+  const values = previous.map((month) =>
+    kind === "savings"
+      ? safeNumber(month.savingsGoal)
+      : month.expenses.reduce(
+          (sum, expense) => sum + safeNumber(expense.amount),
+          0,
+        ),
+  );
+  const average = values.reduce((sum, value) => sum + value, 0) / values.length;
+  const difference = currentValue - average;
+  const replacements = {
+    difference: formatEuro(Math.abs(difference)),
+    average: formatEuro(average),
+    count: previous.length,
+  };
+
+  if (Math.abs(difference) < 0.005) {
+    return {
+      text: t(kind === "savings" ? "savingsSame" : "spendingSame", replacements),
+      tone: "neutral",
+    };
+  }
+
+  const isMore = difference > 0;
+  const key = `${kind}${isMore ? "More" : "Less"}`;
+  const favorable = kind === "savings" ? isMore : !isMore;
+  return {
+    text: t(key, replacements),
+    tone: favorable ? "favorable" : "unfavorable",
+  };
 }
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -578,6 +638,12 @@ function render() {
       count: data.expenses.length,
       plural: data.expenses.length === 1 ? "" : "s",
     });
+  const savingsComparison = comparisonFor("savings", savings);
+  const spendingComparison = comparisonFor("spending", spent);
+  element("savings-comparison").textContent = savingsComparison.text;
+  element("savings-comparison").className = `stat-comparison ${savingsComparison.tone}`;
+  element("spending-comparison").textContent = spendingComparison.text;
+  element("spending-comparison").className = `stat-comparison ${spendingComparison.tone}`;
   element("remaining").textContent = formatEuro(remaining);
   element("spent-percent").textContent = `${Math.round(percent)}% ${t("spent")}`;
   element("ring-percent").textContent = `${Math.round(percent)}%`;

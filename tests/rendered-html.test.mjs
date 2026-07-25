@@ -44,6 +44,8 @@ test("server-renders the current finance tracker", async () => {
   assert.match(html, /10 Jul/i);
   assert.match(html, /11 Aug/i);
   assert.match(html, /YOUR SALARY CYCLE AT A GLANCE/);
+  assert.match(html, /Past 3-cycle comparison appears when history is available/);
+  assert.match(html, /id="savings-comparison"|class="stat-comparison neutral"/);
   assert.match(html, /left until next salary/);
   assert.match(html, /Buses/);
   assert.match(html, /Transport &amp; Travel/);
@@ -309,5 +311,9 @@ test("keeps database history and translations aligned", async () => {
     assert.match(source, /effectiveSalaryDate/);
     assert.match(source, /previousFriday/);
     assert.match(source, /SALARY CYCLE|Salary cycle/);
+    assert.match(source, /comparisonUnavailable/);
+    assert.match(source, /savingsMore/);
+    assert.match(source, /spendingLess/);
+    assert.match(source, /selectedIndex - 3/);
   }
 });

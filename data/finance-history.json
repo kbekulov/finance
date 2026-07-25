@@ -18,7 +18,7 @@
       "currency": "EUR",
       "timezone": "Europe/Vilnius",
       "updatedAt": "2026-07-25",
-      "revision": 14,
+      "revision": 15,
       "salary": 2150,
       "savingsGoal": 200,
       "expenses": [
@@ -81,10 +81,10 @@
         {
           "id": "2026-07-apartment-debt",
           "amount": 300,
-          "note": "Apartment debt",
+          "note": "Mortgage",
           "noteTranslations": {
-            "en": "Apartment debt",
-            "ru": "Долг за квартиру"
+            "en": "Mortgage",
+            "ru": "Ипотека"
           },
           "date": "2026-07-25",
           "category": "Debt & repayments",

@@ -57,6 +57,8 @@ test("server-renders the current finance tracker", async () => {
   assert.match(html, /€863\.46/);
   assert.match(html, /One-time expenses/);
   assert.match(html, /Gaming laptop/);
+  assert.match(html, /Mortgage/);
+  assert.doesNotMatch(html, /Apartment debt/);
   assert.match(html, /Keturi vėjai 0\.4 l/);
   assert.match(html, /Shelton&#x27;s pear cider/);
   assert.match(html, /Alcohol &amp; nightlife/);
@@ -84,7 +86,7 @@ test("keeps database history and translations aligned", async () => {
   assert.equal(database.currency, "EUR");
   assert.equal(database.timezone, "Europe/Vilnius");
   assert.equal(current.updatedAt, "2026-07-25");
-  assert.equal(current.revision, 14);
+  assert.equal(current.revision, 15);
   assert.equal(current.savingsGoal, 200);
   assert.deepEqual(current.period, {
     start: "2026-07-10",
@@ -137,6 +139,14 @@ test("keeps database history and translations aligned", async () => {
     current.expenses.find((expense) => expense.id === "2026-07-chatgpt")
       ?.amount,
     22.99,
+  );
+  assert.deepEqual(
+    current.expenses.find((expense) => expense.id === "2026-07-apartment-debt")
+      ?.noteTranslations,
+    {
+      en: "Mortgage",
+      ru: "Ипотека",
+    },
   );
   assert.equal(
     current.expenses.find(

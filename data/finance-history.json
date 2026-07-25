@@ -18,7 +18,7 @@
       "currency": "EUR",
       "timezone": "Europe/Vilnius",
       "updatedAt": "2026-07-25",
-      "revision": 16,
+      "revision": 17,
       "salary": 2150,
       "savingsGoal": 200,
       "expenses": [
@@ -127,6 +127,20 @@
           "noteTranslations": {
             "en": "Apple Devices",
             "ru": "Устройства Apple"
+          },
+          "date": "2026-07-25",
+          "category": "Devices & installments",
+          "source": "chat",
+          "recurring": true,
+          "frequency": "monthly"
+        },
+        {
+          "id": "2026-07-ipad",
+          "amount": 59,
+          "note": "iPad",
+          "noteTranslations": {
+            "en": "iPad",
+            "ru": "iPad"
           },
           "date": "2026-07-25",
           "category": "Devices & installments",

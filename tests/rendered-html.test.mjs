@@ -38,6 +38,7 @@ test("server-renders the current finance tracker", async () => {
   assert.match(html, /Spending alert/);
   assert.match(html, /Debt &amp; repayments is your largest cost at €555\.00/);
   assert.match(html, /Apple Devices/);
+  assert.match(html, /iPad/);
   assert.match(html, /Updated 25 July 2026/);
   assert.match(html, /Today<!-- --> · <!-- -->25 Jul/);
   assert.match(html, /10 Jul/i);
@@ -60,7 +61,7 @@ test("server-renders the current finance tracker", async () => {
   assert.match(html, /€7\.99/);
   assert.match(html, /Expected monthly expenses/);
   assert.match(html, /Expected monthly total/);
-  assert.match(html, /€880\.46/);
+  assert.match(html, /€939\.46/);
   assert.match(html, /One-time expenses/);
   assert.match(html, /Gaming laptop/);
   assert.match(html, /Mortgage/);
@@ -68,8 +69,8 @@ test("server-renders the current finance tracker", async () => {
   assert.match(html, /Keturi vėjai 0\.4 l/);
   assert.match(html, /Shelton&#x27;s pear cider/);
   assert.match(html, /Alcohol &amp; nightlife/);
-  assert.match(html, /€888\.45/);
-  assert.match(html, /€1,061\.55/);
+  assert.match(html, /€947\.45/);
+  assert.match(html, /€1,002\.55/);
   assert.doesNotMatch(html, /Your site is taking shape|Building your site/);
 });
 
@@ -92,7 +93,7 @@ test("keeps database history and translations aligned", async () => {
   assert.equal(database.currency, "EUR");
   assert.equal(database.timezone, "Europe/Vilnius");
   assert.equal(current.updatedAt, "2026-07-25");
-  assert.equal(current.revision, 16);
+  assert.equal(current.revision, 17);
   assert.equal(current.savingsGoal, 200);
   assert.deepEqual(current.period, {
     start: "2026-07-10",
@@ -128,6 +129,23 @@ test("keeps database history and translations aligned", async () => {
     current.expenses.find((expense) => expense.id === "2026-07-apple-devices")
       ?.amount,
     97,
+  );
+  assert.deepEqual(
+    current.expenses.find((expense) => expense.id === "2026-07-ipad"),
+    {
+      id: "2026-07-ipad",
+      amount: 59,
+      note: "iPad",
+      noteTranslations: {
+        en: "iPad",
+        ru: "iPad",
+      },
+      date: "2026-07-25",
+      category: "Devices & installments",
+      source: "chat",
+      recurring: true,
+      frequency: "monthly",
+    },
   );
   assert.deepEqual(
     current.expenses.find((expense) => expense.id === "2026-07-buses"),

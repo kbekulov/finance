@@ -18,7 +18,7 @@
       "currency": "EUR",
       "timezone": "Europe/Vilnius",
       "updatedAt": "2026-07-25",
-      "revision": 20,
+      "revision": 21,
       "salary": 2150,
       "savingsGoal": 200,
       "expenses": [
@@ -302,6 +302,20 @@
           },
           "date": "2026-07-25",
           "category": "Alcohol & nightlife",
+          "source": "chat",
+          "paymentMethod": "credit",
+          "creditStatus": "outstanding"
+        },
+        {
+          "id": "2026-07-ice-cream-credit-001",
+          "amount": 2,
+          "note": "Ice cream",
+          "noteTranslations": {
+            "en": "Ice cream",
+            "ru": "Мороженое"
+          },
+          "date": "2026-07-25",
+          "category": "Food",
           "source": "chat",
           "paymentMethod": "credit",
           "creditStatus": "outstanding"

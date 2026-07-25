@@ -27,6 +27,7 @@
   --font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
     "Helvetica Neue", sans-serif;
   --display-font: var(--font-family);
+  --banner-fade: #050506;
 }
 
 :root[data-theme="nier-automata"] {
@@ -57,6 +58,7 @@
   --shadow-glass: 0 14px 36px rgba(48, 68, 77, 0.13);
   --font-family: "Helvetica Neue", Arial, sans-serif;
   --display-font: Georgia, "Times New Roman", serif;
+  --banner-fade: #e7eff1;
 }
 
 :root[data-theme="tohsaka-rin"] {
@@ -82,6 +84,7 @@
   --shadow-card: 0 24px 70px rgba(46, 0, 31, 0.46);
   --shadow-glass: 0 14px 40px rgba(62, 0, 42, 0.38);
   --display-font: Georgia, "Times New Roman", serif;
+  --banner-fade: #080713;
 }
 
 * {
@@ -859,18 +862,15 @@ main::before {
 /* Theme character banner */
 
 .theme-banner {
+  --banner-bleed: clamp(18px, 4vw, 48px);
   position: relative;
   isolation: isolate;
+  width: calc(100% + (var(--banner-bleed) * 2));
   aspect-ratio: 3 / 1;
-  min-height: 210px;
+  min-height: 230px;
   overflow: hidden;
-  margin-top: 18px;
-  border: 1px solid var(--separator);
-  border-radius: var(--radius-outer);
-  background:
-    radial-gradient(circle at 72% 44%, rgba(10, 132, 255, 0.22), transparent 34%),
-    var(--surface-inset);
-  box-shadow: var(--shadow-card);
+  margin: 24px calc(var(--banner-bleed) * -1) 30px;
+  background: transparent;
 }
 
 .theme-banner::after {
@@ -878,8 +878,8 @@ main::before {
   z-index: 1;
   inset: 0;
   background:
-    linear-gradient(90deg, rgba(5, 5, 7, 0.28), transparent 38% 78%, rgba(5, 5, 7, 0.08)),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 28%, rgba(0, 0, 0, 0.16));
+    linear-gradient(90deg, var(--banner-fade), transparent 13% 87%, var(--banner-fade)),
+    linear-gradient(180deg, var(--banner-fade), transparent 18% 76%, var(--banner-fade));
   content: "";
   pointer-events: none;
 }
@@ -890,32 +890,67 @@ main::before {
   height: 100%;
   object-fit: cover;
   object-position: center;
+  opacity: 0.92;
 }
 
 .theme-banner img[hidden] {
   display: none;
 }
 
-:root[data-theme="nier-automata"] .theme-banner {
-  border-color: rgba(34, 52, 59, 0.2);
-  background:
-    radial-gradient(circle at 70% 45%, rgba(255, 255, 255, 0.9), transparent 34%),
-    #cfdcdf;
+/* Daily spending chart */
+
+.daily-chart-panel {
+  margin-bottom: 20px;
+  border: 1px solid var(--separator);
+  border-radius: var(--radius-outer);
+  background: var(--surface);
+  padding: clamp(20px, 3vw, 30px);
+  box-shadow: var(--shadow-card);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
 }
 
-:root[data-theme="nier-automata"] .theme-banner::after {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.12), transparent 54%, rgba(35, 51, 57, 0.12));
+.daily-chart-heading {
+  display: flex;
+  gap: 24px;
+  align-items: end;
+  justify-content: space-between;
 }
 
-:root[data-theme="tohsaka-rin"] .theme-banner {
-  border-color: rgba(255, 116, 153, 0.28);
-  background:
-    radial-gradient(circle at 72% 44%, rgba(229, 42, 85, 0.28), transparent 34%),
-    #100714;
+.daily-chart-heading h2 {
+  margin: 0 0 6px;
+  font-size: clamp(25px, 3vw, 34px);
 }
 
-:root[data-theme="tohsaka-rin"] .theme-banner::after {
-  background: linear-gradient(180deg, rgba(255, 116, 153, 0.05), transparent 54%, rgba(8, 7, 19, 0.2));
+.daily-chart-heading > div > p:last-child {
+  margin: 0;
+  color: var(--secondary);
+  font-size: 13px;
+}
+
+.daily-chart-total {
+  flex: 0 0 auto;
+  text-align: right;
+}
+
+.daily-chart-total span {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--tertiary);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.daily-chart-total strong {
+  color: var(--label);
+  font-size: 24px;
+}
+
+.daily-expense-chart {
+  min-height: 270px;
+  margin: 14px -8px -8px;
 }
 
 /* Hero */
@@ -1169,6 +1204,43 @@ h1 em {
 
 .stat-card.expenses .stat-icon {
   color: var(--cyan);
+}
+
+.stat-card.salary-locked {
+  border-color: color-mix(in srgb, var(--blue) 46%, var(--separator));
+  background:
+    linear-gradient(145deg, color-mix(in srgb, var(--blue) 14%, transparent), transparent 58%),
+    var(--surface);
+  box-shadow:
+    inset 3px 0 var(--blue),
+    inset 0 1px rgba(255, 255, 255, 0.06),
+    0 16px 44px rgba(0, 0, 0, 0.2);
+}
+
+.salary-lock-icon {
+  width: auto;
+  min-width: 58px;
+  padding: 0 9px;
+  color: var(--blue);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.locked-salary {
+  color: var(--label);
+}
+
+.stat-card small.locked-status {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  color: var(--blue);
+  font-weight: 650;
+}
+
+.locked-status > span:first-child {
+  font-size: 8px;
 }
 
 .category-strip {
@@ -2101,15 +2173,33 @@ footer p {
   }
 
   .theme-banner {
+    --banner-bleed: 12px;
     aspect-ratio: auto;
     min-height: 0;
     height: clamp(150px, 42vw, 190px);
     margin-top: 14px;
-    border-radius: 20px;
+    margin-bottom: 24px;
   }
 
   .theme-banner img {
     object-position: 70% center;
+  }
+
+  .daily-chart-panel {
+    border-radius: 21px;
+    padding: 18px 14px 12px;
+  }
+
+  .daily-chart-heading {
+    align-items: flex-start;
+  }
+
+  .daily-chart-heading > div > p:last-child {
+    max-width: 230px;
+  }
+
+  .daily-chart-total strong {
+    font-size: 19px;
   }
 
   .timeline-copy {

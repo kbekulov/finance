@@ -13,8 +13,9 @@
     <meta property="og:image" content="https://finance.bekulov.com/public/og.png" />
     <title>Kinance</title>
     <link rel="icon" type="image/jpeg" href="/kinance-favicon.jpg" />
-    <link rel="stylesheet" href="/styles.css?v=20" />
-    <script src="/script.js?v=20" defer></script>
+    <link rel="stylesheet" href="/styles.css?v=21" />
+    <script src="/public/vendor/apexcharts.min.js?v=21" defer></script>
+    <script src="/script.js?v=21" defer></script>
   </head>
   <body>
     <main>
@@ -84,6 +85,27 @@
           />
         </section>
 
+        <section class="daily-chart-panel" aria-labelledby="daily-chart-title">
+          <div class="daily-chart-heading">
+            <div>
+              <p class="eyebrow" data-i18n="dailySpendingEyebrow">DAILY RHYTHM</p>
+              <h2 id="daily-chart-title" data-i18n="dailySpending">Daily expenses</h2>
+              <p data-i18n="dailySpendingIntro">What left your account each day this salary cycle</p>
+            </div>
+            <div class="daily-chart-total">
+              <span data-i18n="thisCycleTotal">This cycle</span>
+              <strong id="daily-chart-total">€0.00</strong>
+            </div>
+          </div>
+          <div
+            id="daily-expense-chart"
+            class="daily-expense-chart"
+            role="img"
+            aria-label="Daily expenses line chart"
+            data-i18n-aria-label="dailySpendingChartLabel"
+          ></div>
+        </section>
+
         <section class="hero" id="top" aria-labelledby="page-title">
           <div class="hero-copy">
             <p class="eyebrow" data-i18n="monthGlance">YOUR SALARY CYCLE AT A GLANCE</p>
@@ -116,15 +138,14 @@
         </section>
 
         <section class="stat-grid" aria-label="Salary cycle totals" data-i18n-aria-label="monthlyTotalsLabel">
-          <article class="stat-card">
-            <span class="stat-icon" aria-hidden="true">↗</span>
+          <article class="stat-card salary salary-locked">
+            <span class="stat-icon salary-lock-icon" aria-hidden="true">FIXED</span>
             <p data-i18n="monthlySalary">MONTHLY SALARY</p>
-            <label class="editable-value">
-              <span class="sr-only" data-i18n="salaryEuroLabel">Monthly salary in euros</span>
-              <span aria-hidden="true">€</span>
-              <input id="salary" inputmode="decimal" value="0" />
-            </label>
-            <small data-i18n="tapToEdit">Tap the amount to edit</small>
+            <strong id="salary-value" class="locked-salary">€0.00</strong>
+            <small class="locked-status">
+              <span aria-hidden="true">●</span>
+              <span data-i18n="salaryLocked">Fixed in your finance plan</span>
+            </small>
           </article>
 
           <article class="stat-card">

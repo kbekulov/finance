@@ -108,6 +108,8 @@ Read the final amount actually paid, not subtotal, tax, savings, balance due bef
 
 When the user states a monthly salary, replace the current salary cycle’s `salary`. Salary is the base from which savings and expenses are deducted. Current canonical salary is €2,150 until changed.
 
+Salary is backend-owned canonical data and must never be editable from either frontend interface. Render it as a visually distinct locked or fixed value with no input control, mutation handler, or browser-local override. Salary changes happen only by editing the canonical database through the maintenance workflow.
+
 Salary is nominally paid on the 12th of every month. If the 12th is Saturday or Sunday, the effective salary and reset date is the Friday immediately before that weekend. A cycle starts on that effective salary date and ends one calendar day before the next effective salary date. Use `Europe/Vilnius` dates and calculate this rule for each month; never hard-code a permanent day-of-week assumption.
 
 ### Savings requirement
@@ -124,7 +126,7 @@ Debit is the universal default. Every new purchase, receipt, subscription, debt 
 
 When the user says that credit has been repaid, update every currently outstanding credit expense to `creditStatus: "repaid"` and set `repaidAt` to the stated repayment date, or today when no date is supplied. Preserve the original expense amount, category, date, source, recurrence, and payment method. Credit repayment is a balance settlement, not a second purchase, so do not add another expense or count the repayment twice in spending totals.
 
-The outstanding-credit banner must remain completely hidden when the outstanding total is zero. When any outstanding credit exists in the retained finance history, show the flashing high-priority banner above the normal spending warning and calculate its euro total from all expenses where `paymentMethod` is `credit` and `creditStatus` is not `repaid`. Repaid credit stays visibly labeled in its expense table but never contributes to the banner total. The banner must keep its theme-specific palette, assertive live-region semantics, mobile layout, and reduced-motion fallback.
+The outstanding-credit banner must remain completely hidden when the outstanding total is zero. When any outstanding credit exists in the retained finance history, show the flashing high-priority banner above the normal spending warning and calculate its euro total dynamically from all expenses where `paymentMethod` is `credit` and `creditStatus` is not `repaid`. Never store or manually update a banner total. A maintenance pass only adds credit records or marks existing records repaid when the user says repayment occurred. Repaid credit stays visibly labeled in its expense table but never contributes to the banner total. The banner must keep its theme-specific palette, assertive live-region semantics, mobile layout, and reduced-motion fallback.
 
 Every expense row must display a localized payment badge: Debit, Credit, or Credit repaid. The quick-entry form must default to Debit while allowing Credit to be selected explicitly. Carry an explicitly configured payment method forward with recurring expenses.
 
@@ -250,7 +252,9 @@ Do not introduce heavy libraries for behavior that plain TypeScript/JavaScript/C
 
 ## Theme system
 
-Theme selection is a device-local preference stored as `kinance:theme`. Keep the switcher data-driven so the number of themes is not artificially limited. Every theme must have one stable ID, display label, and PNG banner path in the `THEMES` collection in both JavaScript and React, matching `data-theme` CSS selectors. Store theme banners in `public/theme-banners/`, use `/public/theme-banners/...` paths in the static site and `/theme-banners/...` paths in React, use a wide composition with the important characters inside the central crop-safe area, and provide localized accessible alt text through `themeBannerLabel`.
+Theme selection is a device-local preference stored as `kinance:theme`. Keep the switcher data-driven so the number of themes is not artificially limited. Every theme must have one stable ID, display label, and PNG banner path in the `THEMES` collection in both JavaScript and React, matching `data-theme` CSS selectors. Store theme banners in `public/theme-banners/`, use `/public/theme-banners/...` paths in the static site and `/theme-banners/...` paths in React, use a wide composition with the important characters inside the central crop-safe area, and provide localized accessible alt text through `themeBannerLabel`. Character artwork must read as a borderless, edge-faded page-background break with intentional vertical spacing, not as a rounded card or standalone wrapper.
+
+The daily-expense line chart sits directly below the character artwork and uses ApexCharts in both implementations. Aggregate canonical expenses by `date`, include zero-value points for every day in the selected salary cycle, keep the x-axis as a datetime axis, recalculate on cycle, language, theme, or expense changes, and derive the displayed cycle total from the same expense array. Keep chart colors theme-aware and disable chart animation when reduced motion is requested.
 
 The built-in themes are:
 

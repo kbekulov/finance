@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import financeHistoryJson from "@/data/finance-history.json";
 
 type Category =
@@ -76,6 +76,13 @@ const COPY = {
     pace: "Comfortable daily pace",
     day: "/ day",
     salary: "MONTHLY SALARY",
+    salaryLocked: "Fixed in your finance plan",
+    dailySpendingEyebrow: "DAILY RHYTHM",
+    dailySpending: "Daily expenses",
+    dailySpendingIntro: "What left your account each day this salary cycle",
+    thisCycleTotal: "This cycle",
+    dailyExpenseSeries: "Daily spending",
+    dailySpendingChartLabel: "Daily expenses line chart",
     edit: "Tap the amount to edit",
     savings: "SAVINGS REQUIREMENT",
     protected: "Protected from spending",
@@ -151,6 +158,13 @@ const COPY = {
     pace: "Комфортный дневной лимит",
     day: "/ день",
     salary: "МЕСЯЧНЫЙ ДОХОД",
+    salaryLocked: "Зафиксировано в финансовом плане",
+    dailySpendingEyebrow: "ДНЕВНОЙ РИТМ",
+    dailySpending: "Расходы по дням",
+    dailySpendingIntro: "Сколько уходило со счёта каждый день этого цикла зарплаты",
+    thisCycleTotal: "За цикл",
+    dailyExpenseSeries: "Расходы за день",
+    dailySpendingChartLabel: "Линейный график расходов по дням",
     edit: "Нажмите на сумму, чтобы изменить",
     savings: "ЦЕЛЬ НАКОПЛЕНИЙ",
     protected: "Защищено от расходов",
@@ -322,6 +336,27 @@ function fillTemplate(
   );
 }
 
+function dailyExpensePoints(expenses: Expense[], period: MonthRecord["period"]) {
+  const totals = expenses.reduce((daily, expense) => {
+    daily.set(expense.date, (daily.get(expense.date) ?? 0) + expense.amount);
+    return daily;
+  }, new Map<string, number>());
+  const points: Array<{ x: number; y: number }> = [];
+  const cursor = new Date(`${period.start}T12:00:00`);
+  const end = new Date(`${period.end}T12:00:00`);
+
+  while (cursor <= end) {
+    const date = cursor.toISOString().slice(0, 10);
+    points.push({
+      x: cursor.getTime(),
+      y: Math.round((totals.get(date) ?? 0) * 100) / 100,
+    });
+    cursor.setDate(cursor.getDate() + 1);
+  }
+
+  return points;
+}
+
 export default function Home() {
   const [selectedMonth, setSelectedMonth] = useState<MonthRecord>(INITIAL_MONTH);
   const [data, setData] = useState<FinanceData>(INITIAL_MONTH);
@@ -334,7 +369,10 @@ export default function Home() {
   const [theme, setTheme] = useState<ThemeId>("kinance");
   const [recurringExpanded, setRecurringExpanded] = useState(true);
   const [oneTimeExpanded, setOneTimeExpanded] = useState(true);
+  const dailyChartRef = useRef<HTMLDivElement>(null);
 
+  /* Device-local preferences and entries hydrate only after the client mounts. */
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     const savedLanguage =
       localStorage.getItem("kinance:language") ??
@@ -358,13 +396,17 @@ export default function Home() {
       const saved =
         localStorage.getItem(`kinance:${key}`) ??
         localStorage.getItem(`euroscope:${key}`);
-      if (saved) setData(JSON.parse(saved));
+      if (saved) {
+        const savedData = JSON.parse(saved) as FinanceData;
+        setData({ ...savedData, salary: selectedMonth.salary });
+      }
       else setData(selectedMonth);
     } catch {
       // Source data remains available if browser storage is unavailable.
     }
     setIsReady(true);
   }, [selectedMonth]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   useEffect(() => {
     if (!isReady) return;
@@ -570,6 +612,76 @@ export default function Home() {
       }`
     : copy.spendingClear;
 
+  useEffect(() => {
+    const container = dailyChartRef.current;
+    if (!container) return;
+    let active = true;
+    let chart: { destroy: () => void } | null = null;
+
+    const draw = async () => {
+      const { default: ApexCharts } = await import("apexcharts");
+      if (!active) return;
+      const palette =
+        theme === "nier-automata"
+          ? { accent: "#476f7b", grid: "rgba(28, 43, 49, 0.14)", text: "#4c585e", tooltip: "light" }
+          : theme === "tohsaka-rin"
+            ? { accent: "#e52a55", grid: "rgba(255, 116, 153, 0.17)", text: "#d8b8c5", tooltip: "dark" }
+            : { accent: "#0a84ff", grid: "rgba(255, 255, 255, 0.1)", text: "#aeaeb2", tooltip: "dark" };
+
+      chart = new ApexCharts(container, {
+        chart: {
+          type: "line",
+          height: 270,
+          background: "transparent",
+          foreColor: palette.text,
+          fontFamily: getComputedStyle(document.documentElement).getPropertyValue("--font-family"),
+          animations: { enabled: !window.matchMedia("(prefers-reduced-motion: reduce)").matches },
+          toolbar: { show: false },
+          zoom: { enabled: false },
+        },
+        series: [{ name: copy.dailyExpenseSeries, data: dailyExpensePoints(data.expenses, selectedMonth.period) }],
+        colors: [palette.accent],
+        stroke: { curve: "smooth", width: 3 },
+        markers: { size: 0, hover: { size: 5 } },
+        dataLabels: { enabled: false },
+        grid: { borderColor: palette.grid, strokeDashArray: 4, padding: { left: 4, right: 10 } },
+        xaxis: {
+          type: "datetime",
+          labels: {
+            datetimeUTC: false,
+            formatter: (_value: string, timestamp: number) =>
+              new Intl.DateTimeFormat(locale, { day: "numeric", month: "short" })
+                .format(new Date(timestamp)),
+            style: { colors: palette.text },
+          },
+          axisBorder: { color: palette.grid },
+          axisTicks: { color: palette.grid },
+        },
+        yaxis: {
+          min: 0,
+          labels: { formatter: (value: number) => compactEuro.format(value), style: { colors: [palette.text] } },
+        },
+        tooltip: {
+          theme: palette.tooltip,
+          x: {
+            formatter: (timestamp: number) =>
+              new Intl.DateTimeFormat(locale, { day: "numeric", month: "short", year: "numeric" })
+                .format(new Date(timestamp)),
+          },
+          y: { formatter: (value: number) => euro.format(value) },
+        },
+        noData: { text: copy.spendingClear },
+      });
+      await (chart as { render: () => Promise<void> }).render();
+    };
+
+    void draw();
+    return () => {
+      active = false;
+      chart?.destroy();
+    };
+  }, [copy.dailyExpenseSeries, copy.spendingClear, data.expenses, locale, selectedMonth.period, theme]);
+
   function addExpense(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const value = Number.parseFloat(amount.replace(",", "."));
@@ -719,6 +831,26 @@ export default function Home() {
           />
         </section>
 
+        <section className="daily-chart-panel" aria-labelledby="daily-chart-title">
+          <div className="daily-chart-heading">
+            <div>
+              <p className="eyebrow">{copy.dailySpendingEyebrow}</p>
+              <h2 id="daily-chart-title">{copy.dailySpending}</h2>
+              <p>{copy.dailySpendingIntro}</p>
+            </div>
+            <div className="daily-chart-total">
+              <span>{copy.thisCycleTotal}</span>
+              <strong>{euro.format(spent)}</strong>
+            </div>
+          </div>
+          <div
+            ref={dailyChartRef}
+            className="daily-expense-chart"
+            role="img"
+            aria-label={copy.dailySpendingChartLabel}
+          />
+        </section>
+
         <section className="hero" id="top" aria-labelledby="page-title">
           <div className="hero-copy">
             <p className="eyebrow">{copy.monthGlance}</p>
@@ -758,24 +890,14 @@ export default function Home() {
         </section>
 
         <section className="stat-grid" aria-label={copy.monthlyTotalsLabel}>
-          <article className="stat-card salary">
-            <span className="stat-icon" aria-hidden="true">↗</span>
+          <article className="stat-card salary salary-locked">
+            <span className="stat-icon salary-lock-icon" aria-hidden="true">FIXED</span>
             <p>{copy.salary}</p>
-            <label className="editable-value">
-              <span className="sr-only">{copy.salaryEuroLabel}</span>
-              <span aria-hidden="true">€</span>
-              <input
-                inputMode="decimal"
-                value={data.salary}
-                onChange={(event) =>
-                  setData((current) => ({
-                    ...current,
-                    salary: Math.max(Number(event.target.value) || 0, 0),
-                  }))
-                }
-              />
-            </label>
-            <small>{copy.edit}</small>
+            <strong className="locked-salary">{euro.format(data.salary)}</strong>
+            <small className="locked-status">
+              <span aria-hidden="true">●</span>
+              <span>{copy.salaryLocked}</span>
+            </small>
           </article>
 
           <article className="stat-card savings">

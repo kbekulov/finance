@@ -23,6 +23,13 @@ const TRANSLATIONS = {
     leftForMonth: "left until next salary",
     dailyPace: "Comfortable daily pace",
     monthlySalary: "MONTHLY SALARY",
+    salaryLocked: "Fixed in your finance plan",
+    dailySpendingEyebrow: "DAILY RHYTHM",
+    dailySpending: "Daily expenses",
+    dailySpendingIntro: "What left your account each day this salary cycle",
+    thisCycleTotal: "This cycle",
+    dailyExpenseSeries: "Daily spending",
+    dailySpendingChartLabel: "Daily expenses line chart",
     tapToEdit: "Tap the amount to edit",
     savingsRequirement: "SAVINGS REQUIREMENT",
     protectedSpending: "Protected from spending",
@@ -110,6 +117,13 @@ const TRANSLATIONS = {
     leftForMonth: "до следующей зарплаты",
     dailyPace: "Комфортный дневной лимит",
     monthlySalary: "МЕСЯЧНЫЙ ДОХОД",
+    salaryLocked: "Зафиксировано в финансовом плане",
+    dailySpendingEyebrow: "ДНЕВНОЙ РИТМ",
+    dailySpending: "Расходы по дням",
+    dailySpendingIntro: "Сколько уходило со счёта каждый день этого цикла зарплаты",
+    thisCycleTotal: "За цикл",
+    dailyExpenseSeries: "Расходы за день",
+    dailySpendingChartLabel: "Линейный график расходов по дням",
     tapToEdit: "Нажмите на сумму, чтобы изменить",
     savingsRequirement: "ЦЕЛЬ НАКОПЛЕНИЙ",
     protectedSpending: "Защищено от расходов",
@@ -194,6 +208,7 @@ const TRANSLATIONS = {
 let history = [];
 let selectedMonth = null;
 let data = null;
+let dailyExpenseChart = null;
 let salarySchedule = { dayOfMonth: 12, weekendRule: "previousFriday" };
 let theme = THEMES.some(
   ({ id }) => id === localStorage.getItem("kinance:theme"),
@@ -489,7 +504,10 @@ function loadMonth(month) {
     const saved =
       localStorage.getItem(storageKey(month)) ??
       localStorage.getItem(legacyStorageKey(month));
-    data = JSON.parse(saved) || structuredClone(month);
+    const savedData = JSON.parse(saved);
+    data = savedData
+      ? { ...savedData, salary: month.salary }
+      : structuredClone(month);
   } catch {
     data = structuredClone(month);
   }
@@ -702,6 +720,92 @@ function renderLedger() {
   container.append(oneTime);
 }
 
+function dailyExpensePoints(expenses, period) {
+  const totals = expenses.reduce((daily, expense) => {
+    daily.set(expense.date, (daily.get(expense.date) ?? 0) + safeNumber(expense.amount));
+    return daily;
+  }, new Map());
+  const points = [];
+  const cursor = new Date(`${period.start}T12:00:00`);
+  const end = new Date(`${period.end}T12:00:00`);
+
+  while (cursor <= end) {
+    const date = cursor.toISOString().slice(0, 10);
+    points.push({
+      x: cursor.getTime(),
+      y: Math.round((totals.get(date) ?? 0) * 100) / 100,
+    });
+    cursor.setDate(cursor.getDate() + 1);
+  }
+
+  return points;
+}
+
+function renderDailyExpenseChart() {
+  const container = element("daily-expense-chart");
+  dailyExpenseChart?.destroy();
+  dailyExpenseChart = null;
+
+  if (!window.ApexCharts) {
+    container.textContent = t("refresh");
+    return;
+  }
+
+  container.textContent = "";
+  const palette =
+    theme === "nier-automata"
+      ? { accent: "#476f7b", grid: "rgba(28, 43, 49, 0.14)", text: "#4c585e", tooltip: "light" }
+      : theme === "tohsaka-rin"
+        ? { accent: "#e52a55", grid: "rgba(255, 116, 153, 0.17)", text: "#d8b8c5", tooltip: "dark" }
+        : { accent: "#0a84ff", grid: "rgba(255, 255, 255, 0.1)", text: "#aeaeb2", tooltip: "dark" };
+
+  dailyExpenseChart = new window.ApexCharts(container, {
+    chart: {
+      type: "line",
+      height: 270,
+      background: "transparent",
+      foreColor: palette.text,
+      fontFamily: getComputedStyle(document.documentElement).getPropertyValue("--font-family"),
+      animations: { enabled: !window.matchMedia("(prefers-reduced-motion: reduce)").matches },
+      toolbar: { show: false },
+      zoom: { enabled: false },
+    },
+    series: [{ name: t("dailyExpenseSeries"), data: dailyExpensePoints(data.expenses, selectedMonth.period) }],
+    colors: [palette.accent],
+    stroke: { curve: "smooth", width: 3 },
+    markers: { size: 0, hover: { size: 5 } },
+    dataLabels: { enabled: false },
+    grid: { borderColor: palette.grid, strokeDashArray: 4, padding: { left: 4, right: 10 } },
+    xaxis: {
+      type: "datetime",
+      labels: {
+        datetimeUTC: false,
+        formatter: (_value, timestamp) =>
+          new Intl.DateTimeFormat(locale(), { day: "numeric", month: "short" })
+            .format(new Date(timestamp)),
+        style: { colors: palette.text },
+      },
+      axisBorder: { color: palette.grid },
+      axisTicks: { color: palette.grid },
+    },
+    yaxis: {
+      min: 0,
+      labels: { formatter: (value) => formatEuro(value, true), style: { colors: [palette.text] } },
+    },
+    tooltip: {
+      theme: palette.tooltip,
+      x: {
+        formatter: (timestamp) =>
+          new Intl.DateTimeFormat(locale(), { day: "numeric", month: "short", year: "numeric" })
+            .format(new Date(timestamp)),
+      },
+      y: { formatter: (value) => formatEuro(value) },
+    },
+    noData: { text: t("noExpenses") },
+  });
+  dailyExpenseChart.render();
+}
+
 function render() {
   const spent = data.expenses.reduce(
     (sum, expense) => sum + safeNumber(expense.amount),
@@ -719,7 +823,7 @@ function render() {
   element("updated-label").textContent = `${t("updated")} ${new Date(
     `${selectedMonth.updatedAt}T12:00:00`,
   ).toLocaleDateString(locale(), { day: "numeric", month: "long", year: "numeric" })}`;
-  element("salary").value = salary;
+  element("salary-value").textContent = formatEuro(salary);
   element("savings").value = savings;
   element("spent-total").textContent = formatEuro(spent);
   element("expense-count").textContent =
@@ -742,8 +846,10 @@ function render() {
     t("budgetUsed", { percent: Math.round(percent) }),
   );
   element("daily-pace").textContent = `${formatEuro(Math.max(remaining, 0) / daysLeft, true)} ${t("perDay")}`;
+  element("daily-chart-total").textContent = formatEuro(spent);
 
   applyTranslations();
+  renderDailyExpenseChart();
   renderCreditAlert();
   renderSpendingAlert();
   renderHistory();
@@ -762,6 +868,7 @@ function bindControls() {
       : "kinance";
     localStorage.setItem("kinance:theme", theme);
     applyTheme();
+    if (data) renderDailyExpenseChart();
   });
   document.querySelectorAll("[data-language]").forEach((button) => {
     button.addEventListener("click", () => {
@@ -771,11 +878,6 @@ function bindControls() {
       applyTheme();
       if (data) render();
     });
-  });
-  element("salary").addEventListener("change", (event) => {
-    data.salary = safeNumber(event.target.value);
-    save();
-    render();
   });
   element("savings").addEventListener("change", (event) => {
     data.savingsGoal = safeNumber(event.target.value);

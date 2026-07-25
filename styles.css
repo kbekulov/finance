@@ -491,7 +491,6 @@ main::before {
 :root[data-theme="nier-automata"] .breakdown-panel,
 :root[data-theme="nier-automata"] .expense-table,
 :root[data-theme="nier-automata"] .add-panel,
-:root[data-theme="nier-automata"] .breakdown-item,
 :root[data-theme="nier-automata"] .month-timeline {
   border-color: rgba(34, 52, 59, 0.14);
   background-color: rgba(250, 252, 251, 0.78);
@@ -1393,7 +1392,7 @@ h1 em {
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: var(--radius-outer);
   background: rgba(28, 28, 30, 0.78);
-  padding: clamp(24px, 4vw, 36px);
+  padding: clamp(18px, 2.4vw, 24px);
   box-shadow:
     inset 0 1px rgba(255, 255, 255, 0.05),
     var(--shadow-card);
@@ -1410,10 +1409,10 @@ h1 em {
 }
 
 .breakdown-heading {
-  margin-bottom: 25px;
+  align-items: center;
+  margin-bottom: 14px;
 }
 
-.breakdown-heading h2,
 .section-heading h2,
 .add-panel h2,
 .empty-state h3 {
@@ -1424,23 +1423,31 @@ h1 em {
   letter-spacing: -0.045em;
 }
 
+.breakdown-heading h2 {
+  margin: 0;
+  color: var(--label);
+  font-size: clamp(18px, 2vw, 22px);
+  font-weight: 650;
+  letter-spacing: -0.035em;
+}
+
 .breakdown-heading > strong,
 .section-heading > span {
   color: var(--secondary);
-  font-size: 12px;
+  font-size: clamp(12px, 1.4vw, 15px);
   font-weight: 650;
   white-space: nowrap;
 }
 
 .breakdown-bar {
   display: flex;
-  height: 30px;
+  height: 16px;
   overflow: hidden;
-  border: 4px solid #111113;
-  border-radius: 13px;
+  border: 2px solid #111113;
+  border-radius: 7px;
   background: var(--surface-inset);
   box-shadow:
-    inset 0 2px 7px rgba(0, 0, 0, 0.55),
+    inset 0 1px 4px rgba(0, 0, 0, 0.5),
     0 1px rgba(255, 255, 255, 0.04);
 }
 
@@ -1491,21 +1498,18 @@ h1 em {
 }
 
 .breakdown-legend {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
-  margin-top: 19px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+  margin-top: 14px;
 }
 
 .breakdown-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 7px;
   min-width: 0;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 15px;
-  background: rgba(44, 44, 46, 0.48);
-  padding: 11px 12px;
+  padding: 0;
 }
 
 .breakdown-dot {
@@ -1516,6 +1520,9 @@ h1 em {
 }
 
 .breakdown-item span:last-child {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
   min-width: 0;
 }
 
@@ -1528,14 +1535,15 @@ h1 em {
 }
 
 .breakdown-item strong {
-  margin-bottom: 3px;
+  margin: 0;
   color: var(--label);
-  font-size: 11px;
+  font-size: 12px;
+  font-weight: 550;
 }
 
 .breakdown-item small {
   color: var(--tertiary);
-  font-size: 10px;
+  font-size: 11px;
 }
 
 /* Ledger and entry */
@@ -1957,8 +1965,7 @@ footer p {
 }
 
 @media (hover: hover) {
-  .stat-card,
-  .breakdown-item {
+  .stat-card {
     transition:
       border-color 180ms ease,
       background 180ms ease,
@@ -2217,6 +2224,10 @@ footer p {
     padding: 22px;
   }
 
+  .breakdown-panel {
+    padding: 17px;
+  }
+
   .breakdown-heading,
   .section-heading {
     align-items: flex-start;
@@ -2224,8 +2235,14 @@ footer p {
     gap: 7px;
   }
 
+  .breakdown-heading {
+    align-items: center;
+    flex-direction: row;
+    gap: 12px;
+  }
+
   .breakdown-legend {
-    grid-template-columns: 1fr 1fr;
+    gap: 9px 14px;
   }
 
   .expense-table-summary {
@@ -2263,8 +2280,9 @@ footer p {
     white-space: nowrap;
   }
 
-  .breakdown-legend {
-    grid-template-columns: 1fr;
+  .breakdown-item span:last-child {
+    flex-wrap: wrap;
+    row-gap: 0;
   }
 
   .balance-main {

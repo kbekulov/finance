@@ -561,7 +561,7 @@ test("keeps database history and translations aligned", async () => {
     assert.doesNotMatch(source, /const TODAY\s*=/);
   }
   assert.match(index, /id="theme-select"/);
-  assert.match(index, /styles\.css\?v=32/);
+  assert.match(index, /styles\.css\?v=33/);
   assert.match(index, /public\/vendor\/apexcharts\.min\.js\?v=21/);
   assert.match(index, /script\.js\?v=33/);
   assert.match(index, /data-current-theme="kinance"/);
@@ -620,6 +620,9 @@ test("keeps database history and translations aligned", async () => {
   assert.match(styles, /\.pace-limit-all strong\s*\{[^}]*color:\s*var\(--red\)/s);
   assert.match(styles, /\.pace-limit-safe strong\s*\{[^}]*color:\s*var\(--green\)/s);
   assert.match(styles, /\.expense-category-icon\s*\{[^}]*width:\s*48px[^}]*height:\s*48px/s);
+  assert.match(styles, /\.breakdown-bar\s*\{[^}]*height:\s*16px/s);
+  assert.match(styles, /\.breakdown-legend\s*\{[^}]*display:\s*flex[^}]*flex-wrap:\s*wrap/s);
+  assert.doesNotMatch(styles, /\.breakdown-item\s*\{[^}]*background:/s);
   assert.doesNotMatch(styles, /\.expense-monogram/);
   assert.match(styles, /--chart-accent:\s*#5ac8fa/);
   assert.match(styles, /:root\[data-theme="nier-automata"\][^{]*\{[^}]*--chart-accent:\s*#526f78/s);

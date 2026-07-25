@@ -182,7 +182,7 @@ Receipt evaluation may introduce a genuinely necessary new category. Treat that 
 - `CATEGORIES` and category labeling/classification in both JavaScript and React;
 - the form options;
 - English and Russian labels;
-- colored category strip, breakdown bar, legend, and accessibility text;
+- colored category strip, compact proportional breakdown bar, wrapping inline legend, and accessibility text;
 - warning guidance and flexible-category behavior when applicable;
 - tests for canonical data, calculations, rendering, and translation parity;
 - this manual.

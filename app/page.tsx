@@ -1039,10 +1039,7 @@ export default function Home() {
 
         <section className="breakdown-panel" aria-labelledby="breakdown-title">
           <div className="breakdown-heading">
-            <div>
-              <p className="eyebrow">{copy.mix}</p>
-              <h2 id="breakdown-title">{copy.where}</h2>
-            </div>
+            <h2 id="breakdown-title">{copy.where}</h2>
             <strong>{euro.format(spent)} {copy.total}</strong>
           </div>
           <div

@@ -14,13 +14,13 @@
       "currency": "EUR",
       "timezone": "Europe/Vilnius",
       "updatedAt": "2026-07-25",
-      "revision": 8,
+      "revision": 9,
       "salary": 2150,
       "savingsGoal": 200,
       "expenses": [
         {
           "id": "2026-07-university-debt",
-          "amount": 200,
+          "amount": 189,
           "note": "University debt",
           "noteTranslations": {
             "en": "University debt",

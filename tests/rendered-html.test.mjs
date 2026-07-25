@@ -32,7 +32,7 @@ test("server-renders the current finance tracker", async () => {
   assert.match(html, /<title>Euroscope — Your monthly money, clearly<\/title>/i);
   assert.match(html, /class="spending-alert"/);
   assert.match(html, /Spending alert/);
-  assert.match(html, /Debt &amp; repayments is your largest cost at €566\.00/);
+  assert.match(html, /Debt &amp; repayments is your largest cost at €555\.00/);
   assert.match(html, /Apple Devices/);
   assert.match(html, /Updated 25 July 2026/);
   assert.match(html, /Today<!-- --> · <!-- -->25/);
@@ -42,8 +42,8 @@ test("server-renders the current finance tracker", async () => {
   assert.match(html, /Mercury Weather/);
   assert.match(html, /Microsoft 365/);
   assert.match(html, /Gaming laptop/);
-  assert.match(html, /€811\.96/);
-  assert.match(html, /€1,138\.04/);
+  assert.match(html, /€800\.96/);
+  assert.match(html, /€1,149\.04/);
   assert.doesNotMatch(html, /Your site is taking shape|Building your site/);
 });
 
@@ -61,7 +61,7 @@ test("keeps database history and translations aligned", async () => {
   assert.equal(database.currency, "EUR");
   assert.equal(database.timezone, "Europe/Vilnius");
   assert.equal(current.updatedAt, "2026-07-25");
-  assert.equal(current.revision, 8);
+  assert.equal(current.revision, 9);
   assert.equal(current.savingsGoal, 200);
   assert.deepEqual(current.period, {
     start: "2026-07-01",
@@ -93,6 +93,12 @@ test("keeps database history and translations aligned", async () => {
     current.expenses.find((expense) => expense.id === "2026-07-chatgpt")
       ?.amount,
     22.99,
+  );
+  assert.equal(
+    current.expenses.find(
+      (expense) => expense.id === "2026-07-university-debt",
+    )?.amount,
+    189,
   );
   assert.equal(
     current.expenses.find((expense) => expense.id === "2026-07-youtube")

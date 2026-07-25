@@ -250,6 +250,8 @@ h1 em { color: var(--green); font-weight: 400; }
 .category-symbol.food { background: #e1eac9; color: #345022; }
 .category-symbol.services { background: #d9e5e5; color: #235156; }
 .category-symbol.luxury { background: #f2ded8; color: #8a3e2e; }
+.category-symbol.debt { background: #e2dce9; color: #51396a; }
+.category-symbol.devices { background: #e9e1cc; color: #6b5018; }
 .category-strip small, .category-strip strong { display: block; }
 .category-strip small { color: var(--muted); font-size: 10px; }
 .category-strip strong { margin-top: 3px; font-size: 14px; }

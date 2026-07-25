@@ -1,14 +1,96 @@
 {
-  "version": 1,
+  "version": 2,
   "maxMonths": 12,
   "months": [
     {
       "month": "2026-07",
       "label": "July 2026",
       "updatedAt": "2026-07-25",
+      "revision": 2,
       "salary": 2150,
       "savingsGoal": 0,
-      "expenses": []
+      "expenses": [
+        {
+          "id": "2026-07-university-debt",
+          "amount": 200,
+          "note": "University debt",
+          "date": "2026-07-25",
+          "category": "Debt & repayments",
+          "source": "chat",
+          "recurring": true,
+          "frequency": "monthly"
+        },
+        {
+          "id": "2026-07-chatgpt",
+          "amount": 25,
+          "note": "ChatGPT",
+          "date": "2026-07-25",
+          "category": "Subscriptions & services",
+          "source": "chat",
+          "recurring": true,
+          "frequency": "monthly"
+        },
+        {
+          "id": "2026-07-youtube",
+          "amount": 25,
+          "note": "YouTube",
+          "date": "2026-07-25",
+          "category": "Subscriptions & services",
+          "source": "chat",
+          "recurring": true,
+          "frequency": "monthly"
+        },
+        {
+          "id": "2026-07-slite",
+          "amount": 9,
+          "note": "Slite",
+          "date": "2026-07-25",
+          "category": "Subscriptions & services",
+          "source": "chat",
+          "recurring": true,
+          "frequency": "monthly"
+        },
+        {
+          "id": "2026-07-apartment-debt",
+          "amount": 300,
+          "note": "Apartment debt",
+          "date": "2026-07-25",
+          "category": "Debt & repayments",
+          "source": "chat",
+          "recurring": true,
+          "frequency": "monthly"
+        },
+        {
+          "id": "2026-07-laptop",
+          "amount": 80,
+          "note": "Laptop",
+          "date": "2026-07-25",
+          "category": "Devices & installments",
+          "source": "chat",
+          "recurring": true,
+          "frequency": "monthly"
+        },
+        {
+          "id": "2026-07-revolut-debt",
+          "amount": 66,
+          "note": "Revolut debt",
+          "date": "2026-07-25",
+          "category": "Debt & repayments",
+          "source": "chat",
+          "recurring": true,
+          "frequency": "monthly"
+        },
+        {
+          "id": "2026-07-iphone",
+          "amount": 80,
+          "note": "iPhone",
+          "date": "2026-07-25",
+          "category": "Devices & installments",
+          "source": "chat",
+          "recurring": true,
+          "frequency": "monthly"
+        }
+      ]
     }
   ]
 }

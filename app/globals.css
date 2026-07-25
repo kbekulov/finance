@@ -440,6 +440,8 @@ h1 em { color: var(--green); font-weight: 400; }
 .category-f { background: #e1eac9; color: #345022; }
 .category-s { background: #d9e5e5; color: #235156; }
 .category-l { background: #f2ded8; color: #8a3e2e; }
+.category-d { background: #e2dce9; color: #51396a; }
+.category-i { background: #e9e1cc; color: #6b5018; }
 
 .category-strip small, .category-strip strong { display: block; }
 .category-strip small { color: var(--muted); font-size: 10px; }

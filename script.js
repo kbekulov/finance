@@ -1,4 +1,10 @@
-const CATEGORIES = ["Food", "Subscriptions & services", "Luxury purchases"];
+const CATEGORIES = [
+  "Food",
+  "Subscriptions & services",
+  "Luxury purchases",
+  "Debt & repayments",
+  "Devices & installments",
+];
 const euro = new Intl.NumberFormat("en-IE", {
   style: "currency",
   currency: "EUR",
@@ -26,11 +32,13 @@ function safeNumber(value) {
 function categoryCode(category) {
   if (category === "Food") return ["F", "food"];
   if (category === "Subscriptions & services") return ["S", "services"];
-  return ["L", "luxury"];
+  if (category === "Luxury purchases") return ["L", "luxury"];
+  if (category === "Debt & repayments") return ["D", "debt"];
+  return ["I", "devices"];
 }
 
 function storageKey(month) {
-  return `euroscope:${month.month}:${month.updatedAt}`;
+  return `euroscope:${month.month}:${month.updatedAt}:r${month.revision}`;
 }
 
 function loadMonth(month) {
@@ -129,7 +137,7 @@ function renderLedger() {
       <span class="expense-monogram" aria-hidden="true">${code}</span>
       <span class="expense-info">
         <strong></strong>
-        <small>${expense.category} · ${date}</small>
+        <small>${expense.category} · ${expense.recurring ? "Monthly · " : ""}${date}</small>
       </span>
       <strong class="expense-amount">−${euro.format(safeNumber(expense.amount))}</strong>
     `;

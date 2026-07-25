@@ -3,7 +3,12 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import financeHistoryJson from "@/data/finance-history.json";
 
-type Category = "Food" | "Subscriptions & services" | "Luxury purchases";
+type Category =
+  | "Food"
+  | "Subscriptions & services"
+  | "Luxury purchases"
+  | "Debt & repayments"
+  | "Devices & installments";
 
 type Expense = {
   id: string;
@@ -12,6 +17,8 @@ type Expense = {
   date: string;
   category: Category;
   source: "chat" | "site" | "receipt";
+  recurring?: boolean;
+  frequency?: "monthly";
 };
 
 type FinanceData = {
@@ -24,12 +31,15 @@ type MonthRecord = FinanceData & {
   month: string;
   label: string;
   updatedAt: string;
+  revision: number;
 };
 
 const CATEGORIES: Category[] = [
   "Food",
   "Subscriptions & services",
   "Luxury purchases",
+  "Debt & repayments",
+  "Devices & installments",
 ];
 
 // The JSON file is the source of truth. Only the most recent 12 records are shown.
@@ -58,7 +68,9 @@ function sourceLabel(source: Expense["source"]) {
 function categorySymbol(category: Category) {
   if (category === "Food") return "F";
   if (category === "Subscriptions & services") return "S";
-  return "L";
+  if (category === "Luxury purchases") return "L";
+  if (category === "Debt & repayments") return "D";
+  return "I";
 }
 
 export default function Home() {
@@ -71,7 +83,9 @@ export default function Home() {
 
   useEffect(() => {
     try {
-      const saved = localStorage.getItem(`euroscope:${selectedMonth.month}:${selectedMonth.updatedAt}`);
+      const saved = localStorage.getItem(
+        `euroscope:${selectedMonth.month}:${selectedMonth.updatedAt}:r${selectedMonth.revision}`,
+      );
       if (saved) setData(JSON.parse(saved));
       else setData(selectedMonth);
     } catch {
@@ -83,7 +97,7 @@ export default function Home() {
   useEffect(() => {
     if (!isReady) return;
     localStorage.setItem(
-      `euroscope:${selectedMonth.month}:${selectedMonth.updatedAt}`,
+      `euroscope:${selectedMonth.month}:${selectedMonth.updatedAt}:r${selectedMonth.revision}`,
       JSON.stringify(data),
     );
   }, [data, isReady, selectedMonth]);
@@ -316,7 +330,8 @@ export default function Home() {
                     <span className="expense-info">
                       <strong>{expense.note}</strong>
                       <small>
-                        {expense.category} · {sourceLabel(expense.source)} ·{" "}
+                        {expense.category} · {expense.recurring ? "Monthly · " : ""}
+                        {sourceLabel(expense.source)} ·{" "}
                         {new Date(`${expense.date}T12:00:00`).toLocaleDateString("en-GB", {
                           day: "numeric",
                           month: "short",

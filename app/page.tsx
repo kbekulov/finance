@@ -31,6 +31,12 @@ type FinanceData = {
 type MonthRecord = FinanceData & {
   month: string;
   label: string;
+  period: {
+    start: string;
+    end: string;
+  };
+  currency: "EUR";
+  timezone: "Europe/Vilnius";
   updatedAt: string;
   revision: number;
 };
@@ -85,6 +91,11 @@ const COPY = {
     monthEnd: "Month end",
     updated: "Updated",
     monthsSaved: "months saved",
+    spendingAlert: "Spending alert",
+    spendingClear: "No spending pressure yet. Keep logging expenses to receive current guidance.",
+    spendingLargest: "{category} is your largest cost at {amount} ({percent}% of spending).",
+    spendingCut: "For flexible cuts, focus on {category} next ({amount}).",
+    spendingSame: "Pause new spending in this category until the balance improves.",
   },
   ru: {
     monthGlance: "ВАШ МЕСЯЦ В ЦИФРАХ",
@@ -127,6 +138,11 @@ const COPY = {
     monthEnd: "Конец месяца",
     updated: "Обновлено",
     monthsSaved: "месяцев сохранено",
+    spendingAlert: "Контроль расходов",
+    spendingClear: "Пока нет признаков перерасхода. Продолжайте добавлять расходы для актуальных рекомендаций.",
+    spendingLargest: "Самая крупная статья — {category}: {amount} ({percent}% всех расходов).",
+    spendingCut: "Для гибкого сокращения расходов обратите внимание на {category} ({amount}).",
+    spendingSame: "Не добавляйте новые траты в этой категории, пока баланс не улучшится.",
   },
 };
 
@@ -193,6 +209,17 @@ function categoryClass(category: Category) {
   if (category === "Luxury purchases") return "luxury";
   if (category === "Debt & repayments") return "debt";
   return "devices";
+}
+
+function fillTemplate(
+  template: string,
+  replacements: Record<string, string | number>,
+) {
+  return Object.entries(replacements).reduce(
+    (value, [key, replacement]) =>
+      value.replace(`{${key}}`, String(replacement)),
+    template,
+  );
 }
 
 export default function Home() {
@@ -268,6 +295,36 @@ export default function Home() {
   const categoryLabel = (name: Category) => CATEGORY_LABELS[language][name];
   const expenseNoteLabel = (note: string) =>
     EXPENSE_NOTE_LABELS[language][note] ?? note;
+  const rankedCategories = [...categoryTotals]
+    .filter((item) => item.amount > 0)
+    .sort((a, b) => b.amount - a.amount);
+  const largestCategory = rankedCategories[0];
+  const flexibleCategories = new Set<Category>([
+    "Food",
+    "Subscriptions & services",
+    "Luxury purchases",
+    "Devices & installments",
+  ]);
+  const cutTarget =
+    rankedCategories.find(
+      (item) =>
+        item.name !== largestCategory?.name &&
+        flexibleCategories.has(item.name),
+    ) ?? largestCategory;
+  const spendingAlertDetail = largestCategory
+    ? `${fillTemplate(copy.spendingLargest, {
+        category: categoryLabel(largestCategory.name),
+        amount: euro.format(largestCategory.amount),
+        percent: Math.round((largestCategory.amount / spent) * 100),
+      })} ${
+        cutTarget?.name === largestCategory.name
+          ? copy.spendingSame
+          : fillTemplate(copy.spendingCut, {
+              category: categoryLabel(cutTarget.name),
+              amount: euro.format(cutTarget.amount),
+            })
+      }`
+    : copy.spendingClear;
 
   function addExpense(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -295,6 +352,14 @@ export default function Home() {
   return (
     <main>
       <div className="shell">
+        <section className="spending-alert" role="status" aria-live="polite">
+          <span className="spending-alert-icon" aria-hidden="true">!</span>
+          <div>
+            <strong>{copy.spendingAlert}</strong>
+            <p>{spendingAlertDetail}</p>
+          </div>
+        </section>
+
         <header className="topbar">
           <a className="brand" href="#top" aria-label="Euroscope home">
             <span className="brand-mark" aria-hidden="true">€</span>

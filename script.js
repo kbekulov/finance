@@ -45,6 +45,11 @@ const TRANSLATIONS = {
     perDay: "/ day",
     monthsSaved: "{count} / 12 months saved",
     noExpenses: "No expenses recorded",
+    spendingAlert: "Spending alert",
+    spendingClear: "No spending pressure yet. Keep logging expenses to receive current guidance.",
+    spendingLargest: "{category} is your largest cost at {amount} ({percent}% of spending).",
+    spendingCut: "For flexible cuts, focus on {category} next ({amount}).",
+    spendingSame: "Pause new spending in this category until the balance improves.",
     historyUnavailable: "History unavailable",
     refresh: "Please refresh the page in a moment.",
     categories: {
@@ -96,6 +101,11 @@ const TRANSLATIONS = {
     perDay: "/ день",
     monthsSaved: "Сохранено месяцев: {count} из 12",
     noExpenses: "Расходов нет",
+    spendingAlert: "Контроль расходов",
+    spendingClear: "Пока нет признаков перерасхода. Продолжайте добавлять расходы для актуальных рекомендаций.",
+    spendingLargest: "Самая крупная статья — {category}: {amount} ({percent}% всех расходов).",
+    spendingCut: "Для гибкого сокращения расходов обратите внимание на {category} ({amount}).",
+    spendingSame: "Не добавляйте новые траты в этой категории, пока баланс не улучшится.",
     historyUnavailable: "История недоступна",
     refresh: "Обновите страницу через несколько секунд.",
     categories: {
@@ -194,6 +204,47 @@ function categoryTotals() {
       .filter((expense) => expense.category === category)
       .reduce((sum, expense) => sum + safeNumber(expense.amount), 0),
   }));
+}
+
+function renderSpendingAlert() {
+  const ranked = categoryTotals()
+    .filter((item) => item.amount > 0)
+    .sort((a, b) => b.amount - a.amount);
+  const total = ranked.reduce((sum, item) => sum + item.amount, 0);
+  element("spending-alert-title").textContent = t("spendingAlert");
+
+  if (!ranked.length || total <= 0) {
+    element("spending-alert-detail").textContent = t("spendingClear");
+    return;
+  }
+
+  const largest = ranked[0];
+  const flexibleCategories = new Set([
+    "Food",
+    "Subscriptions & services",
+    "Luxury purchases",
+    "Devices & installments",
+  ]);
+  const cutTarget =
+    ranked.find(
+      (item) =>
+        item.category !== largest.category &&
+        flexibleCategories.has(item.category),
+    ) ?? largest;
+  const lead = t("spendingLargest", {
+    category: categoryLabel(largest.category),
+    amount: formatEuro(largest.amount),
+    percent: Math.round((largest.amount / total) * 100),
+  });
+  const action =
+    cutTarget.category === largest.category
+      ? t("spendingSame")
+      : t("spendingCut", {
+          category: categoryLabel(cutTarget.category),
+          amount: formatEuro(cutTarget.amount),
+        });
+
+  element("spending-alert-detail").textContent = `${lead} ${action}`;
 }
 
 function storageKey(month) {
@@ -377,6 +428,7 @@ function render() {
   element("daily-pace").textContent = `${formatEuro(Math.max(remaining, 0) / daysLeft, true)} ${t("perDay")}`;
 
   applyTranslations();
+  renderSpendingAlert();
   renderHistory();
   renderCategories();
   renderBreakdown();

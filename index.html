@@ -8,98 +8,157 @@
       name="description"
       content="Euroscope — a clear monthly view of expenses, income, and savings."
     />
-    <meta http-equiv="refresh" content="0; url=https://euroscope-finance.lateumn.chatgpt.site/" />
+    <meta property="og:title" content="Euroscope — Every euro has a place." />
+    <meta property="og:description" content="Monthly money, clearly." />
+    <meta property="og:image" content="https://finance.bekulov.com/public/og.png" />
     <title>Euroscope — Monthly money, clearly</title>
-    <style>
-      :root {
-        color-scheme: light;
-        font-family: Inter, ui-sans-serif, system-ui, -apple-system, sans-serif;
-        background: #f3f1e9;
-        color: #12201b;
-      }
-
-      * {
-        box-sizing: border-box;
-      }
-
-      body {
-        display: grid;
-        min-height: 100vh;
-        margin: 0;
-        place-items: center;
-        padding: 24px;
-        background:
-          radial-gradient(circle at 75% 20%, #dfff4f55, transparent 24rem),
-          #f3f1e9;
-      }
-
-      main {
-        width: min(100%, 540px);
-        border: 1px solid #d9d7cd;
-        border-radius: 24px;
-        background: #fbfaf5;
-        padding: clamp(28px, 7vw, 52px);
-        text-align: center;
-        box-shadow: 0 24px 70px #12201b18;
-      }
-
-      .mark {
-        display: grid;
-        width: 52px;
-        height: 52px;
-        margin: 0 auto 24px;
-        place-items: center;
-        border-radius: 50%;
-        background: #12201b;
-        color: #dfff4f;
-        font-family: Georgia, serif;
-        font-size: 34px;
-      }
-
-      h1 {
-        margin: 0 0 10px;
-        font-family: Georgia, serif;
-        font-size: clamp(42px, 10vw, 64px);
-        font-weight: 400;
-        letter-spacing: -0.055em;
-      }
-
-      p {
-        margin: 0 0 26px;
-        color: #66716c;
-        line-height: 1.6;
-      }
-
-      a {
-        display: inline-flex;
-        min-height: 48px;
-        align-items: center;
-        justify-content: center;
-        border-radius: 12px;
-        background: #184f3d;
-        color: white;
-        padding: 0 20px;
-        font-weight: 750;
-        text-decoration: none;
-      }
-
-      a:focus-visible {
-        outline: 3px solid #dfff4f;
-        outline-offset: 4px;
-      }
-    </style>
-    <script>
-      window.location.replace("https://euroscope-finance.lateumn.chatgpt.site/");
-    </script>
+    <link rel="icon" href="/public/favicon.svg" />
+    <link rel="stylesheet" href="/styles.css" />
+    <script src="/script.js" defer></script>
   </head>
   <body>
     <main>
-      <span class="mark" aria-hidden="true">€</span>
-      <h1>Euroscope</h1>
-      <p>Opening your private monthly finance tracker…</p>
-      <a href="https://euroscope-finance.lateumn.chatgpt.site/">
-        Open Euroscope
-      </a>
+      <div class="shell">
+        <header class="topbar">
+          <a class="brand" href="#top" aria-label="Euroscope home">
+            <span class="brand-mark" aria-hidden="true">€</span>
+            <span>euroscope</span>
+          </a>
+          <div class="header-meta">
+            <span class="updated-label" id="updated-label">Loading history…</span>
+            <div class="month-pill">
+              <span class="month-dot" aria-hidden="true"></span>
+              <span id="month-label">Current month</span>
+            </div>
+          </div>
+        </header>
+
+        <nav class="month-history" id="month-history" aria-label="Finance history"></nav>
+
+        <section class="month-timeline" aria-label="Monthly timeline">
+          <div class="timeline-copy">
+            <span id="timeline-start">01</span>
+            <strong id="timeline-current">Today</strong>
+            <span id="timeline-end">Month end</span>
+          </div>
+          <div class="timeline-track">
+            <span id="timeline-progress"></span>
+            <i id="timeline-marker"></i>
+          </div>
+        </section>
+
+        <section class="hero" id="top" aria-labelledby="page-title">
+          <div class="hero-copy">
+            <p class="eyebrow">YOUR MONTH AT A GLANCE</p>
+            <h1 id="page-title">Every euro has<br /><em>a place.</em></h1>
+            <p class="hero-intro">
+              A calm, honest view of what came in, what went out, and what
+              you’re keeping for yourself.
+            </p>
+          </div>
+
+          <div class="balance-card" aria-label="Monthly plan balance">
+            <div class="balance-topline">
+              <span>AVAILABLE AFTER PLAN</span>
+              <span id="spent-percent">0% SPENT</span>
+            </div>
+            <div class="balance-main">
+              <div>
+                <strong id="remaining">€0.00</strong>
+                <span class="balance-caption">left for the month</span>
+              </div>
+              <div class="progress-ring" id="progress-ring">
+                <span id="ring-percent">0%</span>
+              </div>
+            </div>
+            <div class="pace-row">
+              <span>Comfortable daily pace</span>
+              <strong id="daily-pace">€0 / day</strong>
+            </div>
+          </div>
+        </section>
+
+        <section class="stat-grid" aria-label="Monthly totals">
+          <article class="stat-card">
+            <span class="stat-icon" aria-hidden="true">↗</span>
+            <p>MONTHLY SALARY</p>
+            <label class="editable-value">
+              <span class="sr-only">Monthly salary in euros</span>
+              <span aria-hidden="true">€</span>
+              <input id="salary" inputmode="decimal" value="0" />
+            </label>
+            <small>Tap the amount to edit</small>
+          </article>
+
+          <article class="stat-card">
+            <span class="stat-icon" aria-hidden="true">◇</span>
+            <p>SAVINGS REQUIREMENT</p>
+            <label class="editable-value">
+              <span class="sr-only">Monthly savings requirement in euros</span>
+              <span aria-hidden="true">€</span>
+              <input id="savings" inputmode="decimal" value="0" />
+            </label>
+            <small>Protected from spending</small>
+          </article>
+
+          <article class="stat-card">
+            <span class="stat-icon" aria-hidden="true">↓</span>
+            <p>SPENT THIS MONTH</p>
+            <strong id="spent-total">€0.00</strong>
+            <small id="expense-count">0 recorded expenses</small>
+          </article>
+        </section>
+
+        <section class="category-strip" id="category-strip" aria-label="Expense categories"></section>
+
+        <section class="workspace">
+          <div class="activity-panel">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">THE LEDGER</p>
+                <h2>Recent expenses</h2>
+              </div>
+              <span id="ledger-count">0 ITEMS</span>
+            </div>
+            <div id="ledger"></div>
+          </div>
+
+          <aside class="add-panel" aria-labelledby="add-title">
+            <p class="eyebrow">QUICK ENTRY</p>
+            <h2 id="add-title">Add an expense</h2>
+            <p class="form-intro">Log something now, or simply send the amount in our chat.</p>
+            <form id="expense-form">
+              <label for="amount">Amount</label>
+              <div class="amount-field">
+                <span aria-hidden="true">€</span>
+                <input id="amount" inputmode="decimal" placeholder="0.00" required />
+              </div>
+
+              <label for="category">Category</label>
+              <select id="category">
+                <option>Food</option>
+                <option>Subscriptions &amp; services</option>
+                <option>Luxury purchases</option>
+              </select>
+
+              <label for="note">What was it for?</label>
+              <input id="note" placeholder="Coffee, Netflix, new shoes…" />
+
+              <button type="submit"><span aria-hidden="true">＋</span> Add expense</button>
+            </form>
+            <p class="chat-hint">
+              <span aria-hidden="true">✦</span>
+              In chat, send a number or receipt photo and it will be added and categorised here.
+            </p>
+          </aside>
+        </section>
+
+        <footer>
+          <span>EUROSCOPE</span>
+          <p>Private by design. Clear by default.</p>
+        </footer>
+      </div>
     </main>
+    <noscript>This tracker requires JavaScript to read your monthly finance history.</noscript>
   </body>
 </html>

@@ -30,31 +30,32 @@
 }
 
 :root[data-theme="nier-automata"] {
-  --canvas: #171713;
-  --surface: rgba(50, 49, 42, 0.9);
-  --surface-solid: #302f29;
-  --surface-raised: #3a3931;
-  --surface-inset: #11110f;
-  --glass: rgba(49, 48, 41, 0.74);
-  --glass-strong: rgba(62, 60, 51, 0.86);
-  --label: #e4dec8;
-  --secondary: #b3ad98;
-  --tertiary: #827d6c;
-  --separator: rgba(224, 216, 190, 0.18);
-  --separator-strong: rgba(224, 216, 190, 0.3);
-  --blue: #c9c2a9;
-  --green: #b6c8a5;
-  --orange: #c9ad7a;
-  --yellow: #d8c99b;
-  --red: #bd8176;
-  --purple: #aaa2b9;
-  --cyan: #aebfbc;
-  --radius-outer: 8px;
-  --radius-card: 5px;
-  --radius-control: 3px;
-  --shadow-card: 8px 10px 0 rgba(0, 0, 0, 0.34);
-  --shadow-glass: 5px 6px 0 rgba(0, 0, 0, 0.28);
-  --font-family: "Courier New", Courier, monospace;
+  color-scheme: light;
+  --canvas: #e7eff1;
+  --surface: rgba(249, 251, 250, 0.8);
+  --surface-solid: #f4f7f6;
+  --surface-raised: #ffffff;
+  --surface-inset: #dbe4e6;
+  --glass: rgba(245, 249, 249, 0.72);
+  --glass-strong: rgba(252, 253, 252, 0.88);
+  --label: #121619;
+  --secondary: #4c585e;
+  --tertiary: #77858b;
+  --separator: rgba(28, 43, 49, 0.14);
+  --separator-strong: rgba(28, 43, 49, 0.25);
+  --blue: #476f7b;
+  --green: #527866;
+  --orange: #c27032;
+  --yellow: #a97b28;
+  --red: #a7473c;
+  --purple: #726c84;
+  --cyan: #56818a;
+  --radius-outer: 16px;
+  --radius-card: 11px;
+  --radius-control: 8px;
+  --shadow-card: 0 24px 60px rgba(48, 68, 77, 0.16);
+  --shadow-glass: 0 14px 36px rgba(48, 68, 77, 0.13);
+  --font-family: "Helvetica Neue", Arial, sans-serif;
   --display-font: Georgia, "Times New Roman", serif;
 }
 
@@ -322,9 +323,10 @@ main::before {
 }
 
 .theme-switcher[data-current-theme="nier-automata"]::before {
-  border-radius: 1px;
-  background: linear-gradient(135deg, #ded7be 0 50%, #45443c 50%);
-  box-shadow: 0 0 0 3px rgba(222, 215, 190, 0.08);
+  border-color: rgba(22, 31, 35, 0.28);
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f9fcfc 0 48%, #9eb2ba 50% 72%, #171b1e 74%);
+  box-shadow: 0 0 0 3px rgba(115, 143, 153, 0.1);
 }
 
 .theme-switcher[data-current-theme="tohsaka-rin"]::before {
@@ -406,26 +408,33 @@ main::before {
 :root[data-theme="nier-automata"] .stat-card,
 :root[data-theme="nier-automata"] .breakdown-panel,
 :root[data-theme="nier-automata"] .expense-table,
-:root[data-theme="nier-automata"] .add-panel {
-  border-color: rgba(224, 216, 190, 0.22);
-  background-color: rgba(49, 48, 41, 0.9);
-  background-image: linear-gradient(140deg, rgba(225, 216, 188, 0.06), transparent 48%);
+:root[data-theme="nier-automata"] .add-panel,
+:root[data-theme="nier-automata"] .category-strip article,
+:root[data-theme="nier-automata"] .breakdown-item,
+:root[data-theme="nier-automata"] .month-timeline {
+  border-color: rgba(34, 52, 59, 0.14);
+  background-color: rgba(250, 252, 251, 0.78);
+  background-image: linear-gradient(145deg, rgba(255, 255, 255, 0.72), rgba(188, 207, 213, 0.1));
+  box-shadow:
+    inset 0 1px rgba(255, 255, 255, 0.82),
+    var(--shadow-card);
 }
 
 :root[data-theme="nier-automata"] .topbar,
 :root[data-theme="nier-automata"] .theme-switcher select,
 :root[data-theme="nier-automata"] .language-switch,
 :root[data-theme="nier-automata"] .month-pill {
-  border-radius: 2px;
-  background-color: rgba(38, 37, 32, 0.94);
+  border-color: rgba(34, 52, 59, 0.16);
+  border-radius: 8px;
+  background-color: rgba(249, 252, 252, 0.82);
 }
 
 :root[data-theme="nier-automata"] .brand-mark {
-  border: 1px solid #e0d8bf;
-  border-radius: 1px;
-  background: #d9d1b8;
-  color: #1d1d19;
-  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.42);
+  border: 1px solid #101416;
+  border-radius: 7px;
+  background: #121619;
+  color: #f7fbfb;
+  box-shadow: 0 9px 22px rgba(40, 57, 64, 0.22);
 }
 
 :root[data-theme="nier-automata"] .hero h1,
@@ -435,22 +444,129 @@ main::before {
   font-family: var(--display-font);
 }
 
+:root[data-theme="nier-automata"] h1,
+:root[data-theme="nier-automata"] .balance-main strong,
+:root[data-theme="nier-automata"] .stat-card > strong,
+:root[data-theme="nier-automata"] .editable-value,
+:root[data-theme="nier-automata"] .editable-value input {
+  color: var(--label);
+}
+
+:root[data-theme="nier-automata"] h1 em {
+  color: #63757c;
+}
+
 :root[data-theme="nier-automata"] .eyebrow,
 :root[data-theme="nier-automata"] .stat-card p {
   letter-spacing: 0.16em;
 }
 
 :root[data-theme="nier-automata"] .category-symbol {
-  border: 1px solid rgba(224, 216, 190, 0.28);
-  border-radius: 1px;
-  background: rgba(218, 210, 184, 0.1);
+  border: 1px solid rgba(34, 52, 59, 0.2);
+  border-radius: 6px;
+  background: rgba(114, 141, 150, 0.1);
   color: var(--label);
 }
 
 :root[data-theme="nier-automata"] .spending-alert {
-  border-radius: 3px;
-  border-color: rgba(201, 173, 122, 0.4);
-  background: linear-gradient(100deg, rgba(201, 173, 122, 0.14), transparent 62%), var(--glass);
+  border-radius: 12px;
+  border-color: rgba(194, 112, 50, 0.3);
+  background: linear-gradient(100deg, rgba(238, 180, 119, 0.2), rgba(255, 255, 255, 0.6) 62%), var(--glass);
+}
+
+:root[data-theme="nier-automata"] .spending-alert strong {
+  color: #86491f;
+}
+
+:root[data-theme="nier-automata"] .spending-alert p {
+  color: var(--secondary);
+}
+
+:root[data-theme="nier-automata"] .balance-card {
+  border-color: rgba(34, 52, 59, 0.18);
+  background:
+    radial-gradient(circle at 94% 8%, rgba(142, 174, 184, 0.3), transparent 42%),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.92), rgba(212, 225, 228, 0.86));
+  box-shadow: var(--shadow-card);
+}
+
+:root[data-theme="nier-automata"] .balance-card::after {
+  border-color: rgba(71, 111, 123, 0.09);
+}
+
+:root[data-theme="nier-automata"] .progress-ring::before {
+  border-color: rgba(34, 52, 59, 0.12);
+  background: #f4f8f8;
+}
+
+:root[data-theme="nier-automata"] .language-switch button.active {
+  background: #182024;
+  color: #f7fbfb;
+  box-shadow: 0 3px 9px rgba(37, 52, 58, 0.18);
+}
+
+:root[data-theme="nier-automata"] .month-history button {
+  border-color: rgba(34, 52, 59, 0.14);
+  background: rgba(249, 252, 252, 0.62);
+}
+
+:root[data-theme="nier-automata"] .month-history button:hover,
+:root[data-theme="nier-automata"] .month-history button.active {
+  border-color: rgba(71, 111, 123, 0.42);
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--label);
+}
+
+:root[data-theme="nier-automata"] .timeline-copy strong,
+:root[data-theme="nier-automata"] .eyebrow {
+  color: #3f6975;
+}
+
+:root[data-theme="nier-automata"] .timeline-track span {
+  background: linear-gradient(90deg, #4b7480, #9bbbc3);
+  box-shadow: 0 0 12px rgba(71, 111, 123, 0.2);
+}
+
+:root[data-theme="nier-automata"] .recurring-expenses {
+  border-color: rgba(71, 111, 123, 0.28);
+  background:
+    linear-gradient(145deg, rgba(126, 164, 174, 0.15), transparent 52%),
+    rgba(250, 252, 251, 0.82);
+}
+
+:root[data-theme="nier-automata"] .expense-list li,
+:root[data-theme="nier-automata"] .expense-table[open] > .expense-table-summary,
+:root[data-theme="nier-automata"] .recurring-total {
+  border-color: rgba(34, 52, 59, 0.12);
+}
+
+:root[data-theme="nier-automata"] .expense-table-summary:hover,
+:root[data-theme="nier-automata"] .recurring-total,
+:root[data-theme="nier-automata"] .expense-table-meta > span {
+  background: rgba(126, 164, 174, 0.11);
+}
+
+:root[data-theme="nier-automata"] .add-panel input,
+:root[data-theme="nier-automata"] .add-panel select,
+:root[data-theme="nier-automata"] .amount-field {
+  border-color: rgba(34, 52, 59, 0.15);
+  background: rgba(255, 255, 255, 0.78);
+  color: var(--label);
+}
+
+:root[data-theme="nier-automata"] .add-panel input::placeholder {
+  color: #87949a;
+}
+
+:root[data-theme="nier-automata"] .add-panel button[type="submit"] {
+  border: 1px solid #101416;
+  background: #151a1d;
+  color: #f8fbfb;
+  box-shadow: 0 10px 24px rgba(40, 57, 64, 0.2);
+}
+
+:root[data-theme="nier-automata"] .chat-hint > span:first-child {
+  color: #476f7b;
 }
 
 :root[data-theme="tohsaka-rin"] .topbar,
@@ -981,15 +1097,16 @@ h1 em {
 
 :root[data-theme="nier-automata"] main {
   background:
-    radial-gradient(circle at 82% 0%, rgba(216, 207, 178, 0.11), transparent 28rem),
-    linear-gradient(135deg, rgba(214, 205, 176, 0.045), transparent 42%),
+    radial-gradient(circle at 76% 4%, rgba(255, 255, 255, 0.96), transparent 29rem),
+    radial-gradient(circle at 8% 38%, rgba(178, 203, 210, 0.38), transparent 31rem),
+    linear-gradient(155deg, rgba(255, 255, 255, 0.78), rgba(203, 218, 223, 0.52) 52%, rgba(241, 246, 246, 0.88)),
     var(--canvas);
 }
 
 :root[data-theme="nier-automata"] main::before {
   background-image:
-    repeating-linear-gradient(0deg, transparent 0 4px, rgba(226, 217, 189, 0.025) 4px 5px),
-    repeating-linear-gradient(90deg, transparent 0 48px, rgba(226, 217, 189, 0.025) 48px 49px);
+    repeating-linear-gradient(0deg, transparent 0 5px, rgba(34, 52, 59, 0.022) 5px 6px),
+    linear-gradient(105deg, transparent 0 47%, rgba(255, 255, 255, 0.34) 49% 51%, transparent 53%);
 }
 
 :root[data-theme="tohsaka-rin"] main {

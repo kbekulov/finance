@@ -328,6 +328,14 @@ test("keeps database history and translations aligned", async () => {
   assert.match(index, /data-current-theme="kinance"/);
   assert.match(styles, /:root\[data-theme="nier-automata"\]/);
   assert.match(styles, /:root\[data-theme="tohsaka-rin"\]/);
+  assert.match(
+    styles,
+    /:root\[data-theme="nier-automata"\]\s*\{[^}]*color-scheme:\s*light/s,
+  );
+  assert.match(
+    styles,
+    /:root\[data-theme="nier-automata"\]\s*\{[^}]*--canvas:\s*#e7eff1/s,
+  );
   assert.match(styles, /\.workspace\s*\{[^}]*align-items:\s*start/s);
   assert.match(styles, /\.ledger-stack\s*\{[^}]*grid-auto-rows:\s*max-content/s);
   assert.match(styles, /\.ledger-stack\s*\{[^}]*align-content:\s*start/s);

@@ -240,7 +240,7 @@ Theme selection is a device-local preference stored as `kinance:theme`. Keep the
 The built-in themes are:
 
 - `kinance`: the default dark iOS-inspired appearance
-- `nier-automata`: muted parchment, charcoal, scan-line texture, squared controls, and archival typography
+- `nier-automata`: frosted white, pale blue-gray atmosphere, black typography, cool translucent surfaces, and restrained warm sparks
 - `tohsaka-rin`: crimson, midnight violet, jewel highlights, and refined serif accents
 
 New themes must preserve all content, functionality, responsive layouts, keyboard focus, contrast, reduced-motion behavior, and English/Russian accessibility labels. A theme may change palette, typography, radii, texture, and decorative treatment, but never finance calculations or canonical data.

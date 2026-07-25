@@ -99,6 +99,12 @@ A message whose financial intent is simply a number means: add that amount in eu
 Read the final amount actually paid, not subtotal, tax, savings, balance due before payment, or a single line item.
 
 - Use `source: "receipt"`.
+- Inspect every visible receipt date and time before choosing the expense date. When a transaction or fiscal purchase date is clearly legible, use that printed date even if the user uploads the receipt days or months later. Never substitute the chat submission date, attachment timestamp, photo metadata date, or current day for a clearly printed transaction date.
+- When a receipt shows several dates, use the date tied to the completed purchase or payment. Do not use a statement due date, order-creation date, document-copy date, or reprint date unless it is also clearly the purchase date. Preserve a clearly printed transaction time in `transactionTime` when available.
+- Assign the expense to the salary cycle whose inclusive `period.start` through `period.end` contains the chosen receipt date. Salary-cycle boundaries, not the receipt's calendar-month name and not the currently selected page, determine which month record receives the expense. Update that target cycle's `updatedAt` and increment its `revision`.
+- Interpret a receipt date and time in `Europe/Vilnius` unless the receipt explicitly identifies another timezone. Normalize the stored `date` to `YYYY-MM-DD`.
+- If no date is visible, the date is unreadable or partially obscured, multiple dates conflict without a reliable transaction date, or the apparent date is otherwise genuinely uncertain, use the actual current `Europe/Vilnius` calendar day and add the expense to the current salary cycle. Do not invent or OCR-guess missing digits, and do not delay the entry merely to ask about an unclear date when this fallback applies.
+- If a clear old receipt date falls outside every retained salary cycle, never misdate it into the current cycle. Establish the correct historical cycle only when its required salary-cycle data can be preserved without invention; otherwise explain which historical salary or cycle values are missing and ask for them before changing history.
 - Set `paymentMethod: "debit"` unless the user explicitly says that purchase was paid on credit. Do not infer credit merely from a card receipt.
 - Record merchant and receipt-specific details when visible.
 - Preserve the receipt currency and convert only when the user requests conversion or a reliable conversion value is available.

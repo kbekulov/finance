@@ -98,12 +98,13 @@ test("server-renders the current finance tracker", async () => {
 });
 
 test("keeps database history and translations aligned", async () => {
-  const [databaseText, page, script, styles, index] = await Promise.all([
+  const [databaseText, page, script, styles, index, manual] = await Promise.all([
     readFile(new URL("../data/finance-history.json", import.meta.url), "utf8"),
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../script.js", import.meta.url), "utf8"),
     readFile(new URL("../styles.css", import.meta.url), "utf8"),
     readFile(new URL("../index.html", import.meta.url), "utf8"),
+    readFile(new URL("../README.md", import.meta.url), "utf8"),
   ]);
   const database = JSON.parse(databaseText);
   const current = database.months.at(-1);
@@ -118,6 +119,10 @@ test("keeps database history and translations aligned", async () => {
   assert.ok(database.months.every((month) => Number.isFinite(month.salary) && month.salary >= 0));
   assert.equal(database.currency, "EUR");
   assert.equal(database.timezone, "Europe/Vilnius");
+  assert.match(manual, /use that printed date even if the user uploads the receipt days or months later/);
+  assert.match(manual, /salary cycle whose inclusive `period\.start` through `period\.end` contains the chosen receipt date/);
+  assert.match(manual, /use the actual current `Europe\/Vilnius` calendar day and add the expense to the current salary cycle/);
+  assert.match(manual, /never misdate it into the current cycle/);
   assert.equal(current.updatedAt, "2026-07-25");
   assert.equal(current.revision, 22);
   assert.equal(current.savingsGoal, 200);

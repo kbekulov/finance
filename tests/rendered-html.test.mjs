@@ -51,9 +51,13 @@ test("server-renders the current finance tracker", async () => {
   assert.match(html, /Microsoft 365/);
   assert.match(html, /Adobe/);
   assert.match(html, /G Suite/);
-  assert.match(html, /class="recurring-expenses"/);
+  assert.match(html, /class="expense-table recurring-expenses"/);
   assert.match(html, /class="ledger-stack"/);
-  assert.match(html, /class="activity-panel one-time-expenses-table"/);
+  assert.match(html, /class="expense-table one-time-expenses-table"/);
+  assert.match(html, /<details[^>]*class="expense-table recurring-expenses"/);
+  assert.match(html, /<summary class="expense-table-summary"/);
+  assert.match(html, /One-time expenses/);
+  assert.match(html, /€7\.99/);
   assert.match(html, /Expected monthly expenses/);
   assert.match(html, /Expected monthly total/);
   assert.match(html, /€863\.46/);

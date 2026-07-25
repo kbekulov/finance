@@ -117,7 +117,7 @@ Edit the existing record instead of adding a duplicate. Preserve its amount, dat
 
 Store each recurring charge as a normal expense with `recurring: true` and `frequency: "monthly"`. When opening a new month, carry recurring records forward with new month-specific IDs and dates, then apply any user-requested cancellations or amount changes.
 
-Render every expense marked `recurring: true` inside a standalone expected-monthly-expenses table. Render one-time expenses in a separate sibling table. Never nest either table inside the other or inside a shared ledger card. The recurring table footer must always calculate and display the sum of the recurring records in the selected salary cycle.
+Render every expense marked `recurring: true` inside a standalone expected-monthly-expenses table. Render one-time expenses in a separate sibling table. Never nest either table inside the other or inside a shared ledger card. Both tables must be independently collapsible, open by default, keyboard accessible, and show the localized table name on the left and that table’s calculated total on the right while collapsed. The recurring table footer must always calculate and display the sum of the recurring records in the selected salary cycle.
 
 ## Supported categories
 

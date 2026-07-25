@@ -484,49 +484,61 @@ function renderLedger() {
   const oneTimeExpenses = data.expenses.filter((expense) => !expense.recurring);
 
   if (recurringExpenses.length) {
-    const recurring = document.createElement("section");
-    recurring.className = "recurring-expenses";
-    recurring.setAttribute("aria-labelledby", "expected-monthly-title");
-    recurring.innerHTML = `
-      <div class="expense-group-heading">
-        <div>
-          <p class="eyebrow">${t("expectedEyebrow")}</p>
-          <h2 id="expected-monthly-title">${t("expectedMonthly")}</h2>
-        </div>
-        <span>${recurringExpenses.length} ${t("items")}</span>
-      </div>
-    `;
-    recurring.append(createExpenseList(recurringExpenses));
-
-    const footer = document.createElement("footer");
-    footer.className = "recurring-total";
+    const recurring = document.createElement("details");
+    recurring.className = "expense-table recurring-expenses";
+    recurring.open = true;
     const recurringTotal = recurringExpenses.reduce(
       (sum, expense) => sum + safeNumber(expense.amount),
       0,
     );
+    recurring.innerHTML = `
+      <summary class="expense-table-summary">
+        <span>${t("expectedMonthly")}</span>
+        <strong>${formatEuro(recurringTotal)}</strong>
+      </summary>
+      <div class="expense-table-body">
+        <div class="expense-table-meta">
+          <p class="eyebrow">${t("expectedEyebrow")}</p>
+          <span>${recurringExpenses.length} ${t("items")}</span>
+        </div>
+      </div>
+    `;
+    const recurringBody = recurring.querySelector(".expense-table-body");
+    recurringBody.append(createExpenseList(recurringExpenses));
+
+    const footer = document.createElement("footer");
+    footer.className = "recurring-total";
     footer.innerHTML = `
       <span>${t("expectedMonthlyTotal")}</span>
       <strong>${formatEuro(recurringTotal)}</strong>
     `;
-    recurring.append(footer);
+    recurringBody.append(footer);
     container.append(recurring);
   }
 
-  const oneTime = document.createElement("section");
-  oneTime.className = "activity-panel one-time-expenses-table";
-  oneTime.setAttribute("aria-labelledby", "one-time-title");
+  const oneTime = document.createElement("details");
+  oneTime.className = "expense-table one-time-expenses-table";
+  oneTime.open = true;
+  const oneTimeTotal = oneTimeExpenses.reduce(
+    (sum, expense) => sum + safeNumber(expense.amount),
+    0,
+  );
   oneTime.innerHTML = `
-    <div class="section-heading">
-      <div>
+    <summary class="expense-table-summary">
+      <span>${t("oneTimeExpenses")}</span>
+      <strong>${formatEuro(oneTimeTotal)}</strong>
+    </summary>
+    <div class="expense-table-body">
+      <div class="expense-table-meta">
         <p class="eyebrow">${t("ledger")}</p>
-        <h2 id="one-time-title">${t("oneTimeExpenses")}</h2>
+        <span>${oneTimeExpenses.length} ${t("items")}</span>
       </div>
-      <span>${oneTimeExpenses.length} ${t("items")}</span>
     </div>
   `;
+  const oneTimeBody = oneTime.querySelector(".expense-table-body");
 
   if (oneTimeExpenses.length) {
-    oneTime.append(createExpenseList(oneTimeExpenses));
+    oneTimeBody.append(createExpenseList(oneTimeExpenses));
   } else {
     const empty = document.createElement("div");
     empty.className = "empty-state";
@@ -535,7 +547,7 @@ function renderLedger() {
       <h3>${t("nothingSpent")}</h3>
       <p>${t("monthEmpty", { month: formatMonth(selectedMonth.month) })}</p>
     `;
-    oneTime.append(empty);
+    oneTimeBody.append(empty);
   }
 
   container.append(oneTime);

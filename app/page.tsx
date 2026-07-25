@@ -290,6 +290,8 @@ export default function Home() {
   const [category, setCategory] = useState<Category>("Food");
   const [isReady, setIsReady] = useState(false);
   const [language, setLanguage] = useState<Language>("en");
+  const [recurringExpanded, setRecurringExpanded] = useState(true);
+  const [oneTimeExpanded, setOneTimeExpanded] = useState(true);
 
   useEffect(() => {
     const savedLanguage =
@@ -338,6 +340,10 @@ export default function Home() {
   const recurringExpenses = data.expenses.filter((expense) => expense.recurring);
   const oneTimeExpenses = data.expenses.filter((expense) => !expense.recurring);
   const recurringTotal = recurringExpenses.reduce(
+    (sum, expense) => sum + expense.amount,
+    0,
+  );
+  const oneTimeTotal = oneTimeExpenses.reduce(
     (sum, expense) => sum + expense.amount,
     0,
   );
@@ -680,46 +686,58 @@ export default function Home() {
         <section className="workspace">
           <div className="ledger-stack">
             {recurringExpenses.length > 0 && (
-              <section
-                className="recurring-expenses"
-                aria-labelledby="expected-monthly-title"
+              <details
+                className="expense-table recurring-expenses"
+                open={recurringExpanded}
+                onToggle={(event) =>
+                  setRecurringExpanded(event.currentTarget.open)
+                }
               >
-                <div className="expense-group-heading">
-                  <div>
-                    <p className="eyebrow">{copy.expectedEyebrow}</p>
-                    <h2 id="expected-monthly-title">{copy.expectedMonthly}</h2>
-                  </div>
-                  <span>{recurringExpenses.length} {copy.items}</span>
-                </div>
-                {expenseList(recurringExpenses)}
-                <footer className="recurring-total">
-                  <span>{copy.expectedMonthlyTotal}</span>
+                <summary className="expense-table-summary">
+                  <span>{copy.expectedMonthly}</span>
                   <strong>{euro.format(recurringTotal)}</strong>
-                </footer>
-              </section>
+                </summary>
+                <div className="expense-table-body">
+                  <div className="expense-table-meta">
+                    <p className="eyebrow">{copy.expectedEyebrow}</p>
+                    <span>{recurringExpenses.length} {copy.items}</span>
+                  </div>
+                  {expenseList(recurringExpenses)}
+                  <footer className="recurring-total">
+                    <span>{copy.expectedMonthlyTotal}</span>
+                    <strong>{euro.format(recurringTotal)}</strong>
+                  </footer>
+                </div>
+              </details>
             )}
 
-            <section
-              className="activity-panel one-time-expenses-table"
-              aria-labelledby="one-time-title"
+            <details
+              className="expense-table one-time-expenses-table"
+              open={oneTimeExpanded}
+              onToggle={(event) =>
+                setOneTimeExpanded(event.currentTarget.open)
+              }
             >
-              <div className="section-heading">
-                <div>
+              <summary className="expense-table-summary">
+                <span>{copy.oneTimeExpenses}</span>
+                <strong>{euro.format(oneTimeTotal)}</strong>
+              </summary>
+              <div className="expense-table-body">
+                <div className="expense-table-meta">
                   <p className="eyebrow">{copy.ledger}</p>
-                  <h2 id="one-time-title">{copy.oneTimeExpenses}</h2>
+                  <span>{oneTimeExpenses.length} {copy.items}</span>
                 </div>
-                <span>{oneTimeExpenses.length} {copy.items}</span>
+                {oneTimeExpenses.length > 0 ? (
+                  expenseList(oneTimeExpenses)
+                ) : (
+                  <div className="empty-state">
+                    <span aria-hidden="true">○</span>
+                    <h3>{copy.empty}</h3>
+                    <p>{monthLabel}: {copy.emptyText}</p>
+                  </div>
+                )}
               </div>
-              {oneTimeExpenses.length > 0 ? (
-                expenseList(oneTimeExpenses)
-              ) : (
-                <div className="empty-state">
-                  <span aria-hidden="true">○</span>
-                  <h3>{copy.empty}</h3>
-                  <p>{monthLabel}: {copy.emptyText}</p>
-                </div>
-              )}
-            </section>
+            </details>
           </div>
 
           <aside className="add-panel" aria-labelledby="add-title">

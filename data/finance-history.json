@@ -14,7 +14,7 @@
       "currency": "EUR",
       "timezone": "Europe/Vilnius",
       "updatedAt": "2026-07-25",
-      "revision": 7,
+      "revision": 8,
       "salary": 2150,
       "savingsGoal": 200,
       "expenses": [
@@ -34,7 +34,7 @@
         },
         {
           "id": "2026-07-chatgpt",
-          "amount": 25,
+          "amount": 22.99,
           "note": "ChatGPT",
           "noteTranslations": {
             "en": "ChatGPT",
@@ -48,7 +48,7 @@
         },
         {
           "id": "2026-07-youtube",
-          "amount": 25,
+          "amount": 25.99,
           "note": "YouTube",
           "noteTranslations": {
             "en": "YouTube",
@@ -90,11 +90,11 @@
         },
         {
           "id": "2026-07-laptop",
-          "amount": 80,
-          "note": "Laptop",
+          "amount": 49,
+          "note": "Gaming laptop",
           "noteTranslations": {
-            "en": "Laptop",
-            "ru": "Ноутбук"
+            "en": "Gaming laptop",
+            "ru": "Игровой ноутбук"
           },
           "date": "2026-07-25",
           "category": "Devices & installments",
@@ -126,6 +126,48 @@
           },
           "date": "2026-07-25",
           "category": "Devices & installments",
+          "source": "chat",
+          "recurring": true,
+          "frequency": "monthly"
+        },
+        {
+          "id": "2026-07-icloud-plus",
+          "amount": 2.99,
+          "note": "iCloud+",
+          "noteTranslations": {
+            "en": "iCloud+",
+            "ru": "iCloud+"
+          },
+          "date": "2026-07-25",
+          "category": "Subscriptions & services",
+          "source": "chat",
+          "recurring": true,
+          "frequency": "monthly"
+        },
+        {
+          "id": "2026-07-mercury-weather",
+          "amount": 2.99,
+          "note": "Mercury Weather",
+          "noteTranslations": {
+            "en": "Mercury Weather",
+            "ru": "Mercury Weather"
+          },
+          "date": "2026-07-25",
+          "category": "Subscriptions & services",
+          "source": "chat",
+          "recurring": true,
+          "frequency": "monthly"
+        },
+        {
+          "id": "2026-07-microsoft-365",
+          "amount": 13,
+          "note": "Microsoft 365",
+          "noteTranslations": {
+            "en": "Microsoft 365",
+            "ru": "Microsoft 365"
+          },
+          "date": "2026-07-25",
+          "category": "Subscriptions & services",
           "source": "chat",
           "recurring": true,
           "frequency": "monthly"

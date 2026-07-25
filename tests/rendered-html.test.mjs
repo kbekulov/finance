@@ -38,8 +38,12 @@ test("server-renders the current finance tracker", async () => {
   assert.match(html, /Today<!-- --> · <!-- -->25/);
   assert.match(html, /Buses/);
   assert.match(html, /Transport &amp; Travel/);
-  assert.match(html, /€825\.00/);
-  assert.match(html, /€1,125\.00/);
+  assert.match(html, /iCloud\+/);
+  assert.match(html, /Mercury Weather/);
+  assert.match(html, /Microsoft 365/);
+  assert.match(html, /Gaming laptop/);
+  assert.match(html, /€811\.96/);
+  assert.match(html, /€1,138\.04/);
   assert.doesNotMatch(html, /Your site is taking shape|Building your site/);
 });
 
@@ -57,7 +61,7 @@ test("keeps database history and translations aligned", async () => {
   assert.equal(database.currency, "EUR");
   assert.equal(database.timezone, "Europe/Vilnius");
   assert.equal(current.updatedAt, "2026-07-25");
-  assert.equal(current.revision, 7);
+  assert.equal(current.revision, 8);
   assert.equal(current.savingsGoal, 200);
   assert.deepEqual(current.period, {
     start: "2026-07-01",
@@ -85,6 +89,44 @@ test("keeps database history and translations aligned", async () => {
       frequency: "monthly",
     },
   );
+  assert.equal(
+    current.expenses.find((expense) => expense.id === "2026-07-chatgpt")
+      ?.amount,
+    22.99,
+  );
+  assert.equal(
+    current.expenses.find((expense) => expense.id === "2026-07-youtube")
+      ?.amount,
+    25.99,
+  );
+  assert.deepEqual(
+    current.expenses.find((expense) => expense.id === "2026-07-laptop"),
+    {
+      id: "2026-07-laptop",
+      amount: 49,
+      note: "Gaming laptop",
+      noteTranslations: {
+        en: "Gaming laptop",
+        ru: "Игровой ноутбук",
+      },
+      date: "2026-07-25",
+      category: "Devices & installments",
+      source: "chat",
+      recurring: true,
+      frequency: "monthly",
+    },
+  );
+  for (const [id, amount] of [
+    ["2026-07-icloud-plus", 2.99],
+    ["2026-07-mercury-weather", 2.99],
+    ["2026-07-microsoft-365", 13],
+  ]) {
+    const expense = current.expenses.find((item) => item.id === id);
+    assert.equal(expense?.amount, amount);
+    assert.equal(expense?.category, "Subscriptions & services");
+    assert.equal(expense?.recurring, true);
+    assert.equal(expense?.frequency, "monthly");
+  }
   for (const expense of current.expenses) {
     assert.equal(typeof expense.noteTranslations?.en, "string");
     assert.equal(typeof expense.noteTranslations?.ru, "string");

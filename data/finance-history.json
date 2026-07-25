@@ -14,7 +14,7 @@
       "currency": "EUR",
       "timezone": "Europe/Vilnius",
       "updatedAt": "2026-07-25",
-      "revision": 10,
+      "revision": 11,
       "salary": 2150,
       "savingsGoal": 200,
       "expenses": [
@@ -209,6 +209,40 @@
           "transactionTime": "11:52:56",
           "vatRate": 21,
           "vatAmount": 1.04
+        },
+        {
+          "id": "2026-07-maxima-cider-001",
+          "amount": 1.99,
+          "note": "Shelton's pear cider",
+          "noteTranslations": {
+            "en": "Shelton's pear cider",
+            "ru": "Грушевый сидр Shelton's"
+          },
+          "date": "2026-07-25",
+          "category": "Alcohol & nightlife",
+          "source": "receipt",
+          "merchant": "Maxima",
+          "legalEntity": "MAXIMA LT, UAB",
+          "merchantAddress": "Medeinos g. 39, Vilnius",
+          "description": "Shelton's pear cider with refundable can deposit",
+          "originalCurrency": "EUR",
+          "originalAmount": 1.99,
+          "receiptReference": "00320265",
+          "paymentMethod": "Contactless debit Mastercard",
+          "transactionTime": "19:32:26",
+          "vatRate": 21,
+          "vatAmount": 0.33,
+          "containerDeposit": 0.1,
+          "lineItems": [
+            {
+              "description": "Shelton's pear cider",
+              "amount": 1.89
+            },
+            {
+              "description": "Refundable can deposit",
+              "amount": 0.1
+            }
+          ]
         }
       ]
     }

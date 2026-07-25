@@ -5,6 +5,7 @@ const CATEGORIES = [
   "Debt & repayments",
   "Devices & installments",
   "Transport & Travel",
+  "Alcohol & nightlife",
 ];
 
 const TRANSLATIONS = {
@@ -73,6 +74,7 @@ const TRANSLATIONS = {
       "Debt & repayments": "Debt & repayments",
       "Devices & installments": "Devices & installments",
       "Transport & Travel": "Transport & Travel",
+      "Alcohol & nightlife": "Alcohol & nightlife",
     },
   },
   ru: {
@@ -140,6 +142,7 @@ const TRANSLATIONS = {
       "Debt & repayments": "Долги и выплаты",
       "Devices & installments": "Устройства и рассрочки",
       "Transport & Travel": "Транспорт и путешествия",
+      "Alcohol & nightlife": "Алкоголь и ночная жизнь",
     },
   },
 };
@@ -227,7 +230,8 @@ function categoryCode(category) {
   if (category === "Luxury purchases") return ["L", "luxury"];
   if (category === "Debt & repayments") return ["D", "debt"];
   if (category === "Devices & installments") return ["I", "devices"];
-  return ["T", "transport"];
+  if (category === "Transport & Travel") return ["T", "transport"];
+  return ["A", "alcohol"];
 }
 
 function categoryTotals() {
@@ -258,6 +262,7 @@ function renderSpendingAlert() {
     "Luxury purchases",
     "Devices & installments",
     "Transport & Travel",
+    "Alcohol & nightlife",
   ]);
   const cutTarget =
     ranked.find(

@@ -123,6 +123,7 @@ Internal values must remain exactly:
 - `Debt & repayments`
 - `Devices & installments`
 - `Transport & Travel`
+- `Alcohol & nightlife`
 
 Receipt evaluation may introduce a genuinely necessary new category. Treat that as a complete database and product feature, never as a JSON-only value. Translate only the displayed labels. In the same committed update, change:
 
@@ -158,7 +159,7 @@ The warning strip at the very top is dynamic and must never contain stale hard-c
 
 - Recalculate it from the selected month’s category totals on every render.
 - Identify the largest current category and show its amount and share of total spending.
-- Recommend a flexible cut from `Food`, `Subscriptions & services`, `Luxury purchases`, `Devices & installments`, or `Transport & Travel`, preferring the largest flexible category other than the dominant category.
+- Recommend a flexible cut from `Food`, `Subscriptions & services`, `Luxury purchases`, `Devices & installments`, `Transport & Travel`, or `Alcohol & nightlife`, preferring the largest flexible category other than the dominant category.
 - If only one category has spending, advise pausing new spending in that category.
 - If no expenses exist, show a neutral guidance state rather than a false warning.
 - Use localized category names, euro formatting, English/Russian copy, and live-region semantics.

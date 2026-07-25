@@ -43,8 +43,10 @@ test("server-renders the current finance tracker", async () => {
   assert.match(html, /Microsoft 365/);
   assert.match(html, /Gaming laptop/);
   assert.match(html, /Keturi vėjai 0\.4 l/);
-  assert.match(html, /€806\.96/);
-  assert.match(html, /€1,143\.04/);
+  assert.match(html, /Shelton&#x27;s pear cider/);
+  assert.match(html, /Alcohol &amp; nightlife/);
+  assert.match(html, /€808\.95/);
+  assert.match(html, /€1,141\.05/);
   assert.doesNotMatch(html, /Your site is taking shape|Building your site/);
 });
 
@@ -62,7 +64,7 @@ test("keeps database history and translations aligned", async () => {
   assert.equal(database.currency, "EUR");
   assert.equal(database.timezone, "Europe/Vilnius");
   assert.equal(current.updatedAt, "2026-07-25");
-  assert.equal(current.revision, 10);
+  assert.equal(current.revision, 11);
   assert.equal(current.savingsGoal, 200);
   assert.deepEqual(current.period, {
     start: "2026-07-01",
@@ -161,6 +163,45 @@ test("keeps database history and translations aligned", async () => {
       vatAmount: 1.04,
     },
   );
+  assert.deepEqual(
+    current.expenses.find(
+      (expense) => expense.id === "2026-07-maxima-cider-001",
+    ),
+    {
+      id: "2026-07-maxima-cider-001",
+      amount: 1.99,
+      note: "Shelton's pear cider",
+      noteTranslations: {
+        en: "Shelton's pear cider",
+        ru: "Грушевый сидр Shelton's",
+      },
+      date: "2026-07-25",
+      category: "Alcohol & nightlife",
+      source: "receipt",
+      merchant: "Maxima",
+      legalEntity: "MAXIMA LT, UAB",
+      merchantAddress: "Medeinos g. 39, Vilnius",
+      description: "Shelton's pear cider with refundable can deposit",
+      originalCurrency: "EUR",
+      originalAmount: 1.99,
+      receiptReference: "00320265",
+      paymentMethod: "Contactless debit Mastercard",
+      transactionTime: "19:32:26",
+      vatRate: 21,
+      vatAmount: 0.33,
+      containerDeposit: 0.1,
+      lineItems: [
+        {
+          description: "Shelton's pear cider",
+          amount: 1.89,
+        },
+        {
+          description: "Refundable can deposit",
+          amount: 0.1,
+        },
+      ],
+    },
+  );
   for (const expense of current.expenses) {
     assert.equal(typeof expense.noteTranslations?.en, "string");
     assert.equal(typeof expense.noteTranslations?.ru, "string");
@@ -174,5 +215,7 @@ test("keeps database history and translations aligned", async () => {
     assert.match(source, /Контроль расходов/);
     assert.match(source, /Transport & Travel/);
     assert.match(source, /Транспорт и путешествия/);
+    assert.match(source, /Alcohol & nightlife/);
+    assert.match(source, /Алкоголь и ночная жизнь/);
   }
 });

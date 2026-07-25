@@ -768,6 +768,12 @@ h1 em {
   color: var(--orange);
 }
 
+.alcohol,
+.category-a {
+  background: rgba(10, 132, 255, 0.13);
+  color: var(--blue);
+}
+
 /* Breakdown */
 
 .breakdown-panel {
@@ -864,6 +870,11 @@ h1 em {
 .breakdown-segment.transport,
 .breakdown-dot.transport {
   background: var(--orange);
+}
+
+.breakdown-segment.alcohol,
+.breakdown-dot.alcohol {
+  background: var(--blue);
 }
 
 .breakdown-legend {

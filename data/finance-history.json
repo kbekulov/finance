@@ -18,7 +18,7 @@
       "currency": "EUR",
       "timezone": "Europe/Vilnius",
       "updatedAt": "2026-07-25",
-      "revision": 15,
+      "revision": 16,
       "salary": 2150,
       "savingsGoal": 200,
       "expenses": [
@@ -122,7 +122,7 @@
         },
         {
           "id": "2026-07-apple-devices",
-          "amount": 80,
+          "amount": 97,
           "note": "Apple Devices",
           "noteTranslations": {
             "en": "Apple Devices",

@@ -156,7 +156,9 @@ test("keeps database history and translations aligned", async () => {
   assert.match(manual, /never misdate it into the current cycle/);
   assert.match(manual, /Synthetic expense history is exceptional/);
   assert.match(manual, /`synthetic: true` and a stable shared `backfillBatch` identifier/);
-  assert.match(manual, /category-specific transparent Tohsaka Rin chibi PNG/);
+  assert.match(manual, /category-specific transparent Fate\/stay night chibi PNG/);
+  assert.match(manual, /Sakura Matou for Food/);
+  assert.match(manual, /Rider for Alcohol & nightlife/);
   assert.match(manual, /overlaps only the lower edge of the character artwork/);
   assert.equal(current.updatedAt, "2026-07-25");
   assert.equal(current.revision, 23);
@@ -543,9 +545,9 @@ test("keeps database history and translations aligned", async () => {
     assert.doesNotMatch(source, /const TODAY\s*=/);
   }
   assert.match(index, /id="theme-select"/);
-  assert.match(index, /styles\.css\?v=28/);
+  assert.match(index, /styles\.css\?v=29/);
   assert.match(index, /public\/vendor\/apexcharts\.min\.js\?v=21/);
-  assert.match(index, /script\.js\?v=28/);
+  assert.match(index, /script\.js\?v=29/);
   assert.match(index, /data-current-theme="kinance"/);
   assert.match(index, /id="credit-alert"[^>]*hidden/);
   assert.match(index, /id="payment-method"/);
@@ -558,6 +560,7 @@ test("keeps database history and translations aligned", async () => {
   assert.match(script, /public\/theme-banners\/tohsaka-rin\.png/);
   assert.match(script, /public\/category-icons\/food\.png/);
   assert.match(script, /public\/category-icons\/alcohol-nightlife\.png/);
+  assert.match(script, /category-icons\/food\.png\?v=2/);
   for (const source of [page]) {
     assert.match(source, /themeBannerLabel/);
     assert.match(source, /theme-banners\/kinance\.png/);
@@ -565,6 +568,7 @@ test("keeps database history and translations aligned", async () => {
     assert.match(source, /theme-banners\/tohsaka-rin\.png/);
     assert.match(source, /category-icons\/food\.png/);
     assert.match(source, /category-icons\/alcohol-nightlife\.png/);
+    assert.match(source, /category-icons\/food\.png\?v=2/);
   }
   for (const filename of [
     "food.png",

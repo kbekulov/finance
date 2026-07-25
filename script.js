@@ -9,13 +9,13 @@ const CATEGORIES = [
 ];
 
 const CATEGORY_ICONS = {
-  Food: "/public/category-icons/food.png",
-  "Subscriptions & services": "/public/category-icons/subscriptions-services.png",
-  "Luxury purchases": "/public/category-icons/luxury-purchases.png",
-  "Debt & repayments": "/public/category-icons/debt-repayments.png",
-  "Devices & installments": "/public/category-icons/devices-installments.png",
-  "Transport & Travel": "/public/category-icons/transport-travel.png",
-  "Alcohol & nightlife": "/public/category-icons/alcohol-nightlife.png",
+  Food: "/public/category-icons/food.png?v=2",
+  "Subscriptions & services": "/public/category-icons/subscriptions-services.png?v=2",
+  "Luxury purchases": "/public/category-icons/luxury-purchases.png?v=2",
+  "Debt & repayments": "/public/category-icons/debt-repayments.png?v=2",
+  "Devices & installments": "/public/category-icons/devices-installments.png?v=2",
+  "Transport & Travel": "/public/category-icons/transport-travel.png?v=2",
+  "Alcohol & nightlife": "/public/category-icons/alcohol-nightlife.png?v=2",
 };
 
 const THEMES = [

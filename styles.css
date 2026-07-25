@@ -901,8 +901,8 @@ main::before {
 
 .daily-expense-chart {
   width: calc(100% + 16px);
-  min-height: 170px;
-  margin: -6px -8px 18px;
+  min-height: 250px;
+  margin: -2px -8px 22px;
   overflow: hidden;
 }
 
@@ -2139,9 +2139,9 @@ footer p {
   }
 
   .daily-expense-chart {
-    min-height: 145px;
-    margin-top: -14px;
-    margin-bottom: 12px;
+    min-height: 205px;
+    margin-top: -8px;
+    margin-bottom: 14px;
   }
 
   .timeline-copy {

@@ -336,6 +336,17 @@ function fillTemplate(
   );
 }
 
+function todayInVilnius() {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/Vilnius",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date());
+  const value = Object.fromEntries(parts.map(({ type, value: part }) => [type, part]));
+  return `${value.year}-${value.month}-${value.day}`;
+}
+
 function dailyExpensePoints(expenses: Expense[], period: MonthRecord["period"]) {
   const totals = expenses.reduce((daily, expense) => {
     daily.set(expense.date, (daily.get(expense.date) ?? 0) + expense.amount);
@@ -623,32 +634,38 @@ export default function Home() {
       if (!active) return;
       const accent =
         theme === "nier-automata"
-          ? "#476f7b"
+          ? "#168ac0"
           : theme === "tohsaka-rin"
-            ? "#e52a55"
+            ? "#ff2d55"
             : "#0a84ff";
 
       chart = new ApexCharts(container, {
         chart: {
-          type: "line",
-          height: 170,
+          type: "area",
+          height: 250,
           background: "transparent",
           fontFamily: getComputedStyle(document.documentElement).getPropertyValue("--font-family"),
           animations: { enabled: !window.matchMedia("(prefers-reduced-motion: reduce)").matches },
           sparkline: { enabled: true },
+          dropShadow: { enabled: true, top: 5, left: 0, blur: 8, color: accent, opacity: 0.34 },
           toolbar: { show: false },
           zoom: { enabled: false },
         },
         series: [{ name: copy.dailyExpenseSeries, data: dailyExpensePoints(data.expenses, selectedMonth.period) }],
         colors: [accent],
-        stroke: { curve: "smooth", width: 4, lineCap: "round" },
+        stroke: { curve: "straight", width: 4.5, lineCap: "round" },
         fill: {
           type: "gradient",
-          gradient: { shadeIntensity: 0.35, opacityFrom: 0.32, opacityTo: 0.02, stops: [0, 92, 100] },
+          gradient: {
+            shadeIntensity: 0.18,
+            opacityFrom: 0.68,
+            opacityTo: 0.12,
+            stops: [0, 72, 100],
+          },
         },
         markers: { size: 0 },
         dataLabels: { enabled: false },
-        grid: { show: false, padding: { left: 0, right: 0, top: 8, bottom: 8 } },
+        grid: { show: false, padding: { left: 3, right: 3, top: 18, bottom: 4 } },
         xaxis: { type: "datetime" },
         yaxis: { min: 0 },
         tooltip: { enabled: false },
@@ -675,7 +692,7 @@ export default function Home() {
           id: crypto.randomUUID(),
           amount: Math.round(value * 100) / 100,
           note: note.trim() || category,
-          date: selectedMonth.updatedAt,
+          date: todayInVilnius(),
           category,
           source: "site",
           paymentMethod,

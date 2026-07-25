@@ -73,6 +73,8 @@ Every expense record must preserve all known details:
 - `recurring`: boolean when known
 - `frequency`: `monthly` for monthly recurring expenses
 
+All expense dates and repayment dates use the `Europe/Vilnius` calendar day. Derive today in that timezone for chat, frontend quick entry, recurring carry-forward, and repayment records, regardless of the maintainer, browser, server, or receipt-processing device timezone. Preserve an explicit user-supplied or clearly printed receipt date, interpreting any associated time in Vilnius unless the source explicitly identifies another timezone.
+
 When more information is actually available, preserve it with clearly named optional fields rather than discarding it, for example `merchant`, `description`, `originalCurrency`, `originalAmount`, or `receiptReference`. Use `null` only when the distinction between “known empty” and “not supplied” matters. Never invent missing receipt, merchant, time, or payment details.
 
 Do not store derived totals in JSON. Total spent, remaining balance, category totals, percentages, daily pace, and warning guidance must be recalculated from canonical salary, savings, expenses, and calendar dates so they cannot drift.
@@ -254,7 +256,7 @@ Do not introduce heavy libraries for behavior that plain TypeScript/JavaScript/C
 
 Theme selection is a device-local preference stored as `kinance:theme`. Keep the switcher data-driven so the number of themes is not artificially limited. Every theme must have one stable ID, display label, and PNG banner path in the `THEMES` collection in both JavaScript and React, matching `data-theme` CSS selectors. Store theme banners in `public/theme-banners/`, use `/public/theme-banners/...` paths in the static site and `/theme-banners/...` paths in React, use a wide composition with the important characters inside the central crop-safe area, and provide localized accessible alt text through `themeBannerLabel`. Character artwork must read as a borderless, edge-faded page-background break with intentional vertical spacing, not as a rounded card or standalone wrapper.
 
-The daily-expense line chart sits directly below the character artwork and uses ApexCharts in both implementations. Aggregate canonical expenses by `date`, include zero-value points for every day in the selected salary cycle, keep the x-axis as a datetime axis, and recalculate on cycle, theme, or expense changes. Render it as a borderless sparkline with no visible title, totals, axes, labels, grid, legend, markers, or tooltip. Its only visual content is a smooth theme-aware movement line with a restrained gradient fill. Disable chart animation when reduced motion is requested, while preserving a localized accessible label for screen readers.
+The daily-expense area chart sits directly below the character artwork and uses ApexCharts in both implementations. Aggregate canonical expenses by `date`, include zero-value points for every day in the selected salary cycle, keep the x-axis as a datetime axis, and recalculate on cycle, theme, or expense changes. Render it as a prominent borderless sparkline with no visible title, totals, axes, labels, grid, legend, markers, or tooltip. Its only visual content is a high-contrast theme-aware movement stroke with a clearly visible translucent gradient area and restrained glow. Disable chart animation when reduced motion is requested, while preserving a localized accessible label for screen readers.
 
 The built-in themes are:
 

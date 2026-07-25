@@ -389,12 +389,14 @@ test("keeps database history and translations aligned", async () => {
     assert.match(source, /outstandingCredit/);
     assert.match(source, /paymentMethod/);
     assert.match(source, /creditStatus !== "repaid"/);
+    assert.match(source, /todayInVilnius/);
+    assert.match(source, /timeZone:\s*"Europe\/Vilnius"/);
     assert.match(source, /creditStatus: "outstanding"/);
   }
   assert.match(index, /id="theme-select"/);
-  assert.match(index, /styles\.css\?v=22/);
+  assert.match(index, /styles\.css\?v=23/);
   assert.match(index, /public\/vendor\/apexcharts\.min\.js\?v=21/);
-  assert.match(index, /script\.js\?v=22/);
+  assert.match(index, /script\.js\?v=23/);
   assert.match(index, /data-current-theme="kinance"/);
   assert.match(index, /id="credit-alert"[^>]*hidden/);
   assert.match(index, /id="payment-method"/);
@@ -418,7 +420,7 @@ test("keeps database history and translations aligned", async () => {
   assert.match(styles, /\.theme-banner img\s*\{[^}]*object-fit:\s*cover/s);
   assert.match(styles, /\.theme-banner\s*\{[^}]*background:\s*transparent/s);
   assert.doesNotMatch(styles, /\.daily-chart-panel\s*\{/);
-  assert.match(styles, /\.daily-expense-chart\s*\{[^}]*min-height:\s*170px/s);
+  assert.match(styles, /\.daily-expense-chart\s*\{[^}]*min-height:\s*250px/s);
   assert.match(styles, /\.salary-locked\s*\{/);
   assert.match(index, /id="salary-value"/);
   assert.doesNotMatch(index, /id="salary"/);
@@ -427,10 +429,12 @@ test("keeps database history and translations aligned", async () => {
   assert.match(page, /salary:\s*selectedMonth\.salary/);
   for (const source of [page, script]) {
     assert.match(source, /dailyExpensePoints/);
-    assert.match(source, /type:\s*"line"/);
+    assert.match(source, /type:\s*"area"/);
     assert.match(source, /type:\s*"datetime"/);
     assert.match(source, /sparkline:\s*\{\s*enabled:\s*true/);
     assert.match(source, /tooltip:\s*\{\s*enabled:\s*false/);
+    assert.match(source, /opacityFrom:\s*0\.68/);
+    assert.match(source, /dropShadow:\s*\{\s*enabled:\s*true/);
     assert.match(source, /creditStatus !== "repaid"/);
   }
   assert.match(page, /import\("apexcharts"\)/);

@@ -14,7 +14,7 @@
       "currency": "EUR",
       "timezone": "Europe/Vilnius",
       "updatedAt": "2026-07-25",
-      "revision": 9,
+      "revision": 10,
       "salary": 2150,
       "savingsGoal": 200,
       "expenses": [
@@ -185,6 +185,30 @@
           "source": "chat",
           "recurring": true,
           "frequency": "monthly"
+        },
+        {
+          "id": "2026-07-istorijos-001",
+          "amount": 6,
+          "note": "Keturi vėjai 0.4 l",
+          "noteTranslations": {
+            "en": "Keturi vėjai 0.4 l",
+            "ru": "Keturi vėjai, 0,4 л"
+          },
+          "date": "2026-07-25",
+          "category": "Food",
+          "source": "receipt",
+          "merchant": "Istorijos",
+          "legalEntity": "MB Skania",
+          "merchantAddress": "M. K. Čiurlionio g. 100, Vilnius",
+          "description": "Keturi vėjai 0.4 l",
+          "originalCurrency": "EUR",
+          "originalAmount": 6,
+          "receiptReference": "6774",
+          "orderNumber": "4648",
+          "paymentMethod": "Credit card",
+          "transactionTime": "11:52:56",
+          "vatRate": 21,
+          "vatAmount": 1.04
         }
       ]
     }

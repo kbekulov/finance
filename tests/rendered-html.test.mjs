@@ -42,8 +42,9 @@ test("server-renders the current finance tracker", async () => {
   assert.match(html, /Mercury Weather/);
   assert.match(html, /Microsoft 365/);
   assert.match(html, /Gaming laptop/);
-  assert.match(html, /€800\.96/);
-  assert.match(html, /€1,149\.04/);
+  assert.match(html, /Keturi vėjai 0\.4 l/);
+  assert.match(html, /€806\.96/);
+  assert.match(html, /€1,143\.04/);
   assert.doesNotMatch(html, /Your site is taking shape|Building your site/);
 });
 
@@ -61,7 +62,7 @@ test("keeps database history and translations aligned", async () => {
   assert.equal(database.currency, "EUR");
   assert.equal(database.timezone, "Europe/Vilnius");
   assert.equal(current.updatedAt, "2026-07-25");
-  assert.equal(current.revision, 9);
+  assert.equal(current.revision, 10);
   assert.equal(current.savingsGoal, 200);
   assert.deepEqual(current.period, {
     start: "2026-07-01",
@@ -133,6 +134,33 @@ test("keeps database history and translations aligned", async () => {
     assert.equal(expense?.recurring, true);
     assert.equal(expense?.frequency, "monthly");
   }
+  assert.deepEqual(
+    current.expenses.find((expense) => expense.id === "2026-07-istorijos-001"),
+    {
+      id: "2026-07-istorijos-001",
+      amount: 6,
+      note: "Keturi vėjai 0.4 l",
+      noteTranslations: {
+        en: "Keturi vėjai 0.4 l",
+        ru: "Keturi vėjai, 0,4 л",
+      },
+      date: "2026-07-25",
+      category: "Food",
+      source: "receipt",
+      merchant: "Istorijos",
+      legalEntity: "MB Skania",
+      merchantAddress: "M. K. Čiurlionio g. 100, Vilnius",
+      description: "Keturi vėjai 0.4 l",
+      originalCurrency: "EUR",
+      originalAmount: 6,
+      receiptReference: "6774",
+      orderNumber: "4648",
+      paymentMethod: "Credit card",
+      transactionTime: "11:52:56",
+      vatRate: 21,
+      vatAmount: 1.04,
+    },
+  );
   for (const expense of current.expenses) {
     assert.equal(typeof expense.noteTranslations?.en, "string");
     assert.equal(typeof expense.noteTranslations?.ru, "string");

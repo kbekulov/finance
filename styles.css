@@ -24,6 +24,63 @@
   --radius-control: 16px;
   --shadow-card: 0 24px 70px rgba(0, 0, 0, 0.34);
   --shadow-glass: 0 14px 40px rgba(0, 0, 0, 0.28);
+  --font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
+    "Helvetica Neue", sans-serif;
+  --display-font: var(--font-family);
+}
+
+:root[data-theme="nier-automata"] {
+  --canvas: #171713;
+  --surface: rgba(50, 49, 42, 0.9);
+  --surface-solid: #302f29;
+  --surface-raised: #3a3931;
+  --surface-inset: #11110f;
+  --glass: rgba(49, 48, 41, 0.74);
+  --glass-strong: rgba(62, 60, 51, 0.86);
+  --label: #e4dec8;
+  --secondary: #b3ad98;
+  --tertiary: #827d6c;
+  --separator: rgba(224, 216, 190, 0.18);
+  --separator-strong: rgba(224, 216, 190, 0.3);
+  --blue: #c9c2a9;
+  --green: #b6c8a5;
+  --orange: #c9ad7a;
+  --yellow: #d8c99b;
+  --red: #bd8176;
+  --purple: #aaa2b9;
+  --cyan: #aebfbc;
+  --radius-outer: 8px;
+  --radius-card: 5px;
+  --radius-control: 3px;
+  --shadow-card: 8px 10px 0 rgba(0, 0, 0, 0.34);
+  --shadow-glass: 5px 6px 0 rgba(0, 0, 0, 0.28);
+  --font-family: "Courier New", Courier, monospace;
+  --display-font: Georgia, "Times New Roman", serif;
+}
+
+:root[data-theme="tohsaka-rin"] {
+  --canvas: #080713;
+  --surface: rgba(32, 15, 36, 0.9);
+  --surface-solid: #211027;
+  --surface-raised: #301337;
+  --surface-inset: #100714;
+  --glass: rgba(35, 14, 40, 0.72);
+  --glass-strong: rgba(52, 18, 57, 0.84);
+  --label: #fff4f7;
+  --secondary: #d8b8c5;
+  --tertiary: #947487;
+  --separator: rgba(255, 116, 153, 0.17);
+  --separator-strong: rgba(255, 116, 153, 0.3);
+  --blue: #e52a55;
+  --green: #5bdfbd;
+  --orange: #f2a94f;
+  --yellow: #f7d274;
+  --red: #ff375f;
+  --purple: #a84fe3;
+  --cyan: #54d8e8;
+  --shadow-card: 0 24px 70px rgba(46, 0, 31, 0.46);
+  --shadow-glass: 0 14px 40px rgba(62, 0, 42, 0.38);
+  --display-font: Georgia, "Times New Roman", serif;
 }
 
 * {
@@ -39,8 +96,7 @@ body {
   margin: 0;
   background: var(--canvas);
   color: var(--label);
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
-    "Helvetica Neue", sans-serif;
+  font-family: var(--font-family);
   font-variant-numeric: tabular-nums;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
@@ -245,6 +301,67 @@ main::before {
   text-transform: uppercase;
 }
 
+.theme-switcher {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.theme-switcher::before {
+  position: absolute;
+  z-index: 1;
+  left: 12px;
+  width: 11px;
+  height: 11px;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0a84ff 0 50%, #bf5af2 50%);
+  content: "";
+  pointer-events: none;
+  box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.08);
+}
+
+.theme-switcher[data-current-theme="nier-automata"]::before {
+  border-radius: 1px;
+  background: linear-gradient(135deg, #ded7be 0 50%, #45443c 50%);
+  box-shadow: 0 0 0 3px rgba(222, 215, 190, 0.08);
+}
+
+.theme-switcher[data-current-theme="tohsaka-rin"]::before {
+  background: linear-gradient(135deg, #e11946 0 50%, #5a2387 50%);
+  box-shadow: 0 0 0 3px rgba(225, 25, 70, 0.1);
+}
+
+.theme-switcher::after {
+  position: absolute;
+  right: 11px;
+  color: var(--tertiary);
+  content: "⌄";
+  font-size: 12px;
+  pointer-events: none;
+}
+
+.theme-switcher select {
+  width: 158px;
+  min-height: 38px;
+  appearance: none;
+  border: 1px solid var(--separator);
+  border-radius: 13px;
+  outline: 0;
+  background: rgba(118, 118, 128, 0.16);
+  color: var(--label);
+  cursor: pointer;
+  padding: 0 30px 0 34px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.theme-switcher option {
+  background: var(--surface-solid);
+  color: var(--label);
+  font-size: 12px;
+}
+
 .language-switch {
   display: flex;
   align-items: center;
@@ -283,6 +400,106 @@ main::before {
 
 .language-switch button:active {
   transform: scale(0.96);
+}
+
+:root[data-theme="nier-automata"] .topbar,
+:root[data-theme="nier-automata"] .stat-card,
+:root[data-theme="nier-automata"] .breakdown-panel,
+:root[data-theme="nier-automata"] .expense-table,
+:root[data-theme="nier-automata"] .add-panel {
+  border-color: rgba(224, 216, 190, 0.22);
+  background-color: rgba(49, 48, 41, 0.9);
+  background-image: linear-gradient(140deg, rgba(225, 216, 188, 0.06), transparent 48%);
+}
+
+:root[data-theme="nier-automata"] .topbar,
+:root[data-theme="nier-automata"] .theme-switcher select,
+:root[data-theme="nier-automata"] .language-switch,
+:root[data-theme="nier-automata"] .month-pill {
+  border-radius: 2px;
+  background-color: rgba(38, 37, 32, 0.94);
+}
+
+:root[data-theme="nier-automata"] .brand-mark {
+  border: 1px solid #e0d8bf;
+  border-radius: 1px;
+  background: #d9d1b8;
+  color: #1d1d19;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.42);
+}
+
+:root[data-theme="nier-automata"] .hero h1,
+:root[data-theme="nier-automata"] .balance-main strong,
+:root[data-theme="nier-automata"] .stat-card > strong,
+:root[data-theme="nier-automata"] .editable-value {
+  font-family: var(--display-font);
+}
+
+:root[data-theme="nier-automata"] .eyebrow,
+:root[data-theme="nier-automata"] .stat-card p {
+  letter-spacing: 0.16em;
+}
+
+:root[data-theme="nier-automata"] .category-symbol {
+  border: 1px solid rgba(224, 216, 190, 0.28);
+  border-radius: 1px;
+  background: rgba(218, 210, 184, 0.1);
+  color: var(--label);
+}
+
+:root[data-theme="nier-automata"] .spending-alert {
+  border-radius: 3px;
+  border-color: rgba(201, 173, 122, 0.4);
+  background: linear-gradient(100deg, rgba(201, 173, 122, 0.14), transparent 62%), var(--glass);
+}
+
+:root[data-theme="tohsaka-rin"] .topbar,
+:root[data-theme="tohsaka-rin"] .stat-card,
+:root[data-theme="tohsaka-rin"] .breakdown-panel,
+:root[data-theme="tohsaka-rin"] .expense-table,
+:root[data-theme="tohsaka-rin"] .add-panel {
+  border-color: rgba(255, 94, 135, 0.17);
+  background-color: rgba(31, 13, 36, 0.9);
+  background-image: linear-gradient(145deg, rgba(224, 30, 76, 0.09), transparent 48%);
+}
+
+:root[data-theme="tohsaka-rin"] .topbar {
+  background: linear-gradient(110deg, rgba(92, 15, 48, 0.88), rgba(22, 12, 35, 0.88));
+}
+
+:root[data-theme="tohsaka-rin"] .brand-mark {
+  border: 1px solid rgba(255, 213, 223, 0.36);
+  background: linear-gradient(145deg, #ff426b, #9b1235 68%);
+  box-shadow:
+    inset 0 1px rgba(255, 255, 255, 0.34),
+    0 0 22px rgba(225, 25, 70, 0.32);
+}
+
+:root[data-theme="tohsaka-rin"] .hero h1,
+:root[data-theme="tohsaka-rin"] .balance-main strong,
+:root[data-theme="tohsaka-rin"] .stat-card > strong,
+:root[data-theme="tohsaka-rin"] .editable-value {
+  font-family: var(--display-font);
+}
+
+:root[data-theme="tohsaka-rin"] .hero h1 em {
+  color: #ff5d82;
+  text-shadow: 0 0 28px rgba(225, 25, 70, 0.28);
+}
+
+:root[data-theme="tohsaka-rin"] .theme-switcher select,
+:root[data-theme="tohsaka-rin"] .language-switch,
+:root[data-theme="tohsaka-rin"] .month-pill {
+  background: rgba(91, 20, 54, 0.38);
+}
+
+:root[data-theme="tohsaka-rin"] .spending-alert {
+  border-color: rgba(242, 169, 79, 0.34);
+  background: linear-gradient(105deg, rgba(225, 25, 70, 0.16), rgba(118, 43, 168, 0.08) 62%), var(--glass);
+}
+
+:root[data-theme="tohsaka-rin"] .progress-ring {
+  filter: drop-shadow(0 0 12px rgba(225, 25, 70, 0.2));
 }
 
 .month-pill {
@@ -760,6 +977,34 @@ h1 em {
 .category-i {
   background: rgba(255, 214, 10, 0.13);
   color: var(--yellow);
+}
+
+:root[data-theme="nier-automata"] main {
+  background:
+    radial-gradient(circle at 82% 0%, rgba(216, 207, 178, 0.11), transparent 28rem),
+    linear-gradient(135deg, rgba(214, 205, 176, 0.045), transparent 42%),
+    var(--canvas);
+}
+
+:root[data-theme="nier-automata"] main::before {
+  background-image:
+    repeating-linear-gradient(0deg, transparent 0 4px, rgba(226, 217, 189, 0.025) 4px 5px),
+    repeating-linear-gradient(90deg, transparent 0 48px, rgba(226, 217, 189, 0.025) 48px 49px);
+}
+
+:root[data-theme="tohsaka-rin"] main {
+  background:
+    radial-gradient(circle at 84% 2%, rgba(225, 25, 70, 0.28), transparent 28rem),
+    radial-gradient(circle at 9% 40%, rgba(87, 31, 137, 0.24), transparent 29rem),
+    radial-gradient(circle at 72% 82%, rgba(255, 193, 96, 0.08), transparent 24rem),
+    var(--canvas);
+}
+
+:root[data-theme="tohsaka-rin"] main::before {
+  background-image:
+    linear-gradient(45deg, transparent 47%, rgba(255, 94, 135, 0.025) 48% 52%, transparent 53%),
+    linear-gradient(-45deg, transparent 47%, rgba(126, 66, 190, 0.025) 48% 52%, transparent 53%);
+  background-size: 72px 72px;
 }
 
 .stat-comparison {
@@ -1459,6 +1704,26 @@ footer p {
 
   .header-meta {
     gap: 6px;
+  }
+
+  .theme-switcher select {
+    width: 42px;
+    padding: 0;
+    color: transparent;
+    font-size: 0;
+  }
+
+  .theme-switcher::before {
+    left: 15px;
+  }
+
+  .theme-switcher::after {
+    display: none;
+  }
+
+  .theme-switcher option {
+    color: var(--label);
+    font-size: 12px;
   }
 
   .language-switch {

@@ -13,6 +13,13 @@ type Category =
   | "Alcohol & nightlife";
 type Language = "en" | "ru";
 
+const THEMES = [
+  { id: "kinance", label: "Kinance" },
+  { id: "nier-automata", label: "NieR:Automata" },
+  { id: "tohsaka-rin", label: "Tohsaka Rin" },
+] as const;
+type ThemeId = (typeof THEMES)[number]["id"];
+
 type Expense = {
   id: string;
   amount: number;
@@ -114,6 +121,7 @@ const COPY = {
     spendingSame: "Pause new spending in this category until the balance improves.",
     kinanceHome: "Kinance home",
     languageLabel: "Language",
+    themeLabel: "Theme",
     financeHistoryLabel: "Salary cycle history",
     monthlyPlanLabel: "Salary cycle plan balance",
     monthlyTotalsLabel: "Salary cycle totals",
@@ -181,6 +189,7 @@ const COPY = {
     spendingSame: "Не добавляйте новые траты в этой категории, пока баланс не улучшится.",
     kinanceHome: "Главная Kinance",
     languageLabel: "Язык",
+    themeLabel: "Тема",
     financeHistoryLabel: "История циклов зарплаты",
     monthlyPlanLabel: "Баланс цикла зарплаты",
     monthlyTotalsLabel: "Итоги цикла зарплаты",
@@ -304,6 +313,7 @@ export default function Home() {
   const [category, setCategory] = useState<Category>("Food");
   const [isReady, setIsReady] = useState(false);
   const [language, setLanguage] = useState<Language>("en");
+  const [theme, setTheme] = useState<ThemeId>("kinance");
   const [recurringExpanded, setRecurringExpanded] = useState(true);
   const [oneTimeExpanded, setOneTimeExpanded] = useState(true);
 
@@ -312,6 +322,15 @@ export default function Home() {
       localStorage.getItem("kinance:language") ??
       localStorage.getItem("euroscope:language");
     if (savedLanguage === "ru") setLanguage("ru");
+  }, []);
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("kinance:theme");
+    const nextTheme = THEMES.some(({ id }) => id === savedTheme)
+      ? (savedTheme as ThemeId)
+      : "kinance";
+    setTheme(nextTheme);
+    document.documentElement.dataset.theme = nextTheme;
   }, []);
 
   useEffect(() => {
@@ -542,6 +561,25 @@ export default function Home() {
           </a>
           <div className="header-meta">
             <span className="updated-label">{updatedLabel}</span>
+            <label className="theme-switcher" data-current-theme={theme}>
+              <span className="sr-only">{copy.themeLabel}</span>
+              <select
+                aria-label={copy.themeLabel}
+                value={theme}
+                onChange={(event) => {
+                  const nextTheme = event.target.value as ThemeId;
+                  setTheme(nextTheme);
+                  document.documentElement.dataset.theme = nextTheme;
+                  localStorage.setItem("kinance:theme", nextTheme);
+                }}
+              >
+                {THEMES.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.label}
+                  </option>
+                ))}
+              </select>
+            </label>
             <div className="language-switch" role="group" aria-label={copy.languageLabel}>
               {(["en", "ru"] as Language[]).map((item) => (
                 <button

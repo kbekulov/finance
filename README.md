@@ -233,6 +233,18 @@ Preserve the dark iOS-inspired system:
 
 Do not introduce heavy libraries for behavior that plain TypeScript/JavaScript/CSS already handles.
 
+## Theme system
+
+Theme selection is a device-local preference stored as `kinance:theme`. Keep the switcher data-driven so the number of themes is not artificially limited. Every theme must have one stable ID and display label in the `THEMES` collection in both JavaScript and React, matching `data-theme` CSS selectors.
+
+The built-in themes are:
+
+- `kinance`: the default dark iOS-inspired appearance
+- `nier-automata`: muted parchment, charcoal, scan-line texture, squared controls, and archival typography
+- `tohsaka-rin`: crimson, midnight violet, jewel highlights, and refined serif accents
+
+New themes must preserve all content, functionality, responsive layouts, keyboard focus, contrast, reduced-motion behavior, and English/Russian accessibility labels. A theme may change palette, typography, radii, texture, and decorative treatment, but never finance calculations or canonical data.
+
 ## Required validation
 
 At minimum:

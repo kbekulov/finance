@@ -8,6 +8,12 @@ const CATEGORIES = [
   "Alcohol & nightlife",
 ];
 
+const THEMES = [
+  { id: "kinance", label: "Kinance" },
+  { id: "nier-automata", label: "NieR:Automata" },
+  { id: "tohsaka-rin", label: "Tohsaka Rin" },
+];
+
 const TRANSLATIONS = {
   en: {
     monthGlance: "YOUR SALARY CYCLE AT A GLANCE",
@@ -70,6 +76,7 @@ const TRANSLATIONS = {
     spendingSame: "Pause new spending in this category until the balance improves.",
     kinanceHome: "Kinance home",
     languageLabel: "Language",
+    themeLabel: "Theme",
     financeHistoryLabel: "Salary cycle history",
     monthlyTimelineLabel: "Salary cycle timeline",
     monthlyPlanLabel: "Salary cycle plan balance",
@@ -149,6 +156,7 @@ const TRANSLATIONS = {
     spendingSame: "Не добавляйте новые траты в этой категории, пока баланс не улучшится.",
     kinanceHome: "Главная Kinance",
     languageLabel: "Язык",
+    themeLabel: "Тема",
     financeHistoryLabel: "История циклов зарплаты",
     monthlyTimelineLabel: "Шкала цикла зарплаты",
     monthlyPlanLabel: "Баланс цикла зарплаты",
@@ -173,6 +181,11 @@ let history = [];
 let selectedMonth = null;
 let data = null;
 let salarySchedule = { dayOfMonth: 12, weekendRule: "previousFriday" };
+let theme = THEMES.some(
+  ({ id }) => id === localStorage.getItem("kinance:theme"),
+)
+  ? localStorage.getItem("kinance:theme")
+  : "kinance";
 let language =
   (localStorage.getItem("kinance:language") ??
     localStorage.getItem("euroscope:language")) === "ru"
@@ -244,6 +257,24 @@ function applyTranslations() {
 
 function element(id) {
   return document.getElementById(id);
+}
+
+function renderThemeOptions() {
+  const select = element("theme-select");
+  select.replaceChildren(
+    ...THEMES.map(({ id, label }) => {
+      const option = document.createElement("option");
+      option.value = id;
+      option.textContent = label;
+      return option;
+    }),
+  );
+}
+
+function applyTheme() {
+  document.documentElement.dataset.theme = theme;
+  element("theme-select").value = theme;
+  document.querySelector(".theme-switcher").dataset.currentTheme = theme;
 }
 
 function safeNumber(value) {
@@ -663,6 +694,13 @@ function render() {
 }
 
 function bindControls() {
+  element("theme-select").addEventListener("change", (event) => {
+    theme = THEMES.some(({ id }) => id === event.target.value)
+      ? event.target.value
+      : "kinance";
+    localStorage.setItem("kinance:theme", theme);
+    applyTheme();
+  });
   document.querySelectorAll("[data-language]").forEach((button) => {
     button.addEventListener("click", () => {
       language = button.dataset.language;
@@ -705,6 +743,8 @@ function bindControls() {
 
 async function start() {
   try {
+    renderThemeOptions();
+    applyTheme();
     applyTranslations();
     const response = await fetch("/data/finance-history.json", { cache: "no-store" });
     if (!response.ok) throw new Error(`History request failed: ${response.status}`);

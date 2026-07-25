@@ -806,7 +806,7 @@ function renderDailyExpenseChart() {
   dailyExpenseChart = new window.ApexCharts(container, {
     chart: {
       type: "area",
-      height: 84,
+      height: 168,
       background: "transparent",
       fontFamily: getComputedStyle(document.documentElement).getPropertyValue("--font-family"),
       animations: { enabled: !window.matchMedia("(prefers-reduced-motion: reduce)").matches },

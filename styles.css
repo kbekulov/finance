@@ -906,11 +906,13 @@ main::before {
 .daily-expense-chart {
   position: relative;
   z-index: 3;
-  width: calc(100% + 16px);
-  height: 84px;
-  min-height: 84px;
-  margin: -68px -8px 18px;
+  left: 50%;
+  width: 100vw;
+  height: 168px;
+  min-height: 168px;
+  margin: -68px 0 18px;
   overflow: hidden;
+  transform: translateX(-50%);
   filter: drop-shadow(0 4px 8px var(--chart-glow));
 }
 
@@ -2125,8 +2127,8 @@ footer p {
   }
 
   .daily-expense-chart {
-    height: 84px;
-    min-height: 84px;
+    height: 168px;
+    min-height: 168px;
     margin-top: -50px;
     margin-bottom: 12px;
   }

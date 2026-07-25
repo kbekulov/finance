@@ -723,7 +723,7 @@ export default function Home() {
       chart = new ApexCharts(container, {
         chart: {
           type: "area",
-          height: 84,
+          height: 168,
           background: "transparent",
           fontFamily: getComputedStyle(document.documentElement).getPropertyValue("--font-family"),
           animations: { enabled: !window.matchMedia("(prefers-reduced-motion: reduce)").matches },

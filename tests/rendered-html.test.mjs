@@ -49,12 +49,14 @@ test("server-renders the current finance tracker", async () => {
   assert.match(html, /iCloud\+/);
   assert.match(html, /Mercury Weather/);
   assert.match(html, /Microsoft 365/);
+  assert.match(html, /Adobe/);
+  assert.match(html, /G Suite/);
   assert.match(html, /Gaming laptop/);
   assert.match(html, /Keturi vėjai 0\.4 l/);
   assert.match(html, /Shelton&#x27;s pear cider/);
   assert.match(html, /Alcohol &amp; nightlife/);
-  assert.match(html, /€808\.95/);
-  assert.match(html, /€1,141\.05/);
+  assert.match(html, /€843\.45/);
+  assert.match(html, /€1,106\.55/);
   assert.doesNotMatch(html, /Your site is taking shape|Building your site/);
 });
 
@@ -77,7 +79,7 @@ test("keeps database history and translations aligned", async () => {
   assert.equal(database.currency, "EUR");
   assert.equal(database.timezone, "Europe/Vilnius");
   assert.equal(current.updatedAt, "2026-07-25");
-  assert.equal(current.revision, 12);
+  assert.equal(current.revision, 13);
   assert.equal(current.savingsGoal, 200);
   assert.deepEqual(current.period, {
     start: "2026-07-10",
@@ -163,6 +165,8 @@ test("keeps database history and translations aligned", async () => {
     ["2026-07-icloud-plus", 2.99],
     ["2026-07-mercury-weather", 2.99],
     ["2026-07-microsoft-365", 13],
+    ["2026-07-adobe", 18.3],
+    ["2026-07-g-suite", 16.2],
   ]) {
     const expense = current.expenses.find((item) => item.id === id);
     assert.equal(expense?.amount, amount);

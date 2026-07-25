@@ -18,7 +18,7 @@
       "currency": "EUR",
       "timezone": "Europe/Vilnius",
       "updatedAt": "2026-07-25",
-      "revision": 12,
+      "revision": 13,
       "salary": 2150,
       "savingsGoal": 200,
       "expenses": [
@@ -169,6 +169,34 @@
           "noteTranslations": {
             "en": "Microsoft 365",
             "ru": "Microsoft 365"
+          },
+          "date": "2026-07-25",
+          "category": "Subscriptions & services",
+          "source": "chat",
+          "recurring": true,
+          "frequency": "monthly"
+        },
+        {
+          "id": "2026-07-adobe",
+          "amount": 18.3,
+          "note": "Adobe",
+          "noteTranslations": {
+            "en": "Adobe",
+            "ru": "Adobe"
+          },
+          "date": "2026-07-25",
+          "category": "Subscriptions & services",
+          "source": "chat",
+          "recurring": true,
+          "frequency": "monthly"
+        },
+        {
+          "id": "2026-07-g-suite",
+          "amount": 16.2,
+          "note": "G Suite",
+          "noteTranslations": {
+            "en": "G Suite",
+            "ru": "G Suite"
           },
           "date": "2026-07-25",
           "category": "Subscriptions & services",

@@ -762,6 +762,12 @@ h1 em {
   color: var(--yellow);
 }
 
+.transport,
+.category-t {
+  background: rgba(255, 159, 10, 0.13);
+  color: var(--orange);
+}
+
 /* Breakdown */
 
 .breakdown-panel {
@@ -853,6 +859,11 @@ h1 em {
 .breakdown-segment.devices,
 .breakdown-dot.devices {
   background: var(--yellow);
+}
+
+.breakdown-segment.transport,
+.breakdown-dot.transport {
+  background: var(--orange);
 }
 
 .breakdown-legend {

@@ -36,8 +36,10 @@ test("server-renders the current finance tracker", async () => {
   assert.match(html, /Apple Devices/);
   assert.match(html, /Updated 25 July 2026/);
   assert.match(html, /Today<!-- --> · <!-- -->25/);
-  assert.match(html, /€785\.00/);
-  assert.match(html, /€1,165\.00/);
+  assert.match(html, /Buses/);
+  assert.match(html, /Transport &amp; Travel/);
+  assert.match(html, /€825\.00/);
+  assert.match(html, /€1,125\.00/);
   assert.doesNotMatch(html, /Your site is taking shape|Building your site/);
 });
 
@@ -55,7 +57,7 @@ test("keeps database history and translations aligned", async () => {
   assert.equal(database.currency, "EUR");
   assert.equal(database.timezone, "Europe/Vilnius");
   assert.equal(current.updatedAt, "2026-07-25");
-  assert.equal(current.revision, 6);
+  assert.equal(current.revision, 7);
   assert.equal(current.savingsGoal, 200);
   assert.deepEqual(current.period, {
     start: "2026-07-01",
@@ -65,6 +67,23 @@ test("keeps database history and translations aligned", async () => {
     current.expenses.find((expense) => expense.id === "2026-07-apple-devices")
       ?.note,
     "Apple Devices",
+  );
+  assert.deepEqual(
+    current.expenses.find((expense) => expense.id === "2026-07-buses"),
+    {
+      id: "2026-07-buses",
+      amount: 40,
+      note: "Buses",
+      noteTranslations: {
+        en: "Buses",
+        ru: "Автобусы",
+      },
+      date: "2026-07-25",
+      category: "Transport & Travel",
+      source: "chat",
+      recurring: true,
+      frequency: "monthly",
+    },
   );
   for (const expense of current.expenses) {
     assert.equal(typeof expense.noteTranslations?.en, "string");
@@ -77,5 +96,7 @@ test("keeps database history and translations aligned", async () => {
     assert.match(source, /noteTranslations/);
     assert.match(source, /Spending alert/);
     assert.match(source, /Контроль расходов/);
+    assert.match(source, /Transport & Travel/);
+    assert.match(source, /Транспорт и путешествия/);
   }
 });

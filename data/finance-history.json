@@ -14,7 +14,7 @@
       "currency": "EUR",
       "timezone": "Europe/Vilnius",
       "updatedAt": "2026-07-25",
-      "revision": 6,
+      "revision": 7,
       "salary": 2150,
       "savingsGoal": 200,
       "expenses": [
@@ -126,6 +126,20 @@
           },
           "date": "2026-07-25",
           "category": "Devices & installments",
+          "source": "chat",
+          "recurring": true,
+          "frequency": "monthly"
+        },
+        {
+          "id": "2026-07-buses",
+          "amount": 40,
+          "note": "Buses",
+          "noteTranslations": {
+            "en": "Buses",
+            "ru": "Автобусы"
+          },
+          "date": "2026-07-25",
+          "category": "Transport & Travel",
           "source": "chat",
           "recurring": true,
           "frequency": "monthly"

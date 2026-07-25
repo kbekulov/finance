@@ -8,7 +8,8 @@ type Category =
   | "Subscriptions & services"
   | "Luxury purchases"
   | "Debt & repayments"
-  | "Devices & installments";
+  | "Devices & installments"
+  | "Transport & Travel";
 type Language = "en" | "ru";
 
 type Expense = {
@@ -48,6 +49,7 @@ const CATEGORIES: Category[] = [
   "Luxury purchases",
   "Debt & repayments",
   "Devices & installments",
+  "Transport & Travel",
 ];
 
 const COPY = {
@@ -172,6 +174,7 @@ const CATEGORY_LABELS: Record<Language, Record<Category, string>> = {
     "Luxury purchases": "Luxury purchases",
     "Debt & repayments": "Debt & repayments",
     "Devices & installments": "Devices & installments",
+    "Transport & Travel": "Transport & Travel",
   },
   ru: {
     Food: "Еда",
@@ -179,6 +182,7 @@ const CATEGORY_LABELS: Record<Language, Record<Category, string>> = {
     "Luxury purchases": "Покупки для удовольствия",
     "Debt & repayments": "Долги и выплаты",
     "Devices & installments": "Устройства и рассрочки",
+    "Transport & Travel": "Транспорт и путешествия",
   },
 };
 
@@ -210,7 +214,8 @@ function categorySymbol(category: Category) {
   if (category === "Subscriptions & services") return "S";
   if (category === "Luxury purchases") return "L";
   if (category === "Debt & repayments") return "D";
-  return "I";
+  if (category === "Devices & installments") return "I";
+  return "T";
 }
 
 function categoryClass(category: Category) {
@@ -218,7 +223,8 @@ function categoryClass(category: Category) {
   if (category === "Subscriptions & services") return "services";
   if (category === "Luxury purchases") return "luxury";
   if (category === "Debt & repayments") return "debt";
-  return "devices";
+  if (category === "Devices & installments") return "devices";
+  return "transport";
 }
 
 function fillTemplate(
@@ -318,6 +324,7 @@ export default function Home() {
     "Subscriptions & services",
     "Luxury purchases",
     "Devices & installments",
+    "Transport & Travel",
   ]);
   const cutTarget =
     rankedCategories.find(

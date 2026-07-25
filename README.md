@@ -120,6 +120,7 @@ Internal values must remain exactly:
 - `Luxury purchases`
 - `Debt & repayments`
 - `Devices & installments`
+- `Transport & Travel`
 
 Translate only the displayed labels. If a genuinely necessary new category is added, update:
 
@@ -151,7 +152,7 @@ The warning strip at the very top is dynamic and must never contain stale hard-c
 
 - Recalculate it from the selected month’s category totals on every render.
 - Identify the largest current category and show its amount and share of total spending.
-- Recommend a flexible cut from `Food`, `Subscriptions & services`, `Luxury purchases`, or `Devices & installments`, preferring the largest flexible category other than the dominant category.
+- Recommend a flexible cut from `Food`, `Subscriptions & services`, `Luxury purchases`, `Devices & installments`, or `Transport & Travel`, preferring the largest flexible category other than the dominant category.
 - If only one category has spending, advise pausing new spending in that category.
 - If no expenses exist, show a neutral guidance state rather than a false warning.
 - Use localized category names, euro formatting, English/Russian copy, and live-region semantics.

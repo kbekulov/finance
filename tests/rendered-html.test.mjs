@@ -48,7 +48,7 @@ test("server-renders the current finance tracker", async () => {
   assert.match(html, /Buses/);
   assert.match(html, /Transport &amp; Travel/);
   assert.match(html, /iCloud\+/);
-  assert.match(html, /Mercury Weather/);
+  assert.doesNotMatch(html, /Mercury Weather/);
   assert.match(html, /Microsoft 365/);
   assert.match(html, /Adobe/);
   assert.match(html, /G Suite/);
@@ -61,7 +61,7 @@ test("server-renders the current finance tracker", async () => {
   assert.match(html, /€7\.99/);
   assert.match(html, /Expected monthly expenses/);
   assert.match(html, /Expected monthly total/);
-  assert.match(html, /€939\.46/);
+  assert.match(html, /€936\.47/);
   assert.match(html, /One-time expenses/);
   assert.match(html, /Gaming laptop/);
   assert.match(html, /Mortgage/);
@@ -69,8 +69,8 @@ test("server-renders the current finance tracker", async () => {
   assert.match(html, /Keturi vėjai 0\.4 l/);
   assert.match(html, /Shelton&#x27;s pear cider/);
   assert.match(html, /Alcohol &amp; nightlife/);
-  assert.match(html, /€947\.45/);
-  assert.match(html, /€1,002\.55/);
+  assert.match(html, /€944\.46/);
+  assert.match(html, /€1,005\.54/);
   assert.doesNotMatch(html, /Your site is taking shape|Building your site/);
 });
 
@@ -93,7 +93,7 @@ test("keeps database history and translations aligned", async () => {
   assert.equal(database.currency, "EUR");
   assert.equal(database.timezone, "Europe/Vilnius");
   assert.equal(current.updatedAt, "2026-07-25");
-  assert.equal(current.revision, 17);
+  assert.equal(current.revision, 18);
   assert.equal(current.savingsGoal, 200);
   assert.deepEqual(current.period, {
     start: "2026-07-10",
@@ -207,7 +207,6 @@ test("keeps database history and translations aligned", async () => {
   );
   for (const [id, amount] of [
     ["2026-07-icloud-plus", 2.99],
-    ["2026-07-mercury-weather", 2.99],
     ["2026-07-microsoft-365", 13],
     ["2026-07-adobe", 18.3],
     ["2026-07-g-suite", 16.2],
@@ -218,6 +217,10 @@ test("keeps database history and translations aligned", async () => {
     assert.equal(expense?.recurring, true);
     assert.equal(expense?.frequency, "monthly");
   }
+  assert.equal(
+    current.expenses.find((item) => item.id === "2026-07-mercury-weather"),
+    undefined,
+  );
   assert.deepEqual(
     current.expenses.find((expense) => expense.id === "2026-07-istorijos-001"),
     {

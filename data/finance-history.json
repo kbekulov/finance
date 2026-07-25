@@ -18,7 +18,7 @@
       "currency": "EUR",
       "timezone": "Europe/Vilnius",
       "updatedAt": "2026-07-25",
-      "revision": 17,
+      "revision": 18,
       "salary": 2150,
       "savingsGoal": 200,
       "expenses": [
@@ -155,20 +155,6 @@
           "noteTranslations": {
             "en": "iCloud+",
             "ru": "iCloud+"
-          },
-          "date": "2026-07-25",
-          "category": "Subscriptions & services",
-          "source": "chat",
-          "recurring": true,
-          "frequency": "monthly"
-        },
-        {
-          "id": "2026-07-mercury-weather",
-          "amount": 2.99,
-          "note": "Mercury Weather",
-          "noteTranslations": {
-            "en": "Mercury Weather",
-            "ru": "Mercury Weather"
           },
           "date": "2026-07-25",
           "category": "Subscriptions & services",

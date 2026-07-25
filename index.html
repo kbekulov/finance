@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#12201b" />
+    <meta name="theme-color" content="#000000" />
     <meta
       name="description"
       content="Euroscope — a clear monthly view of expenses, income, and savings."
@@ -26,6 +26,10 @@
           </a>
           <div class="header-meta">
             <span class="updated-label" id="updated-label">Loading history…</span>
+            <div class="language-switch" role="group" aria-label="Language">
+              <button type="button" data-language="en" class="active">EN</button>
+              <button type="button" data-language="ru">RU</button>
+            </div>
             <div class="month-pill">
               <span class="month-dot" aria-hidden="true"></span>
               <span id="month-label">Current month</span>
@@ -49,9 +53,9 @@
 
         <section class="hero" id="top" aria-labelledby="page-title">
           <div class="hero-copy">
-            <p class="eyebrow">YOUR MONTH AT A GLANCE</p>
-            <h1 id="page-title">Every euro has<br /><em>a place.</em></h1>
-            <p class="hero-intro">
+            <p class="eyebrow" data-i18n="monthGlance">YOUR MONTH AT A GLANCE</p>
+            <h1 id="page-title" data-i18n-html="headline">Every euro has<br /><em>a place.</em></h1>
+            <p class="hero-intro" data-i18n="intro">
               A calm, honest view of what came in, what went out, and what
               you’re keeping for yourself.
             </p>
@@ -59,20 +63,20 @@
 
           <div class="balance-card" aria-label="Monthly plan balance">
             <div class="balance-topline">
-              <span>AVAILABLE AFTER PLAN</span>
+              <span data-i18n="availableAfterPlan">AVAILABLE AFTER PLAN</span>
               <span id="spent-percent">0% SPENT</span>
             </div>
             <div class="balance-main">
               <div>
                 <strong id="remaining">€0.00</strong>
-                <span class="balance-caption">left for the month</span>
+                <span class="balance-caption" data-i18n="leftForMonth">left for the month</span>
               </div>
               <div class="progress-ring" id="progress-ring">
                 <span id="ring-percent">0%</span>
               </div>
             </div>
             <div class="pace-row">
-              <span>Comfortable daily pace</span>
+              <span data-i18n="dailyPace">Comfortable daily pace</span>
               <strong id="daily-pace">€0 / day</strong>
             </div>
           </div>
@@ -81,29 +85,29 @@
         <section class="stat-grid" aria-label="Monthly totals">
           <article class="stat-card">
             <span class="stat-icon" aria-hidden="true">↗</span>
-            <p>MONTHLY SALARY</p>
+            <p data-i18n="monthlySalary">MONTHLY SALARY</p>
             <label class="editable-value">
               <span class="sr-only">Monthly salary in euros</span>
               <span aria-hidden="true">€</span>
               <input id="salary" inputmode="decimal" value="0" />
             </label>
-            <small>Tap the amount to edit</small>
+            <small data-i18n="tapToEdit">Tap the amount to edit</small>
           </article>
 
           <article class="stat-card">
             <span class="stat-icon" aria-hidden="true">◇</span>
-            <p>SAVINGS REQUIREMENT</p>
+            <p data-i18n="savingsRequirement">SAVINGS REQUIREMENT</p>
             <label class="editable-value">
               <span class="sr-only">Monthly savings requirement in euros</span>
               <span aria-hidden="true">€</span>
               <input id="savings" inputmode="decimal" value="0" />
             </label>
-            <small>Protected from spending</small>
+            <small data-i18n="protectedSpending">Protected from spending</small>
           </article>
 
           <article class="stat-card">
             <span class="stat-icon" aria-hidden="true">↓</span>
-            <p>SPENT THIS MONTH</p>
+            <p data-i18n="spentThisMonth">SPENT THIS MONTH</p>
             <strong id="spent-total">€0.00</strong>
             <small id="expense-count">0 recorded expenses</small>
           </article>
@@ -111,12 +115,29 @@
 
         <section class="category-strip" id="category-strip" aria-label="Expense categories"></section>
 
+        <section class="breakdown-panel" aria-labelledby="breakdown-title">
+          <div class="breakdown-heading">
+            <div>
+              <p class="eyebrow" data-i18n="spendingMix">SPENDING MIX</p>
+              <h2 id="breakdown-title" data-i18n="whereMoneyGoes">Where your money goes</h2>
+            </div>
+            <strong id="breakdown-total">€0.00 total</strong>
+          </div>
+          <div
+            class="breakdown-bar"
+            id="breakdown-bar"
+            role="img"
+            aria-label="Expense category breakdown"
+          ></div>
+          <div class="breakdown-legend" id="breakdown-legend"></div>
+        </section>
+
         <section class="workspace">
           <div class="activity-panel">
             <div class="section-heading">
               <div>
-                <p class="eyebrow">THE LEDGER</p>
-                <h2>Recent expenses</h2>
+                <p class="eyebrow" data-i18n="ledger">THE LEDGER</p>
+                <h2 data-i18n="recentExpenses">Recent expenses</h2>
               </div>
               <span id="ledger-count">0 ITEMS</span>
             </div>
@@ -124,40 +145,40 @@
           </div>
 
           <aside class="add-panel" aria-labelledby="add-title">
-            <p class="eyebrow">QUICK ENTRY</p>
-            <h2 id="add-title">Add an expense</h2>
-            <p class="form-intro">Log something now, or simply send the amount in our chat.</p>
+            <p class="eyebrow" data-i18n="quickEntry">QUICK ENTRY</p>
+            <h2 id="add-title" data-i18n="addExpense">Add an expense</h2>
+            <p class="form-intro" data-i18n="formIntro">Log something now, or simply send the amount in our chat.</p>
             <form id="expense-form">
-              <label for="amount">Amount</label>
+              <label for="amount" data-i18n="amount">Amount</label>
               <div class="amount-field">
                 <span aria-hidden="true">€</span>
                 <input id="amount" inputmode="decimal" placeholder="0.00" required />
               </div>
 
-              <label for="category">Category</label>
+              <label for="category" data-i18n="category">Category</label>
               <select id="category">
-                <option>Food</option>
-                <option>Subscriptions &amp; services</option>
-                <option>Luxury purchases</option>
-                <option>Debt &amp; repayments</option>
-                <option>Devices &amp; installments</option>
+                <option value="Food" data-category-option="Food">Food</option>
+                <option value="Subscriptions & services" data-category-option="Subscriptions & services">Subscriptions &amp; services</option>
+                <option value="Luxury purchases" data-category-option="Luxury purchases">Luxury purchases</option>
+                <option value="Debt & repayments" data-category-option="Debt & repayments">Debt &amp; repayments</option>
+                <option value="Devices & installments" data-category-option="Devices & installments">Devices &amp; installments</option>
               </select>
 
-              <label for="note">What was it for?</label>
-              <input id="note" placeholder="Coffee, Netflix, new shoes…" />
+              <label for="note" data-i18n="whatFor">What was it for?</label>
+              <input id="note" placeholder="Coffee, Netflix, new shoes…" data-i18n-placeholder="notePlaceholder" />
 
-              <button type="submit"><span aria-hidden="true">＋</span> Add expense</button>
+              <button type="submit"><span aria-hidden="true">＋</span> <span data-i18n="addExpense">Add expense</span></button>
             </form>
             <p class="chat-hint">
               <span aria-hidden="true">✦</span>
-              In chat, send a number or receipt photo and it will be added and categorised here.
+              <span data-i18n="chatHint">In chat, send a number or receipt photo and it will be added and categorised here.</span>
             </p>
           </aside>
         </section>
 
         <footer>
           <span>EUROSCOPE</span>
-          <p>Private by design. Clear by default.</p>
+          <p data-i18n="footer">Private by design. Clear by default.</p>
         </footer>
       </div>
     </main>

@@ -9,6 +9,7 @@ type Category =
   | "Luxury purchases"
   | "Debt & repayments"
   | "Devices & installments";
+type Language = "en" | "ru";
 
 type Expense = {
   id: string;
@@ -42,6 +43,110 @@ const CATEGORIES: Category[] = [
   "Devices & installments",
 ];
 
+const COPY = {
+  en: {
+    monthGlance: "YOUR MONTH AT A GLANCE",
+    headlineLead: "Every euro has",
+    headlineEnd: "a place.",
+    intro: "A calm, honest view of what came in, what went out, and what you’re keeping for yourself.",
+    available: "AVAILABLE AFTER PLAN",
+    spent: "SPENT",
+    left: "left for the month",
+    pace: "Comfortable daily pace",
+    day: "/ day",
+    salary: "MONTHLY SALARY",
+    edit: "Tap the amount to edit",
+    savings: "SAVINGS REQUIREMENT",
+    protected: "Protected from spending",
+    spentMonth: "SPENT THIS MONTH",
+    recorded: "recorded expenses",
+    mix: "SPENDING MIX",
+    where: "Where your money goes",
+    total: "total",
+    ledger: "THE LEDGER",
+    recent: "Recent expenses",
+    items: "ITEMS",
+    empty: "Nothing spent yet",
+    emptyText: "expenses will appear here as you add them.",
+    monthly: "Monthly",
+    receipt: "Receipt",
+    chat: "Added in chat",
+    here: "Added here",
+    quick: "QUICK ENTRY",
+    add: "Add an expense",
+    formIntro: "Log something now, or simply send the amount in our chat.",
+    amount: "Amount",
+    category: "Category",
+    what: "What was it for?",
+    placeholder: "Coffee, Netflix, new shoes…",
+    hint: "In chat, send a number or a receipt photo and it will be added and categorised here.",
+    footer: "Private by design. Clear by default.",
+    today: "Today",
+    monthEnd: "Month end",
+    updated: "Updated",
+    monthsSaved: "months saved",
+  },
+  ru: {
+    monthGlance: "ВАШ МЕСЯЦ В ЦИФРАХ",
+    headlineLead: "Каждому евро —",
+    headlineEnd: "своё место.",
+    intro: "Спокойный и честный взгляд на доходы, расходы и деньги, которые вы сохраняете для себя.",
+    available: "ДОСТУПНО ПОСЛЕ ПЛАНА",
+    spent: "ПОТРАЧЕНО",
+    left: "осталось на месяц",
+    pace: "Комфортный дневной лимит",
+    day: "/ день",
+    salary: "МЕСЯЧНЫЙ ДОХОД",
+    edit: "Нажмите на сумму, чтобы изменить",
+    savings: "ЦЕЛЬ НАКОПЛЕНИЙ",
+    protected: "Защищено от расходов",
+    spentMonth: "ПОТРАЧЕНО В ЭТОМ МЕСЯЦЕ",
+    recorded: "расходов записано",
+    mix: "СТРУКТУРА РАСХОДОВ",
+    where: "Куда уходят деньги",
+    total: "всего",
+    ledger: "ЖУРНАЛ",
+    recent: "Последние расходы",
+    items: "ЗАПИСЕЙ",
+    empty: "Расходов пока нет",
+    emptyText: "расходы появятся здесь после добавления.",
+    monthly: "Ежемесячно",
+    receipt: "Чек",
+    chat: "Добавлено в чате",
+    here: "Добавлено здесь",
+    quick: "БЫСТРОЕ ДОБАВЛЕНИЕ",
+    add: "Добавить расход",
+    formIntro: "Добавьте расход здесь или просто отправьте сумму в чате.",
+    amount: "Сумма",
+    category: "Категория",
+    what: "На что потрачено?",
+    placeholder: "Кофе, Netflix, новая обувь…",
+    hint: "Отправьте в чат сумму или фото чека — расход будет добавлен и распределён по категории.",
+    footer: "Приватность по замыслу. Ясность по умолчанию.",
+    today: "Сегодня",
+    monthEnd: "Конец месяца",
+    updated: "Обновлено",
+    monthsSaved: "месяцев сохранено",
+  },
+};
+
+const CATEGORY_LABELS: Record<Language, Record<Category, string>> = {
+  en: {
+    Food: "Food",
+    "Subscriptions & services": "Subscriptions & services",
+    "Luxury purchases": "Luxury purchases",
+    "Debt & repayments": "Debt & repayments",
+    "Devices & installments": "Devices & installments",
+  },
+  ru: {
+    Food: "Еда",
+    "Subscriptions & services": "Подписки и сервисы",
+    "Luxury purchases": "Покупки для удовольствия",
+    "Debt & repayments": "Долги и выплаты",
+    "Devices & installments": "Устройства и рассрочки",
+  },
+};
+
 // The JSON file is the source of truth. Only the most recent 12 records are shown.
 const HISTORY = (financeHistoryJson.months as unknown as MonthRecord[]).slice(-12);
 const INITIAL_MONTH = HISTORY[HISTORY.length - 1];
@@ -59,10 +164,10 @@ const compactEuro = new Intl.NumberFormat("en-IE", {
   maximumFractionDigits: 0,
 });
 
-function sourceLabel(source: Expense["source"]) {
-  if (source === "receipt") return "Receipt";
-  if (source === "chat") return "Added in chat";
-  return "Added here";
+function sourceLabel(source: Expense["source"], language: Language) {
+  if (source === "receipt") return COPY[language].receipt;
+  if (source === "chat") return COPY[language].chat;
+  return COPY[language].here;
 }
 
 function categorySymbol(category: Category) {
@@ -73,6 +178,14 @@ function categorySymbol(category: Category) {
   return "I";
 }
 
+function categoryClass(category: Category) {
+  if (category === "Food") return "food";
+  if (category === "Subscriptions & services") return "services";
+  if (category === "Luxury purchases") return "luxury";
+  if (category === "Debt & repayments") return "debt";
+  return "devices";
+}
+
 export default function Home() {
   const [selectedMonth, setSelectedMonth] = useState<MonthRecord>(INITIAL_MONTH);
   const [data, setData] = useState<FinanceData>(INITIAL_MONTH);
@@ -80,6 +193,12 @@ export default function Home() {
   const [note, setNote] = useState("");
   const [category, setCategory] = useState<Category>("Food");
   const [isReady, setIsReady] = useState(false);
+  const [language, setLanguage] = useState<Language>("en");
+
+  useEffect(() => {
+    const savedLanguage = localStorage.getItem("euroscope:language");
+    if (savedLanguage === "ru") setLanguage("ru");
+  }, []);
 
   useEffect(() => {
     try {
@@ -125,9 +244,19 @@ export default function Home() {
     year === TODAY.getFullYear() && month === TODAY.getMonth() + 1;
   const dayOfMonth = isCurrentMonth ? TODAY.getDate() : daysInMonth;
   const dailyPace = Math.max(remaining, 0) / Math.max(daysInMonth - dayOfMonth, 1);
-  const updatedLabel = `Updated ${new Date(
+  const locale = language === "ru" ? "ru-RU" : "en-GB";
+  const copy = COPY[language];
+  const monthLabel = new Intl.DateTimeFormat(locale, {
+    month: "long",
+    year: "numeric",
+  }).format(new Date(year, month - 1, 1));
+  const shortMonth = new Intl.DateTimeFormat(locale, { month: "short" })
+    .format(new Date(year, month - 1, 1))
+    .replace(".", "");
+  const updatedLabel = `${copy.updated} ${new Date(
     `${selectedMonth.updatedAt}T12:00:00`,
-  ).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}`;
+  ).toLocaleDateString(locale, { day: "numeric", month: "long", year: "numeric" })}`;
+  const categoryLabel = (name: Category) => CATEGORY_LABELS[language][name];
 
   function addExpense(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -162,9 +291,25 @@ export default function Home() {
           </a>
           <div className="header-meta">
             <span className="updated-label">{updatedLabel}</span>
-            <div className="month-pill" aria-label={`Viewing ${selectedMonth.label}`}>
+            <div className="language-switch" role="group" aria-label="Language">
+              {(["en", "ru"] as Language[]).map((item) => (
+                <button
+                  type="button"
+                  key={item}
+                  className={language === item ? "active" : ""}
+                  aria-pressed={language === item}
+                  onClick={() => {
+                    setLanguage(item);
+                    localStorage.setItem("euroscope:language", item);
+                  }}
+                >
+                  {item.toUpperCase()}
+                </button>
+              ))}
+            </div>
+            <div className="month-pill" aria-label={monthLabel}>
               <span className="month-dot" aria-hidden="true" />
-              {selectedMonth.label}
+              {monthLabel}
             </div>
           </div>
         </header>
@@ -178,23 +323,23 @@ export default function Home() {
               aria-current={record.month === selectedMonth.month ? "date" : undefined}
               onClick={() => setSelectedMonth(record)}
             >
-              {record.label}
+              {new Intl.DateTimeFormat(locale, { month: "long", year: "numeric" })
+                .format(new Date(`${record.month}-01T12:00:00`))}
             </button>
           ))}
-          <span>{HISTORY.length} / 12 months saved</span>
+          <span>{HISTORY.length} / 12 {copy.monthsSaved}</span>
         </nav>
 
         <section
           className="month-timeline"
-          aria-label={`${selectedMonth.label} timeline, day ${dayOfMonth}`}
+          aria-label={`${monthLabel}, ${dayOfMonth}`}
         >
           <div className="timeline-copy">
-            <span>01 {selectedMonth.label.slice(0, 3).toUpperCase()}</span>
+            <span>01 {shortMonth.toUpperCase()}</span>
             <strong>
-              {isCurrentMonth ? "Today" : "Month end"} · {dayOfMonth}{" "}
-              {selectedMonth.label.slice(0, 3)}
+              {isCurrentMonth ? copy.today : copy.monthEnd} · {dayOfMonth} {shortMonth}
             </strong>
-            <span>{daysInMonth} {selectedMonth.label.slice(0, 3).toUpperCase()}</span>
+            <span>{daysInMonth} {shortMonth.toUpperCase()}</span>
           </div>
           <div className="timeline-track">
             <span style={{ width: `${(dayOfMonth / daysInMonth) * 100}%` }} />
@@ -204,27 +349,24 @@ export default function Home() {
 
         <section className="hero" id="top" aria-labelledby="page-title">
           <div className="hero-copy">
-            <p className="eyebrow">YOUR MONTH AT A GLANCE</p>
+            <p className="eyebrow">{copy.monthGlance}</p>
             <h1 id="page-title">
-              Every euro has
+              {copy.headlineLead}
               <br />
-              <em>a place.</em>
+              <em>{copy.headlineEnd}</em>
             </h1>
-            <p className="hero-intro">
-              A calm, honest view of what came in, what went out, and what
-              you&apos;re keeping for yourself.
-            </p>
+            <p className="hero-intro">{copy.intro}</p>
           </div>
 
           <div className="balance-card" aria-label="Monthly plan balance">
             <div className="balance-topline">
-              <span>AVAILABLE AFTER PLAN</span>
-              <span>{Math.round(usedPercent)}% SPENT</span>
+              <span>{copy.available}</span>
+              <span>{Math.round(usedPercent)}% {copy.spent}</span>
             </div>
             <div className="balance-main">
               <div>
                 <strong>{euro.format(remaining)}</strong>
-                <span className="balance-caption">left for the month</span>
+                <span className="balance-caption">{copy.left}</span>
               </div>
               <div
                 className="progress-ring"
@@ -235,8 +377,8 @@ export default function Home() {
               </div>
             </div>
             <div className="pace-row">
-              <span>Comfortable daily pace</span>
-              <strong>{compactEuro.format(dailyPace)} / day</strong>
+              <span>{copy.pace}</span>
+              <strong>{compactEuro.format(dailyPace)} {copy.day}</strong>
             </div>
           </div>
         </section>
@@ -244,7 +386,7 @@ export default function Home() {
         <section className="stat-grid" aria-label="Monthly totals">
           <article className="stat-card salary">
             <span className="stat-icon" aria-hidden="true">↗</span>
-            <p>MONTHLY SALARY</p>
+            <p>{copy.salary}</p>
             <label className="editable-value">
               <span className="sr-only">Monthly salary in euros</span>
               <span aria-hidden="true">€</span>
@@ -259,12 +401,12 @@ export default function Home() {
                 }
               />
             </label>
-            <small>Tap the amount to edit</small>
+            <small>{copy.edit}</small>
           </article>
 
           <article className="stat-card savings">
             <span className="stat-icon" aria-hidden="true">◇</span>
-            <p>SAVINGS REQUIREMENT</p>
+            <p>{copy.savings}</p>
             <label className="editable-value">
               <span className="sr-only">Monthly savings requirement in euros</span>
               <span aria-hidden="true">€</span>
@@ -279,14 +421,14 @@ export default function Home() {
                 }
               />
             </label>
-            <small>Protected from spending</small>
+            <small>{copy.protected}</small>
           </article>
 
           <article className="stat-card expenses">
             <span className="stat-icon" aria-hidden="true">↓</span>
-            <p>SPENT THIS MONTH</p>
+            <p>{copy.spentMonth}</p>
             <strong>{euro.format(spent)}</strong>
-            <small>{data.expenses.length} recorded expense{data.expenses.length === 1 ? "" : "s"}</small>
+            <small>{data.expenses.length} {copy.recorded}</small>
           </article>
         </section>
 
@@ -297,28 +439,78 @@ export default function Home() {
                 {categorySymbol(item.name)}
               </span>
               <span>
-                <small>{item.name}</small>
+                <small>{categoryLabel(item.name)}</small>
                 <strong>{euro.format(item.amount)}</strong>
               </span>
             </article>
           ))}
         </section>
 
+        <section className="breakdown-panel" aria-labelledby="breakdown-title">
+          <div className="breakdown-heading">
+            <div>
+              <p className="eyebrow">{copy.mix}</p>
+              <h2 id="breakdown-title">{copy.where}</h2>
+            </div>
+            <strong>{euro.format(spent)} {copy.total}</strong>
+          </div>
+          <div
+            className="breakdown-bar"
+            role="img"
+            aria-label={
+              categoryTotals
+                .filter((item) => item.amount > 0)
+                .map((item) => `${categoryLabel(item.name)}: ${euro.format(item.amount)}`)
+                .join(", ") || "No expenses recorded"
+            }
+          >
+            {categoryTotals
+              .filter((item) => item.amount > 0)
+              .map((item) => (
+                <span
+                  key={item.name}
+                  className={`breakdown-segment ${categoryClass(item.name)}`}
+                  style={{ width: `${spent > 0 ? (item.amount / spent) * 100 : 0}%` }}
+                  title={`${categoryLabel(item.name)}: ${euro.format(item.amount)}`}
+                />
+              ))}
+          </div>
+          <div className="breakdown-legend">
+            {categoryTotals
+              .filter((item) => item.amount > 0)
+              .map((item) => (
+                <div className="breakdown-item" key={item.name}>
+                  <span
+                    className={`breakdown-dot ${categoryClass(item.name)}`}
+                    aria-hidden="true"
+                  />
+                  <span>
+                    <strong>{categoryLabel(item.name)}</strong>
+                    <small>
+                      {euro.format(item.amount)} ·{" "}
+                      {Math.round(spent > 0 ? (item.amount / spent) * 100 : 0)}%
+                    </small>
+                  </span>
+                </div>
+              ))}
+          </div>
+        </section>
+
         <section className="workspace">
           <div className="activity-panel">
             <div className="section-heading">
               <div>
-                <p className="eyebrow">THE LEDGER</p>
-                <h2>Recent expenses</h2>
+                <p className="eyebrow">{copy.ledger}</p>
+                <h2>{copy.recent}</h2>
               </div>
-              <span>{data.expenses.length} ITEMS</span>
+              <span>{data.expenses.length} {copy.items}</span>
             </div>
 
             {data.expenses.length === 0 ? (
               <div className="empty-state">
                 <span aria-hidden="true">○</span>
-                <h3>Nothing spent yet</h3>
-                <p>Your {selectedMonth.label} expenses will appear here as you add them.</p>
+                <h3>{copy.empty}</h3>
+                <p>{monthLabel}: {copy.emptyText}</p>
               </div>
             ) : (
               <ul className="expense-list">
@@ -330,9 +522,9 @@ export default function Home() {
                     <span className="expense-info">
                       <strong>{expense.note}</strong>
                       <small>
-                        {expense.category} · {expense.recurring ? "Monthly · " : ""}
-                        {sourceLabel(expense.source)} ·{" "}
-                        {new Date(`${expense.date}T12:00:00`).toLocaleDateString("en-GB", {
+                        {categoryLabel(expense.category)} · {expense.recurring ? `${copy.monthly} · ` : ""}
+                        {sourceLabel(expense.source, language)} ·{" "}
+                        {new Date(`${expense.date}T12:00:00`).toLocaleDateString(locale, {
                           day: "numeric",
                           month: "short",
                         })}
@@ -346,11 +538,11 @@ export default function Home() {
           </div>
 
           <aside className="add-panel" aria-labelledby="add-title">
-            <p className="eyebrow">QUICK ENTRY</p>
-            <h2 id="add-title">Add an expense</h2>
-            <p className="form-intro">Log something now, or simply send the amount in our chat.</p>
+            <p className="eyebrow">{copy.quick}</p>
+            <h2 id="add-title">{copy.add}</h2>
+            <p className="form-intro">{copy.formIntro}</p>
             <form onSubmit={addExpense}>
-              <label htmlFor="amount">Amount</label>
+              <label htmlFor="amount">{copy.amount}</label>
               <div className="amount-field">
                 <span aria-hidden="true">€</span>
                 <input
@@ -363,7 +555,7 @@ export default function Home() {
                   required
                 />
               </div>
-              <label htmlFor="category">Category</label>
+              <label htmlFor="category">{copy.category}</label>
               <select
                 id="category"
                 name="category"
@@ -371,32 +563,32 @@ export default function Home() {
                 onChange={(event) => setCategory(event.target.value as Category)}
               >
                 {CATEGORIES.map((name) => (
-                  <option key={name} value={name}>{name}</option>
+                  <option key={name} value={name}>{categoryLabel(name)}</option>
                 ))}
               </select>
-              <label htmlFor="note">What was it for?</label>
+              <label htmlFor="note">{copy.what}</label>
               <input
                 id="note"
                 name="note"
-                placeholder="Coffee, Netflix, new shoes…"
+                placeholder={copy.placeholder}
                 value={note}
                 onChange={(event) => setNote(event.target.value)}
               />
               <button type="submit">
                 <span aria-hidden="true">＋</span>
-                Add expense
+                {copy.add}
               </button>
             </form>
             <p className="chat-hint">
               <span aria-hidden="true">✦</span>
-              In chat, send a number or a receipt photo and it will be added and categorised here.
+              {copy.hint}
             </p>
           </aside>
         </section>
 
         <footer>
           <span>EUROSCOPE</span>
-          <p>Private by design. Clear by default.</p>
+          <p>{copy.footer}</p>
         </footer>
       </div>
     </main>

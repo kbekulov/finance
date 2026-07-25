@@ -1,98 +1,109 @@
-# vinext-starter
+# Instructions for AI Maintainers
 
-A clean full-stack starter running on
-[vinext](https://github.com/cloudflare/vinext), with optional Cloudflare D1 and
-Drizzle support.
+You are maintaining a personal finance website for the repository owner. Follow every rule below for every user message.
 
-## Prerequisites
+## Mandatory workflow
 
-- Node.js `>=22.13.0`
+1. Interpret every user message as a request to update the website’s code or finance data when applicable.
+2. Update both implementations:
+   - GitHub Pages: `index.html`, `styles.css`, and `script.js`
+   - Private Sites build: `app/page.tsx`, `app/globals.css`, and related app files
+3. After every code or data modification:
+   - validate the affected JavaScript/JSON;
+   - run the production app build;
+   - commit the complete change;
+   - push `main` to `https://github.com/kbekulov/finance`;
+   - allow GitHub Pages to rebuild;
+   - publish the same commit to the configured private Site when Sites tools are available.
+4. Never add a redirect from `finance.bekulov.com`. GitHub Pages must serve the complete tracker directly.
+5. Do not leave the working tree dirty after a completed update.
 
-## Quick Start
+## Finance data
+
+- The source of truth is `data/finance-history.json`.
+- Retain no more than the latest 12 monthly records.
+- The current base monthly income is €2,150 unless the user changes it.
+- Every month record must contain:
+  - `month`: `YYYY-MM`
+  - `label`
+  - `updatedAt`: `YYYY-MM-DD`
+  - `revision`: increment whenever source finance data changes so stale browser storage cannot override it
+  - `salary`
+  - `savingsGoal`
+  - `expenses`
+- Every expense must contain:
+  - stable unique `id`
+  - positive numeric `amount`
+  - `note`
+  - `date`
+  - `category`
+  - `source`: `chat`, `site`, or `receipt`
+- Recurring expenses also contain:
+  - `recurring: true`
+  - `frequency: "monthly"`
+- A plain number from the user means add that many euros as an expense for the current month.
+- For a receipt image, identify the final paid total and add it as the expense.
+- Salary and savings requirement statements replace the corresponding current-month values.
+- Use sensible categories. Current supported categories are:
+  - `Food`
+  - `Subscriptions & services`
+  - `Luxury purchases`
+  - `Debt & repayments`
+  - `Devices & installments`
+- Recalculate and verify expense count, total spent, remaining balance, category totals, percentages, and daily pace after every finance-data change.
+
+## Timeline and history
+
+- Every code or data update must keep the visible update date and timeline aligned with the actual current day.
+- The timeline position must be calculated from the selected month’s length.
+- Historical months show month end; the current month shows today.
+- Month navigation and all displayed totals must be derived from `data/finance-history.json`.
+
+## English and Russian
+
+- The website must always support English and Russian through the EN/RU switch.
+- Every new or changed visible string requires both English and Russian translations.
+- Translation parity includes:
+  - headings and labels;
+  - form text and placeholders;
+  - categories;
+  - timeline states;
+  - empty/error states;
+  - recurring/source labels;
+  - dynamically generated totals and accessibility labels.
+- Keep internal category values stable in English; translate only their displayed labels.
+- Persist the user’s language choice locally.
+- After every site change, explicitly check whether translation keys need to be added or updated.
+
+## Visual design
+
+- Preserve the dark iOS-inspired design:
+  - black canvas;
+  - layered graphite cards;
+  - translucent blurred navigation;
+  - Apple system font stack;
+  - iOS system accent colors;
+  - rounded, touch-friendly controls;
+  - subtle hairline separators.
+- Keep the responsive layout readable and operable on desktop and mobile.
+- Preserve visible keyboard focus, semantic labels, sufficient contrast, and reduced-motion support.
+- Keep the SSD-style colored expense breakdown bar proportional to category totals and pair it with an accessible legend.
+
+## Validation
+
+At minimum, run:
 
 ```bash
-npm install
-npm run dev
+node --check script.js
+node -e "JSON.parse(require('fs').readFileSync('data/finance-history.json','utf8'))"
 npm run build
 ```
 
-This starter does not use `wrangler.jsonc`.
+If the bundled environment lacks `npm`, run the existing project’s `vinext build` binary with the bundled Node runtime.
 
-## Included Shape
+Before finishing, verify:
 
-- edit site code under `app/`
-- `.openai/hosting.json` declares optional Sites D1 and R2 bindings
-- `vite.config.ts` simulates declared bindings for local development
-- `db/schema.ts` starts intentionally empty
-- `examples/d1/` contains an optional D1 example surface
-- `drizzle.config.ts` supports local migration generation when needed
-
-## Workspace Auth Headers
-
-OpenAI workspace sites can read the current user's email from
-`oai-authenticated-user-email`.
-
-SIWC-authenticated workspace sites may also receive
-`oai-authenticated-user-full-name` when the user's SIWC profile has a non-empty
-`name` claim. The full-name value is percent-encoded UTF-8 and is accompanied by
-`oai-authenticated-user-full-name-encoding: percent-encoded-utf-8`.
-
-Treat the full name as optional and fall back to email when it is absent:
-
-```tsx
-import { headers } from "next/headers";
-
-export default async function Home() {
-  const requestHeaders = await headers();
-  const email = requestHeaders.get("oai-authenticated-user-email");
-  const encodedFullName = requestHeaders.get("oai-authenticated-user-full-name");
-  const fullName =
-    encodedFullName &&
-    requestHeaders.get("oai-authenticated-user-full-name-encoding") ===
-      "percent-encoded-utf-8"
-      ? decodeURIComponent(encodedFullName)
-      : null;
-
-  const displayName = fullName ?? email;
-  // ...
-}
-```
-
-## Optional Dispatch-Owned ChatGPT Sign-In
-
-Import the ready-to-use helpers from `app/chatgpt-auth.ts` when the site needs
-optional or required ChatGPT sign-in:
-
-- Use `getChatGPTUser()` for optional signed-in UI.
-- Use `requireChatGPTUser(returnTo)` for server-rendered pages that should send
-  anonymous visitors through Sign in with ChatGPT.
-- Use `chatGPTSignInPath(returnTo)` and `chatGPTSignOutPath(returnTo)` for
-  browser links or actions.
-- Pass a same-origin relative `returnTo` path for the destination after sign-in
-  or sign-out. The helper validates and safely encodes it.
-- Mark protected pages with `export const dynamic = "force-dynamic"` because
-  they depend on per-request identity headers.
-
-Dispatch owns `/signin-with-chatgpt`, `/signout-with-chatgpt`, `/callback`, the
-OAuth cookies, and identity header injection. Do not implement app routes for
-those reserved paths. Routes that do not import and call the helper remain
-anonymous-compatible.
-
-SIWC establishes identity only; it does not prove workspace membership. Use the
-Sites hosting platform's access policy controls for workspace-wide restrictions,
-or enforce explicit server-side membership or allowlist checks.
-
-Use SIWC for account pages, user-specific dashboards, saved records, and write
-actions tied to the current ChatGPT user. Leave public content anonymous.
-
-## Useful Commands
-
-- `npm run dev`: start local development
-- `npm run build`: verify the vinext build output
-- `npm test`: build the starter and verify its rendered loading skeleton
-- `npm run db:generate`: generate Drizzle migrations after schema changes
-
-## Learn More
-
-- [vinext Documentation](https://github.com/cloudflare/vinext)
-- [Drizzle D1 Guide](https://orm.drizzle.team/docs/get-started/d1-new)
+- GitHub `main` matches local `HEAD`;
+- GitHub Pages serves `finance.bekulov.com` without redirecting;
+- the live JSON revision and totals match the committed source;
+- English and Russian contain the same product functionality and information.

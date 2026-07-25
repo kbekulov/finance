@@ -29,7 +29,9 @@ test("server-renders the current finance tracker", async () => {
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
 
   const html = await response.text();
-  assert.match(html, /<title>Euroscope — Your salary-cycle money, clearly<\/title>/i);
+  assert.match(html, /<title>Kinance — Your salary-cycle money, clearly<\/title>/i);
+  assert.match(html, />kinance<\/span>/i);
+  assert.doesNotMatch(html, />euroscope<\/span>/i);
   assert.match(html, /class="spending-alert"/);
   assert.match(html, /Spending alert/);
   assert.match(html, /Debt &amp; repayments is your largest cost at €555\.00/);

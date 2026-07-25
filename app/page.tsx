@@ -101,7 +101,7 @@ const COPY = {
     spendingLargest: "{category} is your largest cost at {amount} ({percent}% of spending).",
     spendingCut: "For flexible cuts, focus on {category} next ({amount}).",
     spendingSame: "Pause new spending in this category until the balance improves.",
-    euroscopeHome: "Euroscope home",
+    kinanceHome: "Kinance home",
     languageLabel: "Language",
     financeHistoryLabel: "Salary cycle history",
     monthlyPlanLabel: "Salary cycle plan balance",
@@ -157,7 +157,7 @@ const COPY = {
     spendingLargest: "Самая крупная статья — {category}: {amount} ({percent}% всех расходов).",
     spendingCut: "Для гибкого сокращения расходов обратите внимание на {category} ({amount}).",
     spendingSame: "Не добавляйте новые траты в этой категории, пока баланс не улучшится.",
-    euroscopeHome: "Главная Euroscope",
+    kinanceHome: "Главная Kinance",
     languageLabel: "Язык",
     financeHistoryLabel: "История циклов зарплаты",
     monthlyPlanLabel: "Баланс цикла зарплаты",
@@ -284,15 +284,19 @@ export default function Home() {
   const [language, setLanguage] = useState<Language>("en");
 
   useEffect(() => {
-    const savedLanguage = localStorage.getItem("euroscope:language");
+    const savedLanguage =
+      localStorage.getItem("kinance:language") ??
+      localStorage.getItem("euroscope:language");
     if (savedLanguage === "ru") setLanguage("ru");
   }, []);
 
   useEffect(() => {
     try {
-      const saved = localStorage.getItem(
-        `euroscope:${selectedMonth.month}:${selectedMonth.updatedAt}:r${selectedMonth.revision}`,
-      );
+      const key =
+        `${selectedMonth.month}:${selectedMonth.updatedAt}:r${selectedMonth.revision}`;
+      const saved =
+        localStorage.getItem(`kinance:${key}`) ??
+        localStorage.getItem(`euroscope:${key}`);
       if (saved) setData(JSON.parse(saved));
       else setData(selectedMonth);
     } catch {
@@ -304,7 +308,7 @@ export default function Home() {
   useEffect(() => {
     if (!isReady) return;
     localStorage.setItem(
-      `euroscope:${selectedMonth.month}:${selectedMonth.updatedAt}:r${selectedMonth.revision}`,
+      `kinance:${selectedMonth.month}:${selectedMonth.updatedAt}:r${selectedMonth.revision}`,
       JSON.stringify(data),
     );
   }, [data, isReady, selectedMonth]);
@@ -422,9 +426,9 @@ export default function Home() {
         </section>
 
         <header className="topbar">
-          <a className="brand" href="#top" aria-label={copy.euroscopeHome}>
+          <a className="brand" href="#top" aria-label={copy.kinanceHome}>
             <span className="brand-mark" aria-hidden="true">€</span>
-            <span>euroscope</span>
+            <span>kinance</span>
           </a>
           <div className="header-meta">
             <span className="updated-label">{updatedLabel}</span>
@@ -437,7 +441,7 @@ export default function Home() {
                   aria-pressed={language === item}
                   onClick={() => {
                     setLanguage(item);
-                    localStorage.setItem("euroscope:language", item);
+                    localStorage.setItem("kinance:language", item);
                   }}
                 >
                   {item.toUpperCase()}
@@ -726,7 +730,7 @@ export default function Home() {
         </section>
 
         <footer>
-          <span>EUROSCOPE</span>
+          <span>KINANCE</span>
           <p>{copy.footer}</p>
         </footer>
       </div>

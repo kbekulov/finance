@@ -57,7 +57,7 @@ const TRANSLATIONS = {
     spendingLargest: "{category} is your largest cost at {amount} ({percent}% of spending).",
     spendingCut: "For flexible cuts, focus on {category} next ({amount}).",
     spendingSame: "Pause new spending in this category until the balance improves.",
-    euroscopeHome: "Euroscope home",
+    kinanceHome: "Kinance home",
     languageLabel: "Language",
     financeHistoryLabel: "Salary cycle history",
     monthlyTimelineLabel: "Salary cycle timeline",
@@ -125,7 +125,7 @@ const TRANSLATIONS = {
     spendingLargest: "Самая крупная статья — {category}: {amount} ({percent}% всех расходов).",
     spendingCut: "Для гибкого сокращения расходов обратите внимание на {category} ({amount}).",
     spendingSame: "Не добавляйте новые траты в этой категории, пока баланс не улучшится.",
-    euroscopeHome: "Главная Euroscope",
+    kinanceHome: "Главная Kinance",
     languageLabel: "Язык",
     financeHistoryLabel: "История циклов зарплаты",
     monthlyTimelineLabel: "Шкала цикла зарплаты",
@@ -151,7 +151,11 @@ let history = [];
 let selectedMonth = null;
 let data = null;
 let salarySchedule = { dayOfMonth: 12, weekendRule: "previousFriday" };
-let language = localStorage.getItem("euroscope:language") === "ru" ? "ru" : "en";
+let language =
+  (localStorage.getItem("kinance:language") ??
+    localStorage.getItem("euroscope:language")) === "ru"
+    ? "ru"
+    : "en";
 
 function t(key, replacements = {}) {
   let value = TRANSLATIONS[language][key] ?? TRANSLATIONS.en[key] ?? key;
@@ -325,13 +329,20 @@ function renderSpendingAlert() {
 }
 
 function storageKey(month) {
+  return `kinance:${month.month}:${month.updatedAt}:r${month.revision}`;
+}
+
+function legacyStorageKey(month) {
   return `euroscope:${month.month}:${month.updatedAt}:r${month.revision}`;
 }
 
 function loadMonth(month) {
   selectedMonth = month;
   try {
-    data = JSON.parse(localStorage.getItem(storageKey(month))) || structuredClone(month);
+    const saved =
+      localStorage.getItem(storageKey(month)) ??
+      localStorage.getItem(legacyStorageKey(month));
+    data = JSON.parse(saved) || structuredClone(month);
   } catch {
     data = structuredClone(month);
   }
@@ -519,7 +530,7 @@ function bindControls() {
   document.querySelectorAll("[data-language]").forEach((button) => {
     button.addEventListener("click", () => {
       language = button.dataset.language;
-      localStorage.setItem("euroscope:language", language);
+      localStorage.setItem("kinance:language", language);
       applyTranslations();
       if (data) render();
     });

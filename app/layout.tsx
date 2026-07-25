@@ -10,7 +10,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return {
     metadataBase: new URL(baseUrl),
-    title: "Euroscope — Your salary-cycle money, clearly",
+    title: "Kinance — Your salary-cycle money, clearly",
     description:
       "A private, responsive salary-cycle finance tracker for expenses, salary and savings goals.",
     icons: {
@@ -18,13 +18,13 @@ export async function generateMetadata(): Promise<Metadata> {
       shortcut: "/favicon.svg",
     },
     openGraph: {
-      title: "Euroscope — Every euro has a place.",
+      title: "Kinance — Every euro has a place.",
       description: "Salary-cycle money, clearly.",
       images: [{ url: `${baseUrl}/og.png`, width: 1200, height: 630 }],
     },
     twitter: {
       card: "summary_large_image",
-      title: "Euroscope — Every euro has a place.",
+      title: "Kinance — Every euro has a place.",
       description: "Salary-cycle money, clearly.",
       images: [`${baseUrl}/og.png`],
     },

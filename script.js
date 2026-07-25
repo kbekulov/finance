@@ -54,6 +54,9 @@ const TRANSLATIONS = {
       "Debt & repayments": "Debt & repayments",
       "Devices & installments": "Devices & installments",
     },
+    expenseNotes: {
+      "Apple Devices": "Apple Devices",
+    },
   },
   ru: {
     monthGlance: "ВАШ МЕСЯЦ В ЦИФРАХ",
@@ -102,6 +105,9 @@ const TRANSLATIONS = {
       "Debt & repayments": "Долги и выплаты",
       "Devices & installments": "Устройства и рассрочки",
     },
+    expenseNotes: {
+      "Apple Devices": "Устройства Apple",
+    },
   },
 };
 
@@ -120,6 +126,10 @@ function t(key, replacements = {}) {
 
 function categoryLabel(category) {
   return TRANSLATIONS[language].categories[category] ?? category;
+}
+
+function expenseNoteLabel(note) {
+  return TRANSLATIONS[language].expenseNotes[note] ?? note;
 }
 
 function locale() {
@@ -327,7 +337,9 @@ function renderLedger() {
       </span>
       <strong class="expense-amount">−${formatEuro(safeNumber(expense.amount))}</strong>
     `;
-    item.querySelector(".expense-info strong").textContent = expense.note || expense.category;
+    item.querySelector(".expense-info strong").textContent = expenseNoteLabel(
+      expense.note || expense.category,
+    );
     list.append(item);
   });
   container.append(list);

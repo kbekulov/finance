@@ -147,6 +147,15 @@ const CATEGORY_LABELS: Record<Language, Record<Category, string>> = {
   },
 };
 
+const EXPENSE_NOTE_LABELS: Record<Language, Record<string, string>> = {
+  en: {
+    "Apple Devices": "Apple Devices",
+  },
+  ru: {
+    "Apple Devices": "Устройства Apple",
+  },
+};
+
 // The JSON file is the source of truth. Only the most recent 12 records are shown.
 const HISTORY = (financeHistoryJson.months as unknown as MonthRecord[]).slice(-12);
 const INITIAL_MONTH = HISTORY[HISTORY.length - 1];
@@ -257,6 +266,8 @@ export default function Home() {
     `${selectedMonth.updatedAt}T12:00:00`,
   ).toLocaleDateString(locale, { day: "numeric", month: "long", year: "numeric" })}`;
   const categoryLabel = (name: Category) => CATEGORY_LABELS[language][name];
+  const expenseNoteLabel = (note: string) =>
+    EXPENSE_NOTE_LABELS[language][note] ?? note;
 
   function addExpense(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -520,7 +531,7 @@ export default function Home() {
                       {categorySymbol(expense.category)}
                     </span>
                     <span className="expense-info">
-                      <strong>{expense.note}</strong>
+                      <strong>{expenseNoteLabel(expense.note)}</strong>
                       <small>
                         {categoryLabel(expense.category)} · {expense.recurring ? `${copy.monthly} · ` : ""}
                         {sourceLabel(expense.source, language)} ·{" "}

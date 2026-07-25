@@ -6,7 +6,7 @@
       "month": "2026-07",
       "label": "July 2026",
       "updatedAt": "2026-07-25",
-      "revision": 2,
+      "revision": 3,
       "salary": 2150,
       "savingsGoal": 0,
       "expenses": [
@@ -81,9 +81,9 @@
           "frequency": "monthly"
         },
         {
-          "id": "2026-07-iphone",
+          "id": "2026-07-apple-devices",
           "amount": 80,
-          "note": "iPhone",
+          "note": "Apple Devices",
           "date": "2026-07-25",
           "category": "Devices & installments",
           "source": "chat",

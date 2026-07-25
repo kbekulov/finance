@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import financeHistoryJson from "@/public/data/finance-history.json";
+import financeHistoryJson from "@/data/finance-history.json";
 
 type Category = "Food" | "Subscriptions & services" | "Luxury purchases";
 

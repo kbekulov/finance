@@ -14,14 +14,18 @@
       "currency": "EUR",
       "timezone": "Europe/Vilnius",
       "updatedAt": "2026-07-25",
-      "revision": 4,
+      "revision": 6,
       "salary": 2150,
-      "savingsGoal": 0,
+      "savingsGoal": 200,
       "expenses": [
         {
           "id": "2026-07-university-debt",
           "amount": 200,
           "note": "University debt",
+          "noteTranslations": {
+            "en": "University debt",
+            "ru": "Долг за университет"
+          },
           "date": "2026-07-25",
           "category": "Debt & repayments",
           "source": "chat",
@@ -32,6 +36,10 @@
           "id": "2026-07-chatgpt",
           "amount": 25,
           "note": "ChatGPT",
+          "noteTranslations": {
+            "en": "ChatGPT",
+            "ru": "ChatGPT"
+          },
           "date": "2026-07-25",
           "category": "Subscriptions & services",
           "source": "chat",
@@ -42,6 +50,10 @@
           "id": "2026-07-youtube",
           "amount": 25,
           "note": "YouTube",
+          "noteTranslations": {
+            "en": "YouTube",
+            "ru": "YouTube"
+          },
           "date": "2026-07-25",
           "category": "Subscriptions & services",
           "source": "chat",
@@ -52,6 +64,10 @@
           "id": "2026-07-slite",
           "amount": 9,
           "note": "Slite",
+          "noteTranslations": {
+            "en": "Slite",
+            "ru": "Slite"
+          },
           "date": "2026-07-25",
           "category": "Subscriptions & services",
           "source": "chat",
@@ -62,6 +78,10 @@
           "id": "2026-07-apartment-debt",
           "amount": 300,
           "note": "Apartment debt",
+          "noteTranslations": {
+            "en": "Apartment debt",
+            "ru": "Долг за квартиру"
+          },
           "date": "2026-07-25",
           "category": "Debt & repayments",
           "source": "chat",
@@ -72,6 +92,10 @@
           "id": "2026-07-laptop",
           "amount": 80,
           "note": "Laptop",
+          "noteTranslations": {
+            "en": "Laptop",
+            "ru": "Ноутбук"
+          },
           "date": "2026-07-25",
           "category": "Devices & installments",
           "source": "chat",
@@ -82,6 +106,10 @@
           "id": "2026-07-revolut-debt",
           "amount": 66,
           "note": "Revolut debt",
+          "noteTranslations": {
+            "en": "Revolut debt",
+            "ru": "Долг Revolut"
+          },
           "date": "2026-07-25",
           "category": "Debt & repayments",
           "source": "chat",
@@ -92,6 +120,10 @@
           "id": "2026-07-apple-devices",
           "amount": 80,
           "note": "Apple Devices",
+          "noteTranslations": {
+            "en": "Apple Devices",
+            "ru": "Устройства Apple"
+          },
           "date": "2026-07-25",
           "category": "Devices & installments",
           "source": "chat",

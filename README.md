@@ -61,6 +61,7 @@ Every expense record must preserve all known details:
 - `id`: stable, unique, month-prefixed identifier such as `2026-07-grocery-001`
 - `amount`: positive numeric final euro amount, never a formatted string
 - `note`: concise canonical English name
+- `noteTranslations.en` and `noteTranslations.ru`: required display names for every canonical expense, even when a brand name is identical in both languages
 - `date`: actual expense date in `YYYY-MM-DD`
 - `category`: one supported stable English category value
 - `source`: `chat`, `site`, or `receipt`
@@ -78,6 +79,7 @@ Do not store derived totals in JSON. Total spent, remaining balance, category to
 A message whose financial intent is simply a number means: add that amount in euros as a new expense for the current calendar month.
 
 - Use a new stable ID.
+- Add both English and Russian `noteTranslations`; never leave a canonical expense name untranslated.
 - Use today’s date unless the user specifies another date.
 - Choose the most reasonable supported category from context.
 - Use `source: "chat"`.
@@ -99,11 +101,11 @@ When the user states a monthly salary, replace the current month’s `salary`. S
 
 ### Savings requirement
 
-When the user changes the monthly savings requirement, replace the current month’s `savingsGoal`.
+When the user changes the monthly savings requirement, replace the current month’s `savingsGoal`. Current canonical savings requirement is at least €200 per month until changed.
 
 ### Rename or correct an expense
 
-Edit the existing record instead of adding a duplicate. Preserve its amount, date, recurrence, source, and category unless the user changes them. Update English/Russian display mappings if the renamed note is localized.
+Edit the existing record instead of adding a duplicate. Preserve its amount, date, recurrence, source, and category unless the user changes them. Update both database-level `noteTranslations` values with every rename.
 
 ### Recurring expenses
 
@@ -176,7 +178,7 @@ For every change, inspect:
 - month/timeline text, recurrence labels, sources, totals, and generated guidance;
 - `aria-label`, `title`, status/live-region text, and other accessibility copy.
 
-Canonical JSON notes and categories remain English. Translate them at render time through explicit mappings. Persist the selected language locally. Never ship a new visible English string without its Russian equivalent.
+Canonical `note` and category keys remain English, while every canonical expense also stores `noteTranslations.en` and `noteTranslations.ru`. Render expense names from those database fields. Persist the selected language locally. Never ship a new visible English string without its Russian equivalent.
 
 ## Calculation invariants
 

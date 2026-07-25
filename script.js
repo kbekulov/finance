@@ -41,6 +41,11 @@ const TRANSLATIONS = {
     nothingSpent: "Nothing spent yet",
     monthEmpty: "Your {month} expenses will appear here as you add them.",
     monthly: "Monthly",
+    receipt: "Receipt",
+    chat: "Added in chat",
+    here: "Added here",
+    salaryEuroLabel: "Monthly salary in euros",
+    savingsEuroLabel: "Monthly savings requirement in euros",
     recordedExpenses: "{count} recorded expense{plural}",
     perDay: "/ day",
     monthsSaved: "{count} / 12 months saved",
@@ -50,6 +55,14 @@ const TRANSLATIONS = {
     spendingLargest: "{category} is your largest cost at {amount} ({percent}% of spending).",
     spendingCut: "For flexible cuts, focus on {category} next ({amount}).",
     spendingSame: "Pause new spending in this category until the balance improves.",
+    euroscopeHome: "Euroscope home",
+    languageLabel: "Language",
+    financeHistoryLabel: "Finance history",
+    monthlyTimelineLabel: "Monthly timeline",
+    monthlyPlanLabel: "Monthly plan balance",
+    monthlyTotalsLabel: "Monthly totals",
+    expenseCategoriesLabel: "Expense categories",
+    budgetUsed: "{percent}% of spending budget used",
     historyUnavailable: "History unavailable",
     refresh: "Please refresh the page in a moment.",
     categories: {
@@ -58,9 +71,6 @@ const TRANSLATIONS = {
       "Luxury purchases": "Luxury purchases",
       "Debt & repayments": "Debt & repayments",
       "Devices & installments": "Devices & installments",
-    },
-    expenseNotes: {
-      "Apple Devices": "Apple Devices",
     },
   },
   ru: {
@@ -97,6 +107,11 @@ const TRANSLATIONS = {
     nothingSpent: "Расходов пока нет",
     monthEmpty: "Расходы за {month} появятся здесь после добавления.",
     monthly: "Ежемесячно",
+    receipt: "Чек",
+    chat: "Добавлено в чате",
+    here: "Добавлено здесь",
+    salaryEuroLabel: "Месячный доход в евро",
+    savingsEuroLabel: "Цель ежемесячных накоплений в евро",
     recordedExpenses: "Записано расходов: {count}",
     perDay: "/ день",
     monthsSaved: "Сохранено месяцев: {count} из 12",
@@ -106,6 +121,14 @@ const TRANSLATIONS = {
     spendingLargest: "Самая крупная статья — {category}: {amount} ({percent}% всех расходов).",
     spendingCut: "Для гибкого сокращения расходов обратите внимание на {category} ({amount}).",
     spendingSame: "Не добавляйте новые траты в этой категории, пока баланс не улучшится.",
+    euroscopeHome: "Главная Euroscope",
+    languageLabel: "Язык",
+    financeHistoryLabel: "История финансов",
+    monthlyTimelineLabel: "Шкала месяца",
+    monthlyPlanLabel: "Баланс месячного плана",
+    monthlyTotalsLabel: "Итоги месяца",
+    expenseCategoriesLabel: "Категории расходов",
+    budgetUsed: "Использовано {percent}% бюджета на расходы",
     historyUnavailable: "История недоступна",
     refresh: "Обновите страницу через несколько секунд.",
     categories: {
@@ -114,9 +137,6 @@ const TRANSLATIONS = {
       "Luxury purchases": "Покупки для удовольствия",
       "Debt & repayments": "Долги и выплаты",
       "Devices & installments": "Устройства и рассрочки",
-    },
-    expenseNotes: {
-      "Apple Devices": "Устройства Apple",
     },
   },
 };
@@ -138,8 +158,14 @@ function categoryLabel(category) {
   return TRANSLATIONS[language].categories[category] ?? category;
 }
 
-function expenseNoteLabel(note) {
-  return TRANSLATIONS[language].expenseNotes[note] ?? note;
+function expenseNoteLabel(expense) {
+  return expense.noteTranslations?.[language] ?? expense.note ?? expense.category;
+}
+
+function sourceLabel(source) {
+  if (source === "receipt") return t("receipt");
+  if (source === "chat") return t("chat");
+  return t("here");
 }
 
 function locale() {
@@ -170,6 +196,9 @@ function applyTranslations() {
   });
   document.querySelectorAll("[data-i18n-placeholder]").forEach((node) => {
     node.placeholder = t(node.dataset.i18nPlaceholder);
+  });
+  document.querySelectorAll("[data-i18n-aria-label]").forEach((node) => {
+    node.setAttribute("aria-label", t(node.dataset.i18nAriaLabel));
   });
   document.querySelectorAll("[data-category-option]").forEach((option) => {
     option.textContent = categoryLabel(option.dataset.categoryOption);
@@ -294,9 +323,13 @@ function renderTimeline() {
     .format(new Date(year, month - 1, 1))
     .replace(".", "");
   const position = `${(day / daysInMonth) * 100}%`;
+  const dayLabel = new Intl.DateTimeFormat(locale(), {
+    day: "numeric",
+    month: "short",
+  }).format(new Date(year, month - 1, day));
 
   element("timeline-start").textContent = `01 ${shortMonth.toUpperCase()}`;
-  element("timeline-current").textContent = `${isCurrentMonth ? t("today") : t("monthEnd")} · ${day} ${shortMonth}`;
+  element("timeline-current").textContent = `${isCurrentMonth ? t("today") : t("monthEnd")} · ${dayLabel}`;
   element("timeline-end").textContent = `${daysInMonth} ${shortMonth.toUpperCase()}`;
   element("timeline-progress").style.width = position;
   element("timeline-marker").style.left = position;
@@ -384,13 +417,11 @@ function renderLedger() {
       <span class="expense-monogram" aria-hidden="true">${code}</span>
       <span class="expense-info">
         <strong></strong>
-        <small>${categoryLabel(expense.category)} · ${expense.recurring ? `${t("monthly")} · ` : ""}${date}</small>
+        <small>${categoryLabel(expense.category)} · ${expense.recurring ? `${t("monthly")} · ` : ""}${sourceLabel(expense.source)} · ${date}</small>
       </span>
       <strong class="expense-amount">−${formatEuro(safeNumber(expense.amount))}</strong>
     `;
-    item.querySelector(".expense-info strong").textContent = expenseNoteLabel(
-      expense.note || expense.category,
-    );
+    item.querySelector(".expense-info strong").textContent = expenseNoteLabel(expense);
     list.append(item);
   });
   container.append(list);
@@ -425,6 +456,10 @@ function render() {
   element("spent-percent").textContent = `${Math.round(percent)}% ${t("spent")}`;
   element("ring-percent").textContent = `${Math.round(percent)}%`;
   element("progress-ring").style.setProperty("--progress", `${percent * 3.6}deg`);
+  element("progress-ring").setAttribute(
+    "aria-label",
+    t("budgetUsed", { percent: Math.round(percent) }),
+  );
   element("daily-pace").textContent = `${formatEuro(Math.max(remaining, 0) / daysLeft, true)} ${t("perDay")}`;
 
   applyTranslations();

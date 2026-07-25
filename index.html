@@ -28,13 +28,13 @@
         </section>
 
         <header class="topbar">
-          <a class="brand" href="#top" aria-label="Euroscope home">
+          <a class="brand" href="#top" aria-label="Euroscope home" data-i18n-aria-label="euroscopeHome">
             <span class="brand-mark" aria-hidden="true">€</span>
             <span>euroscope</span>
           </a>
           <div class="header-meta">
             <span class="updated-label" id="updated-label">Loading history…</span>
-            <div class="language-switch" role="group" aria-label="Language">
+            <div class="language-switch" role="group" aria-label="Language" data-i18n-aria-label="languageLabel">
               <button type="button" data-language="en" class="active">EN</button>
               <button type="button" data-language="ru">RU</button>
             </div>
@@ -45,9 +45,9 @@
           </div>
         </header>
 
-        <nav class="month-history" id="month-history" aria-label="Finance history"></nav>
+        <nav class="month-history" id="month-history" aria-label="Finance history" data-i18n-aria-label="financeHistoryLabel"></nav>
 
-        <section class="month-timeline" aria-label="Monthly timeline">
+        <section class="month-timeline" aria-label="Monthly timeline" data-i18n-aria-label="monthlyTimelineLabel">
           <div class="timeline-copy">
             <span id="timeline-start">01</span>
             <strong id="timeline-current">Today</strong>
@@ -69,7 +69,7 @@
             </p>
           </div>
 
-          <div class="balance-card" aria-label="Monthly plan balance">
+          <div class="balance-card" aria-label="Monthly plan balance" data-i18n-aria-label="monthlyPlanLabel">
             <div class="balance-topline">
               <span data-i18n="availableAfterPlan">AVAILABLE AFTER PLAN</span>
               <span id="spent-percent">0% SPENT</span>
@@ -90,12 +90,12 @@
           </div>
         </section>
 
-        <section class="stat-grid" aria-label="Monthly totals">
+        <section class="stat-grid" aria-label="Monthly totals" data-i18n-aria-label="monthlyTotalsLabel">
           <article class="stat-card">
             <span class="stat-icon" aria-hidden="true">↗</span>
             <p data-i18n="monthlySalary">MONTHLY SALARY</p>
             <label class="editable-value">
-              <span class="sr-only">Monthly salary in euros</span>
+              <span class="sr-only" data-i18n="salaryEuroLabel">Monthly salary in euros</span>
               <span aria-hidden="true">€</span>
               <input id="salary" inputmode="decimal" value="0" />
             </label>
@@ -106,7 +106,7 @@
             <span class="stat-icon" aria-hidden="true">◇</span>
             <p data-i18n="savingsRequirement">SAVINGS REQUIREMENT</p>
             <label class="editable-value">
-              <span class="sr-only">Monthly savings requirement in euros</span>
+              <span class="sr-only" data-i18n="savingsEuroLabel">Monthly savings requirement in euros</span>
               <span aria-hidden="true">€</span>
               <input id="savings" inputmode="decimal" value="0" />
             </label>
@@ -121,7 +121,7 @@
           </article>
         </section>
 
-        <section class="category-strip" id="category-strip" aria-label="Expense categories"></section>
+        <section class="category-strip" id="category-strip" aria-label="Expense categories" data-i18n-aria-label="expenseCategoriesLabel"></section>
 
         <section class="breakdown-panel" aria-labelledby="breakdown-title">
           <div class="breakdown-heading">

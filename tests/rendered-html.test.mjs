@@ -37,6 +37,7 @@ test("server-renders the current finance tracker", async () => {
   assert.match(html, /Updated 25 July 2026/);
   assert.match(html, /Today<!-- --> · <!-- -->25/);
   assert.match(html, /€785\.00/);
+  assert.match(html, /€1,165\.00/);
   assert.doesNotMatch(html, /Your site is taking shape|Building your site/);
 });
 
@@ -54,7 +55,8 @@ test("keeps database history and translations aligned", async () => {
   assert.equal(database.currency, "EUR");
   assert.equal(database.timezone, "Europe/Vilnius");
   assert.equal(current.updatedAt, "2026-07-25");
-  assert.equal(current.revision, 4);
+  assert.equal(current.revision, 6);
+  assert.equal(current.savingsGoal, 200);
   assert.deepEqual(current.period, {
     start: "2026-07-01",
     end: "2026-07-31",
@@ -64,10 +66,15 @@ test("keeps database history and translations aligned", async () => {
       ?.note,
     "Apple Devices",
   );
+  for (const expense of current.expenses) {
+    assert.equal(typeof expense.noteTranslations?.en, "string");
+    assert.equal(typeof expense.noteTranslations?.ru, "string");
+    assert.ok(expense.noteTranslations.en.length > 0);
+    assert.ok(expense.noteTranslations.ru.length > 0);
+  }
 
   for (const source of [page, script]) {
-    assert.match(source, /Apple Devices/);
-    assert.match(source, /Устройства Apple/);
+    assert.match(source, /noteTranslations/);
     assert.match(source, /Spending alert/);
     assert.match(source, /Контроль расходов/);
   }

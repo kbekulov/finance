@@ -1160,6 +1160,9 @@ h1 em {
 }
 
 .stat-card.salary-locked {
+  align-self: start;
+  min-height: 0;
+  padding-bottom: 20px;
   border-color: color-mix(in srgb, var(--blue) 46%, var(--separator));
   background:
     linear-gradient(145deg, color-mix(in srgb, var(--blue) 14%, transparent), transparent 58%),

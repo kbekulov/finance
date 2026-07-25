@@ -201,8 +201,8 @@ The warning is guidance derived from current data, not financial or legal advice
 - Historical cycles show their cycle end.
 - Daily pace divides non-negative remaining money by the days after today through `period.end`; it must not use calendar-month end.
 - The salary balance resets on `period.start`, including when the nominal 12th moves to the preceding Friday.
-- `updatedAt`, the visible updated label, and current timeline must be aligned whenever code or canonical data changes.
-- The connected React implementation currently uses a deterministic `TODAY` date for consistent builds; update it to the actual current date whenever the site changes.
+- `updatedAt` and its visible label describe the latest canonical-data revision; they must not drive the live timeline or daily pace.
+- Derive the live timeline, chart cutoff, and daily pace from the actual `Europe/Vilnius` calendar day at render time. Never hard-code today or treat future cycle days as zero-spend observations.
 - Month names and short dates must follow the active locale.
 
 ## English/Russian parity
@@ -224,17 +224,19 @@ Never use em dashes in user-facing site copy, metadata, or titles. The document 
 
 After each finance-data update, verify:
 
-- `spent = sum(expense.amount)`
+- `spent = sum(expense.amount)` using integer cents for aggregation
 - `spendable = max(salary - savingsGoal, 0)`
 - `remaining = salary - savingsGoal - spent`
-- used percentage is based on `spent / spendable` and visually capped at 100%
+- used percentage is based on `spent / spendable`; show the real percentage above 100% while capping only the ring graphic at 100%
+- when `spendable` is zero and spending is positive, show a no-spending-budget state instead of a false `0%`
 - category totals sum exactly to `spent`
 - breakdown segment widths are proportional to category totals
 - daily pace uses non-negative remaining money divided by remaining salary-cycle days
 - expense count equals the current salary cycle’s array length
 - warning amount/share match the same category totals
 - savings and spending comparisons use the average of up to the three salary cycles immediately before the selected cycle
-- savings comparisons use each cycle's `savingsGoal`; spending comparisons use the sum of each cycle's expenses
+- savings comparisons are explicitly described as planned savings and use each cycle's `savingsGoal`
+- spending comparisons use only expenses through the same elapsed cycle day in each prior cycle, avoiding partial-to-full-cycle comparisons
 - comparisons state how many prior cycles were available and show a neutral history-unavailable message when none exist
 
 Do not change monetary totals when only renaming an expense.
@@ -256,7 +258,7 @@ Do not introduce heavy libraries for behavior that plain TypeScript/JavaScript/C
 
 Theme selection is a device-local preference stored as `kinance:theme`. Keep the switcher data-driven so the number of themes is not artificially limited. Every theme must have one stable ID, display label, and PNG banner path in the `THEMES` collection in both JavaScript and React, matching `data-theme` CSS selectors. Store theme banners in `public/theme-banners/`, use `/public/theme-banners/...` paths in the static site and `/theme-banners/...` paths in React, use a wide composition with the important characters inside the central crop-safe area, and provide localized accessible alt text through `themeBannerLabel`. Character artwork must read as a borderless, edge-faded page-background break with intentional vertical spacing, not as a rounded card or standalone wrapper.
 
-The daily-expense area chart sits directly below the character artwork and uses ApexCharts in both implementations. Aggregate canonical expenses by `date`, include zero-value points for every day in the selected salary cycle, keep the x-axis as a datetime axis, and recalculate on cycle, theme, or expense changes. Render it as a prominent borderless sparkline with no visible title, totals, axes, labels, grid, legend, markers, or tooltip. Its only visual content is a high-contrast theme-aware movement stroke with a clearly visible translucent gradient area and restrained glow. Disable chart animation when reduced motion is requested, while preserving a localized accessible label for screen readers.
+The daily-expense area chart sits directly below the character artwork and uses ApexCharts in both implementations. Aggregate non-recurring expenses by their actual `date`; do not plot recurring expected expenses on the day they happened to be recorded because that would falsely imply they were paid that day. Include zero-value points from the selected salary cycle start only through the actual Vilnius date for a current cycle, or through `period.end` for a historical cycle. Keep the x-axis as a datetime axis and recalculate on cycle, theme, or expense changes. Render it as a prominent borderless sparkline with no visible title, totals, axes, labels, grid, legend, markers, or tooltip. Its only visual content is a high-contrast theme-aware movement stroke with a clearly visible translucent gradient area and restrained glow. Disable chart animation when reduced motion is requested, while preserving a localized accessible label for screen readers.
 
 The built-in themes are:
 

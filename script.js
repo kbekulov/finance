@@ -29,15 +29,15 @@ const TRANSLATIONS = {
     dailySpendingIntro: "What left your account each day this salary cycle",
     thisCycleTotal: "This cycle",
     dailyExpenseSeries: "Daily spending",
-    dailySpendingChartLabel: "Daily expenses movement",
+    dailySpendingChartLabel: "Daily non-recurring expense movement",
     tapToEdit: "Tap the amount to edit",
     savingsRequirement: "SAVINGS REQUIREMENT",
     protectedSpending: "Protected from spending",
     spentThisMonth: "SPENT THIS SALARY CYCLE",
     comparisonUnavailable: "Past 3-cycle comparison appears when history is available",
-    savingsMore: "{difference} more saved than the prior {count}-cycle average of {average}",
-    savingsLess: "{difference} less saved than the prior {count}-cycle average of {average}",
-    savingsSame: "Matches the prior {count}-cycle savings average of {average}",
+    savingsMore: "Planned savings are {difference} above the prior {count}-cycle average of {average}",
+    savingsLess: "Planned savings are {difference} below the prior {count}-cycle average of {average}",
+    savingsSame: "Planned savings match the prior {count}-cycle average of {average}",
     spendingMore: "{difference} more spent than the prior {count}-cycle average of {average}",
     spendingLess: "{difference} less spent than the prior {count}-cycle average of {average}",
     spendingSame: "Matches the prior {count}-cycle spending average of {average}",
@@ -97,6 +97,7 @@ const TRANSLATIONS = {
     monthlyTotalsLabel: "Salary cycle totals",
     expenseCategoriesLabel: "Expense categories",
     budgetUsed: "{percent}% of spending budget used",
+    noSpendingBudget: "NO SPENDING BUDGET",
     historyUnavailable: "History unavailable",
     refresh: "Please refresh the page in a moment.",
     categories: {
@@ -123,15 +124,15 @@ const TRANSLATIONS = {
     dailySpendingIntro: "Сколько уходило со счёта каждый день этого цикла зарплаты",
     thisCycleTotal: "За цикл",
     dailyExpenseSeries: "Расходы за день",
-    dailySpendingChartLabel: "Динамика расходов по дням",
+    dailySpendingChartLabel: "Динамика разовых расходов по дням",
     tapToEdit: "Нажмите на сумму, чтобы изменить",
     savingsRequirement: "ЦЕЛЬ НАКОПЛЕНИЙ",
     protectedSpending: "Защищено от расходов",
     spentThisMonth: "ПОТРАЧЕНО В ЭТОМ ЦИКЛЕ",
     comparisonUnavailable: "Сравнение с 3 прошлыми циклами появится, когда будет доступна история",
-    savingsMore: "Накоплено на {difference} больше среднего за {count} прошлых цикла: {average}",
-    savingsLess: "Накоплено на {difference} меньше среднего за {count} прошлых цикла: {average}",
-    savingsSame: "На уровне среднего накопления за {count} прошлых цикла: {average}",
+    savingsMore: "План накоплений на {difference} выше среднего за {count} прошлых цикла: {average}",
+    savingsLess: "План накоплений на {difference} ниже среднего за {count} прошлых цикла: {average}",
+    savingsSame: "План накоплений совпадает со средним за {count} прошлых цикла: {average}",
     spendingMore: "Потрачено на {difference} больше среднего за {count} прошлых цикла: {average}",
     spendingLess: "Потрачено на {difference} меньше среднего за {count} прошлых цикла: {average}",
     spendingSame: "На уровне средних расходов за {count} прошлых цикла: {average}",
@@ -191,6 +192,7 @@ const TRANSLATIONS = {
     monthlyTotalsLabel: "Итоги цикла зарплаты",
     expenseCategoriesLabel: "Категории расходов",
     budgetUsed: "Использовано {percent}% бюджета на расходы",
+    noSpendingBudget: "НЕТ БЮДЖЕТА НА РАСХОДЫ",
     historyUnavailable: "История недоступна",
     refresh: "Обновите страницу через несколько секунд.",
     categories: {
@@ -336,6 +338,36 @@ function safeNumber(value) {
   return Number.isFinite(number) ? Math.max(number, 0) : 0;
 }
 
+function toCents(value) {
+  return Math.round(safeNumber(value) * 100);
+}
+
+function sumExpenses(expenses) {
+  return expenses.reduce((sum, expense) => sum + toCents(expense.amount), 0) / 100;
+}
+
+function roundMoney(value) {
+  return Math.round(value * 100) / 100;
+}
+
+function parseExpenseAmount(value) {
+  const normalized = String(value).trim().replace(",", ".");
+  if (!/^(?:\d+|\d*\.\d{1,2})$/.test(normalized)) return null;
+  const amount = Number(normalized);
+  return Number.isFinite(amount) && amount > 0 ? roundMoney(amount) : null;
+}
+
+function calendarDateKey(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function dateFromKey(dateKey) {
+  return new Date(`${dateKey}T12:00:00`);
+}
+
 function priorCycles() {
   const selectedIndex = history.findIndex(
     (month) => month.month === selectedMonth.month,
@@ -344,7 +376,7 @@ function priorCycles() {
   return history.slice(Math.max(0, selectedIndex - 3), selectedIndex);
 }
 
-function comparisonFor(kind, currentValue) {
+function comparisonFor(kind, currentValue, elapsedDays) {
   const previous = priorCycles();
   if (!previous.length) {
     return { text: t("comparisonUnavailable"), tone: "neutral" };
@@ -353,9 +385,14 @@ function comparisonFor(kind, currentValue) {
   const values = previous.map((month) =>
     kind === "savings"
       ? safeNumber(month.savingsGoal)
-      : month.expenses.reduce(
-          (sum, expense) => sum + safeNumber(expense.amount),
-          0,
+      : sumExpenses(
+          month.expenses.filter((expense) => {
+            const expenseDay = inclusiveDayCount(
+              dateFromKey(month.period.start),
+              dateFromKey(expense.date),
+            );
+            return expenseDay >= 1 && expenseDay <= elapsedDays;
+          }),
         ),
   );
   const average = values.reduce((sum, value) => sum + value, 0) / values.length;
@@ -432,9 +469,9 @@ function categoryCode(category) {
 function categoryTotals() {
   return CATEGORIES.map((category) => ({
     category,
-    amount: data.expenses
-      .filter((expense) => expense.category === category)
-      .reduce((sum, expense) => sum + safeNumber(expense.amount), 0),
+    amount: sumExpenses(
+      data.expenses.filter((expense) => expense.category === category),
+    ),
   }));
 }
 
@@ -487,15 +524,15 @@ function storageKey(month) {
 
 function renderCreditAlert() {
   const alert = element("credit-alert");
-  const outstandingTotal = history
+  const outstandingExpenses = history
     .flatMap((month) =>
       month.month === selectedMonth.month ? data.expenses : month.expenses,
     )
     .filter(
       (expense) =>
         expense.paymentMethod === "credit" && expense.creditStatus !== "repaid",
-    )
-    .reduce((sum, expense) => sum + safeNumber(expense.amount), 0);
+    );
+  const outstandingTotal = sumExpenses(outstandingExpenses);
 
   alert.hidden = outstandingTotal <= 0;
   if (alert.hidden) return;
@@ -549,9 +586,9 @@ function renderHistory() {
 
 function renderTimeline() {
   const { start, end } = salaryCycleDates(selectedMonth.month);
-  const updated = new Date(`${selectedMonth.updatedAt}T12:00:00`);
-  const isCurrentCycle = updated >= start && updated <= end;
-  const markerDate = isCurrentCycle ? updated : end;
+  const today = dateFromKey(todayInVilnius());
+  const isCurrentCycle = today >= start && today <= end;
+  const markerDate = isCurrentCycle ? today : end;
   const totalDays = inclusiveDayCount(start, end);
   const elapsedDays = Math.min(
     Math.max(inclusiveDayCount(start, markerDate), 1),
@@ -665,10 +702,7 @@ function renderLedger() {
     const recurring = document.createElement("details");
     recurring.className = "expense-table recurring-expenses";
     recurring.open = true;
-    const recurringTotal = recurringExpenses.reduce(
-      (sum, expense) => sum + safeNumber(expense.amount),
-      0,
-    );
+    const recurringTotal = sumExpenses(recurringExpenses);
     recurring.innerHTML = `
       <summary class="expense-table-summary">
         <span>${t("expectedMonthly")}</span>
@@ -697,10 +731,7 @@ function renderLedger() {
   const oneTime = document.createElement("details");
   oneTime.className = "expense-table one-time-expenses-table";
   oneTime.open = true;
-  const oneTimeTotal = oneTimeExpenses.reduce(
-    (sum, expense) => sum + safeNumber(expense.amount),
-    0,
-  );
+  const oneTimeTotal = sumExpenses(oneTimeExpenses);
   oneTime.innerHTML = `
     <summary class="expense-table-summary">
       <span>${t("oneTimeExpenses")}</span>
@@ -731,20 +762,25 @@ function renderLedger() {
   container.append(oneTime);
 }
 
-function dailyExpensePoints(expenses, period) {
+function dailyExpensePoints(expenses, period, asOfDate) {
   const totals = expenses.reduce((daily, expense) => {
-    daily.set(expense.date, (daily.get(expense.date) ?? 0) + safeNumber(expense.amount));
+    daily.set(expense.date, (daily.get(expense.date) ?? 0) + toCents(expense.amount));
     return daily;
   }, new Map());
   const points = [];
-  const cursor = new Date(`${period.start}T12:00:00`);
-  const end = new Date(`${period.end}T12:00:00`);
+  const effectiveEnd = asOfDate < period.start
+    ? period.start
+    : asOfDate > period.end
+      ? period.end
+      : asOfDate;
+  const cursor = dateFromKey(period.start);
+  const end = dateFromKey(effectiveEnd);
 
   while (cursor <= end) {
-    const date = cursor.toISOString().slice(0, 10);
+    const date = calendarDateKey(cursor);
     points.push({
       x: cursor.getTime(),
-      y: Math.round((totals.get(date) ?? 0) * 100) / 100,
+      y: (totals.get(date) ?? 0) / 100,
     });
     cursor.setDate(cursor.getDate() + 1);
   }
@@ -782,7 +818,14 @@ function renderDailyExpenseChart() {
       toolbar: { show: false },
       zoom: { enabled: false },
     },
-    series: [{ name: t("dailyExpenseSeries"), data: dailyExpensePoints(data.expenses, selectedMonth.period) }],
+    series: [{
+      name: t("dailyExpenseSeries"),
+      data: dailyExpensePoints(
+        data.expenses.filter((expense) => !expense.recurring),
+        selectedMonth.period,
+        todayInVilnius(),
+      ),
+    }],
     colors: [accent],
     stroke: { curve: "straight", width: 4.5, lineCap: "round" },
     fill: {
@@ -805,15 +848,13 @@ function renderDailyExpenseChart() {
 }
 
 function render() {
-  const spent = data.expenses.reduce(
-    (sum, expense) => sum + safeNumber(expense.amount),
-    0,
-  );
+  const spent = sumExpenses(data.expenses);
   const salary = safeNumber(data.salary);
   const savings = safeNumber(data.savingsGoal);
-  const spendable = Math.max(salary - savings, 0);
-  const remaining = salary - savings - spent;
-  const percent = spendable > 0 ? Math.min((spent / spendable) * 100, 100) : 0;
+  const spendable = roundMoney(Math.max(salary - savings, 0));
+  const remaining = roundMoney(salary - savings - spent);
+  const usedPercent = spendable > 0 ? (spent / spendable) * 100 : spent > 0 ? null : 0;
+  const visualPercent = usedPercent === null ? 100 : Math.min(usedPercent, 100);
   const timeline = renderTimeline();
   const daysLeft = Math.max(timeline.totalDays - timeline.elapsedDays, 1);
 
@@ -829,19 +870,24 @@ function render() {
       count: data.expenses.length,
       plural: data.expenses.length === 1 ? "" : "s",
     });
-  const savingsComparison = comparisonFor("savings", savings);
-  const spendingComparison = comparisonFor("spending", spent);
+  const savingsComparison = comparisonFor("savings", savings, timeline.elapsedDays);
+  const spendingComparison = comparisonFor("spending", spent, timeline.elapsedDays);
   element("savings-comparison").textContent = savingsComparison.text;
   element("savings-comparison").className = `stat-comparison ${savingsComparison.tone}`;
   element("spending-comparison").textContent = spendingComparison.text;
   element("spending-comparison").className = `stat-comparison ${spendingComparison.tone}`;
   element("remaining").textContent = formatEuro(remaining);
-  element("spent-percent").textContent = `${Math.round(percent)}% ${t("spent")}`;
-  element("ring-percent").textContent = `${Math.round(percent)}%`;
-  element("progress-ring").style.setProperty("--progress", `${percent * 3.6}deg`);
+  const usedLabel = usedPercent === null
+    ? t("noSpendingBudget")
+    : `${Math.round(usedPercent)}% ${t("spent")}`;
+  element("spent-percent").textContent = usedLabel;
+  element("ring-percent").textContent = usedPercent === null ? "!" : `${Math.round(usedPercent)}%`;
+  element("progress-ring").style.setProperty("--progress", `${visualPercent * 3.6}deg`);
   element("progress-ring").setAttribute(
     "aria-label",
-    t("budgetUsed", { percent: Math.round(percent) }),
+    usedPercent === null
+      ? t("noSpendingBudget")
+      : t("budgetUsed", { percent: Math.round(usedPercent) }),
   );
   element("daily-pace").textContent = `${formatEuro(Math.max(remaining, 0) / daysLeft, true)} ${t("perDay")}`;
 
@@ -884,14 +930,14 @@ function bindControls() {
   element("expense-form").addEventListener("submit", (event) => {
     event.preventDefault();
     const amountInput = element("amount");
-    const amount = safeNumber(amountInput.value.replace(",", "."));
-    if (!amount) return;
+    const amount = parseExpenseAmount(amountInput.value);
+    if (amount === null) return;
     const category = element("category").value;
     const paymentMethod = element("payment-method").value;
     const noteInput = element("note");
     data.expenses.unshift({
       id: crypto.randomUUID(),
-      amount: Math.round(amount * 100) / 100,
+      amount,
       note: noteInput.value.trim() || category,
       date: todayInVilnius(),
       category,

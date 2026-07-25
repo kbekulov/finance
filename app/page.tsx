@@ -82,15 +82,15 @@ const COPY = {
     dailySpendingIntro: "What left your account each day this salary cycle",
     thisCycleTotal: "This cycle",
     dailyExpenseSeries: "Daily spending",
-    dailySpendingChartLabel: "Daily expenses movement",
+    dailySpendingChartLabel: "Daily non-recurring expense movement",
     edit: "Tap the amount to edit",
     savings: "SAVINGS REQUIREMENT",
     protected: "Protected from spending",
     spentMonth: "SPENT THIS SALARY CYCLE",
     comparisonUnavailable: "Past 3-cycle comparison appears when history is available",
-    savingsMore: "{difference} more saved than the prior {count}-cycle average of {average}",
-    savingsLess: "{difference} less saved than the prior {count}-cycle average of {average}",
-    savingsSame: "Matches the prior {count}-cycle savings average of {average}",
+    savingsMore: "Planned savings are {difference} above the prior {count}-cycle average of {average}",
+    savingsLess: "Planned savings are {difference} below the prior {count}-cycle average of {average}",
+    savingsSame: "Planned savings match the prior {count}-cycle average of {average}",
     spendingMore: "{difference} more spent than the prior {count}-cycle average of {average}",
     spendingLess: "{difference} less spent than the prior {count}-cycle average of {average}",
     spendingSame: "Matches the prior {count}-cycle spending average of {average}",
@@ -144,6 +144,7 @@ const COPY = {
     monthlyTotalsLabel: "Salary cycle totals",
     expenseCategoriesLabel: "Expense categories",
     budgetUsed: "{percent}% of spending budget used",
+    noSpendingBudget: "NO SPENDING BUDGET",
     salaryEuroLabel: "Monthly salary in euros",
     savingsEuroLabel: "Monthly savings requirement in euros",
   },
@@ -164,15 +165,15 @@ const COPY = {
     dailySpendingIntro: "Сколько уходило со счёта каждый день этого цикла зарплаты",
     thisCycleTotal: "За цикл",
     dailyExpenseSeries: "Расходы за день",
-    dailySpendingChartLabel: "Динамика расходов по дням",
+    dailySpendingChartLabel: "Динамика разовых расходов по дням",
     edit: "Нажмите на сумму, чтобы изменить",
     savings: "ЦЕЛЬ НАКОПЛЕНИЙ",
     protected: "Защищено от расходов",
     spentMonth: "ПОТРАЧЕНО В ЭТОМ ЦИКЛЕ",
     comparisonUnavailable: "Сравнение с 3 прошлыми циклами появится, когда будет доступна история",
-    savingsMore: "Накоплено на {difference} больше среднего за {count} прошлых цикла: {average}",
-    savingsLess: "Накоплено на {difference} меньше среднего за {count} прошлых цикла: {average}",
-    savingsSame: "На уровне среднего накопления за {count} прошлых цикла: {average}",
+    savingsMore: "План накоплений на {difference} выше среднего за {count} прошлых цикла: {average}",
+    savingsLess: "План накоплений на {difference} ниже среднего за {count} прошлых цикла: {average}",
+    savingsSame: "План накоплений совпадает со средним за {count} прошлых цикла: {average}",
     spendingMore: "Потрачено на {difference} больше среднего за {count} прошлых цикла: {average}",
     spendingLess: "Потрачено на {difference} меньше среднего за {count} прошлых цикла: {average}",
     spendingSame: "На уровне средних расходов за {count} прошлых цикла: {average}",
@@ -226,6 +227,7 @@ const COPY = {
     monthlyTotalsLabel: "Итоги цикла зарплаты",
     expenseCategoriesLabel: "Категории расходов",
     budgetUsed: "Использовано {percent}% бюджета на расходы",
+    noSpendingBudget: "НЕТ БЮДЖЕТА НА РАСХОДЫ",
     salaryEuroLabel: "Месячный доход в евро",
     savingsEuroLabel: "Цель ежемесячных накоплений в евро",
   },
@@ -255,21 +257,8 @@ const CATEGORY_LABELS: Record<Language, Record<Category, string>> = {
 // The JSON file is the source of truth. Only the most recent 12 records are shown.
 const HISTORY = (financeHistoryJson.months as unknown as MonthRecord[]).slice(-12);
 const INITIAL_MONTH = HISTORY[HISTORY.length - 1];
-const TODAY = new Date("2026-07-25T12:00:00");
 const SALARY_SCHEDULE = financeHistoryJson.salarySchedule;
 const DAY_MS = 24 * 60 * 60 * 1000;
-
-const euro = new Intl.NumberFormat("en-IE", {
-  style: "currency",
-  currency: "EUR",
-  maximumFractionDigits: 2,
-});
-
-const compactEuro = new Intl.NumberFormat("en-IE", {
-  style: "currency",
-  currency: "EUR",
-  maximumFractionDigits: 0,
-});
 
 function sourceLabel(source: Expense["source"], language: Language) {
   if (source === "receipt") return COPY[language].receipt;
@@ -347,20 +336,63 @@ function todayInVilnius() {
   return `${value.year}-${value.month}-${value.day}`;
 }
 
-function dailyExpensePoints(expenses: Expense[], period: MonthRecord["period"]) {
+function safeMoney(value: number) {
+  return Number.isFinite(value) ? Math.max(value, 0) : 0;
+}
+
+function toCents(value: number) {
+  return Math.round(safeMoney(value) * 100);
+}
+
+function sumExpenses(expenses: Expense[]) {
+  return expenses.reduce((sum, expense) => sum + toCents(expense.amount), 0) / 100;
+}
+
+function roundMoney(value: number) {
+  return Math.round(value * 100) / 100;
+}
+
+function parseExpenseAmount(value: string) {
+  const normalized = value.trim().replace(",", ".");
+  if (!/^(?:\d+|\d*\.\d{1,2})$/.test(normalized)) return null;
+  const amount = Number(normalized);
+  return Number.isFinite(amount) && amount > 0 ? roundMoney(amount) : null;
+}
+
+function calendarDateKey(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function dateFromKey(dateKey: string) {
+  return new Date(`${dateKey}T12:00:00`);
+}
+
+function dailyExpensePoints(
+  expenses: Expense[],
+  period: MonthRecord["period"],
+  asOfDate: string,
+) {
   const totals = expenses.reduce((daily, expense) => {
-    daily.set(expense.date, (daily.get(expense.date) ?? 0) + expense.amount);
+    daily.set(expense.date, (daily.get(expense.date) ?? 0) + toCents(expense.amount));
     return daily;
   }, new Map<string, number>());
   const points: Array<{ x: number; y: number }> = [];
-  const cursor = new Date(`${period.start}T12:00:00`);
-  const end = new Date(`${period.end}T12:00:00`);
+  const effectiveEnd = asOfDate < period.start
+    ? period.start
+    : asOfDate > period.end
+      ? period.end
+      : asOfDate;
+  const cursor = dateFromKey(period.start);
+  const end = dateFromKey(effectiveEnd);
 
   while (cursor <= end) {
-    const date = cursor.toISOString().slice(0, 10);
+    const date = calendarDateKey(cursor);
     points.push({
       x: cursor.getTime(),
-      y: Math.round((totals.get(date) ?? 0) * 100) / 100,
+      y: (totals.get(date) ?? 0) / 100,
     });
     cursor.setDate(cursor.getDate() + 1);
   }
@@ -428,45 +460,44 @@ export default function Home() {
   }, [data, isReady, selectedMonth]);
 
   const spent = useMemo(
-    () => data.expenses.reduce((sum, expense) => sum + expense.amount, 0),
+    () => sumExpenses(data.expenses),
     [data.expenses],
   );
   const categoryTotals = useMemo(
     () =>
       CATEGORIES.map((name) => ({
         name,
-        amount: data.expenses
-          .filter((expense) => expense.category === name)
-          .reduce((sum, expense) => sum + expense.amount, 0),
+        amount: sumExpenses(
+          data.expenses.filter((expense) => expense.category === name),
+        ),
       })),
     [data.expenses],
   );
   const recurringExpenses = data.expenses.filter((expense) => expense.recurring);
   const oneTimeExpenses = data.expenses.filter((expense) => !expense.recurring);
-  const recurringTotal = recurringExpenses.reduce(
-    (sum, expense) => sum + expense.amount,
-    0,
-  );
-  const oneTimeTotal = oneTimeExpenses.reduce(
-    (sum, expense) => sum + expense.amount,
-    0,
-  );
-  const outstandingCreditTotal = HISTORY
+  const recurringTotal = sumExpenses(recurringExpenses);
+  const oneTimeTotal = sumExpenses(oneTimeExpenses);
+  const outstandingCreditExpenses = HISTORY
     .flatMap((record) =>
       record.month === selectedMonth.month ? data.expenses : record.expenses,
     )
     .filter(
       (expense) =>
         expense.paymentMethod === "credit" && expense.creditStatus !== "repaid",
-    )
-    .reduce((sum, expense) => sum + expense.amount, 0);
-  const spendable = Math.max(data.salary - data.savingsGoal, 0);
-  const remaining = data.salary - data.savingsGoal - spent;
-  const usedPercent = spendable > 0 ? Math.min((spent / spendable) * 100, 100) : 0;
+    );
+  const outstandingCreditTotal = sumExpenses(outstandingCreditExpenses);
+  const salary = safeMoney(data.salary);
+  const savings = safeMoney(data.savingsGoal);
+  const spendable = roundMoney(Math.max(salary - savings, 0));
+  const remaining = roundMoney(salary - savings - spent);
+  const usedPercent = spendable > 0 ? (spent / spendable) * 100 : spent > 0 ? null : 0;
+  const visualPercent = usedPercent === null ? 100 : Math.min(usedPercent, 100);
   const [year, month] = selectedMonth.month.split("-").map(Number);
   const { start: cycleStart, end: cycleEnd } = salaryCycleDates(selectedMonth.month);
-  const isCurrentCycle = TODAY >= cycleStart && TODAY <= cycleEnd;
-  const markerDate = isCurrentCycle ? TODAY : cycleEnd;
+  const todayKey = todayInVilnius();
+  const today = dateFromKey(todayKey);
+  const isCurrentCycle = today >= cycleStart && today <= cycleEnd;
+  const markerDate = isCurrentCycle ? today : cycleEnd;
   const totalCycleDays = inclusiveDayCount(cycleStart, cycleEnd);
   const elapsedCycleDays = Math.min(
     Math.max(inclusiveDayCount(cycleStart, markerDate), 1),
@@ -475,6 +506,22 @@ export default function Home() {
   const dailyPace =
     Math.max(remaining, 0) / Math.max(totalCycleDays - elapsedCycleDays, 1);
   const locale = language === "ru" ? "ru-RU" : "en-GB";
+  const euro = useMemo(
+    () => new Intl.NumberFormat(locale, {
+      style: "currency",
+      currency: "EUR",
+      maximumFractionDigits: 2,
+    }),
+    [locale],
+  );
+  const compactEuro = useMemo(
+    () => new Intl.NumberFormat(locale, {
+      style: "currency",
+      currency: "EUR",
+      maximumFractionDigits: 0,
+    }),
+    [locale],
+  );
   const copy = COPY[language];
   const selectedTheme = THEMES.find(({ id }) => id === theme) ?? THEMES[0];
   const themeBannerLabel = fillTemplate(copy.themeBannerLabel, {
@@ -507,7 +554,15 @@ export default function Home() {
     const values = previousCycles.map((record) =>
       kind === "savings"
         ? record.savingsGoal
-        : record.expenses.reduce((sum, expense) => sum + expense.amount, 0),
+        : sumExpenses(
+            record.expenses.filter((expense) => {
+              const expenseDay = inclusiveDayCount(
+                dateFromKey(record.period.start),
+                dateFromKey(expense.date),
+              );
+              return expenseDay >= 1 && expenseDay <= elapsedCycleDays;
+            }),
+          ),
     );
     const average = values.reduce((sum, value) => sum + value, 0) / values.length;
     const difference = currentValue - average;
@@ -542,7 +597,7 @@ export default function Home() {
       tone: favorable ? "favorable" : "unfavorable",
     };
   };
-  const savingsComparison = comparisonFor("savings", data.savingsGoal);
+  const savingsComparison = comparisonFor("savings", savings);
   const spendingComparison = comparisonFor("spending", spent);
   const categoryLabel = (name: Category) => CATEGORY_LABELS[language][name];
   const expenseNoteLabel = (expense: Expense) =>
@@ -651,7 +706,14 @@ export default function Home() {
           toolbar: { show: false },
           zoom: { enabled: false },
         },
-        series: [{ name: copy.dailyExpenseSeries, data: dailyExpensePoints(data.expenses, selectedMonth.period) }],
+        series: [{
+          name: copy.dailyExpenseSeries,
+          data: dailyExpensePoints(
+            data.expenses.filter((expense) => !expense.recurring),
+            selectedMonth.period,
+            todayKey,
+          ),
+        }],
         colors: [accent],
         stroke: { curve: "straight", width: 4.5, lineCap: "round" },
         fill: {
@@ -678,19 +740,19 @@ export default function Home() {
       active = false;
       chart?.destroy();
     };
-  }, [copy.dailyExpenseSeries, data.expenses, selectedMonth.period, theme]);
+  }, [copy.dailyExpenseSeries, data.expenses, selectedMonth.period, theme, todayKey]);
 
   function addExpense(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const value = Number.parseFloat(amount.replace(",", "."));
-    if (!Number.isFinite(value) || value <= 0) return;
+    const value = parseExpenseAmount(amount);
+    if (value === null) return;
 
     setData((current) => ({
       ...current,
       expenses: [
         {
           id: crypto.randomUUID(),
-          amount: Math.round(value * 100) / 100,
+          amount: value,
           note: note.trim() || category,
           date: todayInVilnius(),
           category,
@@ -850,7 +912,11 @@ export default function Home() {
           <div className="balance-card" aria-label={copy.monthlyPlanLabel}>
             <div className="balance-topline">
               <span>{copy.available}</span>
-              <span>{Math.round(usedPercent)}% {copy.spent}</span>
+              <span>
+                {usedPercent === null
+                  ? copy.noSpendingBudget
+                  : `${Math.round(usedPercent)}% ${copy.spent}`}
+              </span>
             </div>
             <div className="balance-main">
               <div>
@@ -859,12 +925,16 @@ export default function Home() {
               </div>
               <div
                 className="progress-ring"
-                style={{ "--progress": `${usedPercent * 3.6}deg` } as React.CSSProperties}
-                aria-label={fillTemplate(copy.budgetUsed, {
-                  percent: Math.round(usedPercent),
-                })}
+                style={{ "--progress": `${visualPercent * 3.6}deg` } as React.CSSProperties}
+                aria-label={
+                  usedPercent === null
+                    ? copy.noSpendingBudget
+                    : fillTemplate(copy.budgetUsed, {
+                        percent: Math.round(usedPercent),
+                      })
+                }
               >
-                <span>{Math.round(usedPercent)}%</span>
+                <span>{usedPercent === null ? "!" : `${Math.round(usedPercent)}%`}</span>
               </div>
             </div>
             <div className="pace-row">
@@ -878,7 +948,7 @@ export default function Home() {
           <article className="stat-card salary salary-locked">
             <span className="stat-icon salary-lock-icon" aria-hidden="true">FIXED</span>
             <p>{copy.salary}</p>
-            <strong className="locked-salary">{euro.format(data.salary)}</strong>
+            <strong className="locked-salary">{euro.format(salary)}</strong>
             <small className="locked-status">
               <span aria-hidden="true">●</span>
               <span>{copy.salaryLocked}</span>

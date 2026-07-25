@@ -80,6 +80,8 @@ test("server-renders the current finance tracker", async () => {
   assert.match(html, /Alcohol &amp; nightlife/);
   assert.match(html, /€951\.46/);
   assert.match(html, /€998\.54/);
+  assert.match(html, /49%<!-- --> <!-- -->SPENT|49% SPENT/);
+  assert.match(html, /€59<!-- --> <!-- -->\/ day|€59 \/ day/);
   assert.match(html, /Beer/);
   assert.match(html, /Ice cream/);
   assert.match(html, /class="stat-card salary salary-locked"/);
@@ -87,7 +89,7 @@ test("server-renders the current finance tracker", async () => {
   assert.doesNotMatch(html, /Monthly salary in euros[^<]*<\/span>\s*<span[^>]*>€<\/span>\s*<input/s);
   assert.doesNotMatch(html, /class="daily-chart-panel"/);
   assert.match(html, /class="daily-expense-chart"/);
-  assert.match(html, /aria-label="Daily expenses movement"/);
+  assert.match(html, /aria-label="Daily non-recurring expense movement"/);
   assert.doesNotMatch(html, /Your site is taking shape|Building your site/);
 });
 
@@ -114,6 +116,51 @@ test("keeps database history and translations aligned", async () => {
   assert.equal(current.updatedAt, "2026-07-25");
   assert.equal(current.revision, 22);
   assert.equal(current.savingsGoal, 200);
+  const supportedCategories = new Set([
+    "Food",
+    "Subscriptions & services",
+    "Luxury purchases",
+    "Debt & repayments",
+    "Devices & installments",
+    "Transport & Travel",
+    "Alcohol & nightlife",
+  ]);
+  const monthKeys = new Set();
+  const expenseIds = new Set();
+  for (const [monthIndex, monthRecord] of database.months.entries()) {
+    assert.match(monthRecord.month, /^\d{4}-\d{2}$/);
+    assert.ok(!monthKeys.has(monthRecord.month));
+    monthKeys.add(monthRecord.month);
+    assert.ok(monthRecord.period.start <= monthRecord.period.end);
+    if (monthIndex > 0) {
+      const previous = database.months[monthIndex - 1];
+      const dayAfterPreviousEnd = new Date(`${previous.period.end}T12:00:00`);
+      dayAfterPreviousEnd.setDate(dayAfterPreviousEnd.getDate() + 1);
+      assert.equal(
+        `${dayAfterPreviousEnd.getFullYear()}-${String(dayAfterPreviousEnd.getMonth() + 1).padStart(2, "0")}-${String(dayAfterPreviousEnd.getDate()).padStart(2, "0")}`,
+        monthRecord.period.start,
+      );
+    }
+    for (const expense of monthRecord.expenses) {
+      assert.ok(!expenseIds.has(expense.id));
+      expenseIds.add(expense.id);
+      assert.ok(Number.isFinite(expense.amount) && expense.amount > 0);
+      assert.equal(Math.round(expense.amount * 100), expense.amount * 100);
+      assert.ok(supportedCategories.has(expense.category));
+      assert.ok(["chat", "site", "receipt"].includes(expense.source));
+      assert.ok(["debit", "credit"].includes(expense.paymentMethod));
+      assert.ok(expense.date >= monthRecord.period.start);
+      assert.ok(expense.date <= monthRecord.period.end);
+      if (expense.recurring) assert.equal(expense.frequency, "monthly");
+      if (expense.paymentMethod === "credit") {
+        assert.ok(["outstanding", "repaid"].includes(expense.creditStatus));
+        if (expense.creditStatus === "repaid") assert.match(expense.repaidAt, /^\d{4}-\d{2}-\d{2}$/);
+      } else {
+        assert.equal(expense.creditStatus, undefined);
+        assert.equal(expense.repaidAt, undefined);
+      }
+    }
+  }
   assert.deepEqual(current.period, {
     start: "2026-07-10",
     end: "2026-08-11",
@@ -357,6 +404,28 @@ test("keeps database history and translations aligned", async () => {
     )
     .reduce((sum, expense) => sum + expense.amount, 0);
   assert.equal(outstandingCredit, 0);
+  const sumCents = (expenses) =>
+    expenses.reduce((sum, expense) => sum + Math.round(expense.amount * 100), 0);
+  const spentCents = sumCents(current.expenses);
+  const recurringCents = sumCents(current.expenses.filter((expense) => expense.recurring));
+  const oneTimeCents = sumCents(current.expenses.filter((expense) => !expense.recurring));
+  assert.equal(spentCents, 95146);
+  assert.equal(recurringCents, 93647);
+  assert.equal(oneTimeCents, 1499);
+  assert.equal(recurringCents + oneTimeCents, spentCents);
+  assert.equal(current.salary * 100 - current.savingsGoal * 100 - spentCents, 99854);
+  const calendarDay = (dateKey) => {
+    const [year, month, day] = dateKey.split("-").map(Number);
+    return Date.UTC(year, month - 1, day) / 86400000;
+  };
+  const totalCycleDays = calendarDay(current.period.end) - calendarDay(current.period.start) + 1;
+  const elapsedCycleDays = calendarDay("2026-07-25") - calendarDay(current.period.start) + 1;
+  const remainingDaysAfterToday = totalCycleDays - elapsedCycleDays;
+  assert.equal(totalCycleDays, 33);
+  assert.equal(elapsedCycleDays, 16);
+  assert.equal(remainingDaysAfterToday, 17);
+  assert.equal(Math.round((99854 / 100) / remainingDaysAfterToday), 59);
+  assert.equal(Math.round((spentCents / (current.salary * 100 - current.savingsGoal * 100)) * 100), 49);
   for (const expense of current.expenses) {
     assert.equal(typeof expense.noteTranslations?.en, "string");
     assert.equal(typeof expense.noteTranslations?.ru, "string");
@@ -391,12 +460,19 @@ test("keeps database history and translations aligned", async () => {
     assert.match(source, /creditStatus !== "repaid"/);
     assert.match(source, /todayInVilnius/);
     assert.match(source, /timeZone:\s*"Europe\/Vilnius"/);
+    assert.match(source, /sumExpenses/);
+    assert.match(source, /toCents/);
+    assert.match(source, /parseExpenseAmount/);
+    assert.match(source, /visualPercent/);
+    assert.match(source, /noSpendingBudget/);
+    assert.match(source, /expenseDay <= elapsed/);
     assert.match(source, /creditStatus: "outstanding"/);
+    assert.doesNotMatch(source, /const TODAY\s*=/);
   }
   assert.match(index, /id="theme-select"/);
-  assert.match(index, /styles\.css\?v=23/);
+  assert.match(index, /styles\.css\?v=24/);
   assert.match(index, /public\/vendor\/apexcharts\.min\.js\?v=21/);
-  assert.match(index, /script\.js\?v=23/);
+  assert.match(index, /script\.js\?v=24/);
   assert.match(index, /data-current-theme="kinance"/);
   assert.match(index, /id="credit-alert"[^>]*hidden/);
   assert.match(index, /id="payment-method"/);
@@ -422,6 +498,8 @@ test("keeps database history and translations aligned", async () => {
   assert.doesNotMatch(styles, /\.daily-chart-panel\s*\{/);
   assert.match(styles, /\.daily-expense-chart\s*\{[^}]*min-height:\s*250px/s);
   assert.match(styles, /\.salary-locked\s*\{/);
+  assert.match(styles, /\.stat-card\.salary-locked\s*\{[^}]*align-self:\s*start/s);
+  assert.match(styles, /\.stat-card\.salary-locked\s*\{[^}]*min-height:\s*0/s);
   assert.match(index, /id="salary-value"/);
   assert.doesNotMatch(index, /id="salary"/);
   assert.doesNotMatch(script, /element\("salary"\)\.addEventListener/);
@@ -435,9 +513,11 @@ test("keeps database history and translations aligned", async () => {
     assert.match(source, /tooltip:\s*\{\s*enabled:\s*false/);
     assert.match(source, /opacityFrom:\s*0\.68/);
     assert.match(source, /dropShadow:\s*\{\s*enabled:\s*true/);
+    assert.match(source, /data\.expenses\.filter\(\(expense\) => !expense\.recurring\)/);
     assert.match(source, /creditStatus !== "repaid"/);
   }
   assert.match(page, /import\("apexcharts"\)/);
+  assert.match(page, /new Intl\.NumberFormat\(locale/);
   assert.match(styles, /:root\[data-theme="nier-automata"\]/);
   assert.match(styles, /:root\[data-theme="tohsaka-rin"\]/);
   assert.match(

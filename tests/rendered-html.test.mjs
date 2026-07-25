@@ -38,12 +38,10 @@ test("server-renders the current finance tracker", async () => {
   assert.match(html, />kinance<\/span>/i);
   assert.doesNotMatch(html, />euroscope<\/span>/i);
   assert.match(html, /class="spending-alert"/);
-  assert.match(html, /class="credit-alert"/);
-  assert.match(html, /Outstanding credit/);
-  assert.match(html, /Credit spending is awaiting repayment/);
-  assert.match(html, /class="credit-alert-total"[^>]*>€7\.00/);
+  assert.doesNotMatch(html, /class="credit-alert"/);
   assert.match(html, /class="payment-badge debit"/);
-  assert.match(html, /class="payment-badge credit-outstanding"/);
+  assert.match(html, /class="payment-badge credit-repaid"/);
+  assert.doesNotMatch(html, /class="payment-badge credit-outstanding"/);
   assert.match(html, /Spending alert/);
   assert.match(html, /Debt &amp; repayments is your largest cost at €555\.00/);
   assert.match(html, /Apple Devices/);
@@ -87,9 +85,9 @@ test("server-renders the current finance tracker", async () => {
   assert.match(html, /class="stat-card salary salary-locked"/);
   assert.match(html, /Fixed in your finance plan/);
   assert.doesNotMatch(html, /Monthly salary in euros[^<]*<\/span>\s*<span[^>]*>€<\/span>\s*<input/s);
-  assert.match(html, /class="daily-chart-panel"/);
-  assert.match(html, /Daily expenses/);
-  assert.match(html, /aria-label="Daily expenses line chart"/);
+  assert.doesNotMatch(html, /class="daily-chart-panel"/);
+  assert.match(html, /class="daily-expense-chart"/);
+  assert.match(html, /aria-label="Daily expenses movement"/);
   assert.doesNotMatch(html, /Your site is taking shape|Building your site/);
 });
 
@@ -114,7 +112,7 @@ test("keeps database history and translations aligned", async () => {
   assert.equal(database.currency, "EUR");
   assert.equal(database.timezone, "Europe/Vilnius");
   assert.equal(current.updatedAt, "2026-07-25");
-  assert.equal(current.revision, 21);
+  assert.equal(current.revision, 22);
   assert.equal(current.savingsGoal, 200);
   assert.deepEqual(current.period, {
     start: "2026-07-10",
@@ -142,7 +140,8 @@ test("keeps database history and translations aligned", async () => {
     assert.ok(expense.date <= current.period.end);
     if (["2026-07-beer-credit-001", "2026-07-ice-cream-credit-001"].includes(expense.id)) {
       assert.equal(expense.paymentMethod, "credit");
-      assert.equal(expense.creditStatus, "outstanding");
+      assert.equal(expense.creditStatus, "repaid");
+      assert.equal(expense.repaidAt, "2026-07-25");
     } else {
       assert.equal(expense.paymentMethod, "debit");
       assert.equal(expense.creditStatus, undefined);
@@ -331,7 +330,8 @@ test("keeps database history and translations aligned", async () => {
       category: "Alcohol & nightlife",
       source: "chat",
       paymentMethod: "credit",
-      creditStatus: "outstanding",
+      creditStatus: "repaid",
+      repaidAt: "2026-07-25",
     },
   );
   assert.deepEqual(
@@ -345,7 +345,8 @@ test("keeps database history and translations aligned", async () => {
       category: "Food",
       source: "chat",
       paymentMethod: "credit",
-      creditStatus: "outstanding",
+      creditStatus: "repaid",
+      repaidAt: "2026-07-25",
     },
   );
   const outstandingCredit = database.months
@@ -355,7 +356,7 @@ test("keeps database history and translations aligned", async () => {
         expense.paymentMethod === "credit" && expense.creditStatus !== "repaid",
     )
     .reduce((sum, expense) => sum + expense.amount, 0);
-  assert.equal(outstandingCredit, 7);
+  assert.equal(outstandingCredit, 0);
   for (const expense of current.expenses) {
     assert.equal(typeof expense.noteTranslations?.en, "string");
     assert.equal(typeof expense.noteTranslations?.ru, "string");
@@ -391,9 +392,9 @@ test("keeps database history and translations aligned", async () => {
     assert.match(source, /creditStatus: "outstanding"/);
   }
   assert.match(index, /id="theme-select"/);
-  assert.match(index, /styles\.css\?v=21/);
+  assert.match(index, /styles\.css\?v=22/);
   assert.match(index, /public\/vendor\/apexcharts\.min\.js\?v=21/);
-  assert.match(index, /script\.js\?v=21/);
+  assert.match(index, /script\.js\?v=22/);
   assert.match(index, /data-current-theme="kinance"/);
   assert.match(index, /id="credit-alert"[^>]*hidden/);
   assert.match(index, /id="payment-method"/);
@@ -416,7 +417,8 @@ test("keeps database history and translations aligned", async () => {
   assert.match(styles, /prefers-reduced-motion[\s\S]*\.credit-alert[\s\S]*animation:\s*none/);
   assert.match(styles, /\.theme-banner img\s*\{[^}]*object-fit:\s*cover/s);
   assert.match(styles, /\.theme-banner\s*\{[^}]*background:\s*transparent/s);
-  assert.match(styles, /\.daily-chart-panel\s*\{/);
+  assert.doesNotMatch(styles, /\.daily-chart-panel\s*\{/);
+  assert.match(styles, /\.daily-expense-chart\s*\{[^}]*min-height:\s*170px/s);
   assert.match(styles, /\.salary-locked\s*\{/);
   assert.match(index, /id="salary-value"/);
   assert.doesNotMatch(index, /id="salary"/);
@@ -427,6 +429,8 @@ test("keeps database history and translations aligned", async () => {
     assert.match(source, /dailyExpensePoints/);
     assert.match(source, /type:\s*"line"/);
     assert.match(source, /type:\s*"datetime"/);
+    assert.match(source, /sparkline:\s*\{\s*enabled:\s*true/);
+    assert.match(source, /tooltip:\s*\{\s*enabled:\s*false/);
     assert.match(source, /creditStatus !== "repaid"/);
   }
   assert.match(page, /import\("apexcharts"\)/);

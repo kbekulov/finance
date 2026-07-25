@@ -29,7 +29,7 @@ const TRANSLATIONS = {
     dailySpendingIntro: "What left your account each day this salary cycle",
     thisCycleTotal: "This cycle",
     dailyExpenseSeries: "Daily spending",
-    dailySpendingChartLabel: "Daily expenses line chart",
+    dailySpendingChartLabel: "Daily expenses movement",
     tapToEdit: "Tap the amount to edit",
     savingsRequirement: "SAVINGS REQUIREMENT",
     protectedSpending: "Protected from spending",
@@ -123,7 +123,7 @@ const TRANSLATIONS = {
     dailySpendingIntro: "Сколько уходило со счёта каждый день этого цикла зарплаты",
     thisCycleTotal: "За цикл",
     dailyExpenseSeries: "Расходы за день",
-    dailySpendingChartLabel: "Линейный график расходов по дням",
+    dailySpendingChartLabel: "Динамика расходов по дням",
     tapToEdit: "Нажмите на сумму, чтобы изменить",
     savingsRequirement: "ЦЕЛЬ НАКОПЛЕНИЙ",
     protectedSpending: "Защищено от расходов",
@@ -752,56 +752,37 @@ function renderDailyExpenseChart() {
   }
 
   container.textContent = "";
-  const palette =
+  const accent =
     theme === "nier-automata"
-      ? { accent: "#476f7b", grid: "rgba(28, 43, 49, 0.14)", text: "#4c585e", tooltip: "light" }
+      ? "#476f7b"
       : theme === "tohsaka-rin"
-        ? { accent: "#e52a55", grid: "rgba(255, 116, 153, 0.17)", text: "#d8b8c5", tooltip: "dark" }
-        : { accent: "#0a84ff", grid: "rgba(255, 255, 255, 0.1)", text: "#aeaeb2", tooltip: "dark" };
+        ? "#e52a55"
+        : "#0a84ff";
 
   dailyExpenseChart = new window.ApexCharts(container, {
     chart: {
       type: "line",
-      height: 270,
+      height: 170,
       background: "transparent",
-      foreColor: palette.text,
       fontFamily: getComputedStyle(document.documentElement).getPropertyValue("--font-family"),
       animations: { enabled: !window.matchMedia("(prefers-reduced-motion: reduce)").matches },
+      sparkline: { enabled: true },
       toolbar: { show: false },
       zoom: { enabled: false },
     },
     series: [{ name: t("dailyExpenseSeries"), data: dailyExpensePoints(data.expenses, selectedMonth.period) }],
-    colors: [palette.accent],
-    stroke: { curve: "smooth", width: 3 },
-    markers: { size: 0, hover: { size: 5 } },
+    colors: [accent],
+    stroke: { curve: "smooth", width: 4, lineCap: "round" },
+    fill: {
+      type: "gradient",
+      gradient: { shadeIntensity: 0.35, opacityFrom: 0.32, opacityTo: 0.02, stops: [0, 92, 100] },
+    },
+    markers: { size: 0 },
     dataLabels: { enabled: false },
-    grid: { borderColor: palette.grid, strokeDashArray: 4, padding: { left: 4, right: 10 } },
-    xaxis: {
-      type: "datetime",
-      labels: {
-        datetimeUTC: false,
-        formatter: (_value, timestamp) =>
-          new Intl.DateTimeFormat(locale(), { day: "numeric", month: "short" })
-            .format(new Date(timestamp)),
-        style: { colors: palette.text },
-      },
-      axisBorder: { color: palette.grid },
-      axisTicks: { color: palette.grid },
-    },
-    yaxis: {
-      min: 0,
-      labels: { formatter: (value) => formatEuro(value, true), style: { colors: [palette.text] } },
-    },
-    tooltip: {
-      theme: palette.tooltip,
-      x: {
-        formatter: (timestamp) =>
-          new Intl.DateTimeFormat(locale(), { day: "numeric", month: "short", year: "numeric" })
-            .format(new Date(timestamp)),
-      },
-      y: { formatter: (value) => formatEuro(value) },
-    },
-    noData: { text: t("noExpenses") },
+    grid: { show: false, padding: { left: 0, right: 0, top: 8, bottom: 8 } },
+    xaxis: { type: "datetime" },
+    yaxis: { min: 0 },
+    tooltip: { enabled: false },
   });
   dailyExpenseChart.render();
 }
@@ -846,7 +827,6 @@ function render() {
     t("budgetUsed", { percent: Math.round(percent) }),
   );
   element("daily-pace").textContent = `${formatEuro(Math.max(remaining, 0) / daysLeft, true)} ${t("perDay")}`;
-  element("daily-chart-total").textContent = formatEuro(spent);
 
   applyTranslations();
   renderDailyExpenseChart();

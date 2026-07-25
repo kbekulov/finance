@@ -13,9 +13,9 @@
     <meta property="og:image" content="https://finance.bekulov.com/public/og.png" />
     <title>Kinance</title>
     <link rel="icon" type="image/jpeg" href="/kinance-favicon.jpg" />
-    <link rel="stylesheet" href="/styles.css?v=21" />
+    <link rel="stylesheet" href="/styles.css?v=22" />
     <script src="/public/vendor/apexcharts.min.js?v=21" defer></script>
-    <script src="/script.js?v=21" defer></script>
+    <script src="/script.js?v=22" defer></script>
   </head>
   <body>
     <main>
@@ -85,26 +85,13 @@
           />
         </section>
 
-        <section class="daily-chart-panel" aria-labelledby="daily-chart-title">
-          <div class="daily-chart-heading">
-            <div>
-              <p class="eyebrow" data-i18n="dailySpendingEyebrow">DAILY RHYTHM</p>
-              <h2 id="daily-chart-title" data-i18n="dailySpending">Daily expenses</h2>
-              <p data-i18n="dailySpendingIntro">What left your account each day this salary cycle</p>
-            </div>
-            <div class="daily-chart-total">
-              <span data-i18n="thisCycleTotal">This cycle</span>
-              <strong id="daily-chart-total">€0.00</strong>
-            </div>
-          </div>
-          <div
-            id="daily-expense-chart"
-            class="daily-expense-chart"
-            role="img"
-            aria-label="Daily expenses line chart"
-            data-i18n-aria-label="dailySpendingChartLabel"
-          ></div>
-        </section>
+        <div
+          id="daily-expense-chart"
+          class="daily-expense-chart"
+          role="img"
+          aria-label="Daily expenses movement"
+          data-i18n-aria-label="dailySpendingChartLabel"
+        ></div>
 
         <section class="hero" id="top" aria-labelledby="page-title">
           <div class="hero-copy">

@@ -82,7 +82,7 @@ const COPY = {
     dailySpendingIntro: "What left your account each day this salary cycle",
     thisCycleTotal: "This cycle",
     dailyExpenseSeries: "Daily spending",
-    dailySpendingChartLabel: "Daily expenses line chart",
+    dailySpendingChartLabel: "Daily expenses movement",
     edit: "Tap the amount to edit",
     savings: "SAVINGS REQUIREMENT",
     protected: "Protected from spending",
@@ -164,7 +164,7 @@ const COPY = {
     dailySpendingIntro: "Сколько уходило со счёта каждый день этого цикла зарплаты",
     thisCycleTotal: "За цикл",
     dailyExpenseSeries: "Расходы за день",
-    dailySpendingChartLabel: "Линейный график расходов по дням",
+    dailySpendingChartLabel: "Динамика расходов по дням",
     edit: "Нажмите на сумму, чтобы изменить",
     savings: "ЦЕЛЬ НАКОПЛЕНИЙ",
     protected: "Защищено от расходов",
@@ -621,56 +621,37 @@ export default function Home() {
     const draw = async () => {
       const { default: ApexCharts } = await import("apexcharts");
       if (!active) return;
-      const palette =
+      const accent =
         theme === "nier-automata"
-          ? { accent: "#476f7b", grid: "rgba(28, 43, 49, 0.14)", text: "#4c585e", tooltip: "light" }
+          ? "#476f7b"
           : theme === "tohsaka-rin"
-            ? { accent: "#e52a55", grid: "rgba(255, 116, 153, 0.17)", text: "#d8b8c5", tooltip: "dark" }
-            : { accent: "#0a84ff", grid: "rgba(255, 255, 255, 0.1)", text: "#aeaeb2", tooltip: "dark" };
+            ? "#e52a55"
+            : "#0a84ff";
 
       chart = new ApexCharts(container, {
         chart: {
           type: "line",
-          height: 270,
+          height: 170,
           background: "transparent",
-          foreColor: palette.text,
           fontFamily: getComputedStyle(document.documentElement).getPropertyValue("--font-family"),
           animations: { enabled: !window.matchMedia("(prefers-reduced-motion: reduce)").matches },
+          sparkline: { enabled: true },
           toolbar: { show: false },
           zoom: { enabled: false },
         },
         series: [{ name: copy.dailyExpenseSeries, data: dailyExpensePoints(data.expenses, selectedMonth.period) }],
-        colors: [palette.accent],
-        stroke: { curve: "smooth", width: 3 },
-        markers: { size: 0, hover: { size: 5 } },
+        colors: [accent],
+        stroke: { curve: "smooth", width: 4, lineCap: "round" },
+        fill: {
+          type: "gradient",
+          gradient: { shadeIntensity: 0.35, opacityFrom: 0.32, opacityTo: 0.02, stops: [0, 92, 100] },
+        },
+        markers: { size: 0 },
         dataLabels: { enabled: false },
-        grid: { borderColor: palette.grid, strokeDashArray: 4, padding: { left: 4, right: 10 } },
-        xaxis: {
-          type: "datetime",
-          labels: {
-            datetimeUTC: false,
-            formatter: (_value: string, timestamp: number) =>
-              new Intl.DateTimeFormat(locale, { day: "numeric", month: "short" })
-                .format(new Date(timestamp)),
-            style: { colors: palette.text },
-          },
-          axisBorder: { color: palette.grid },
-          axisTicks: { color: palette.grid },
-        },
-        yaxis: {
-          min: 0,
-          labels: { formatter: (value: number) => compactEuro.format(value), style: { colors: [palette.text] } },
-        },
-        tooltip: {
-          theme: palette.tooltip,
-          x: {
-            formatter: (timestamp: number) =>
-              new Intl.DateTimeFormat(locale, { day: "numeric", month: "short", year: "numeric" })
-                .format(new Date(timestamp)),
-          },
-          y: { formatter: (value: number) => euro.format(value) },
-        },
-        noData: { text: copy.spendingClear },
+        grid: { show: false, padding: { left: 0, right: 0, top: 8, bottom: 8 } },
+        xaxis: { type: "datetime" },
+        yaxis: { min: 0 },
+        tooltip: { enabled: false },
       });
       await (chart as { render: () => Promise<void> }).render();
     };
@@ -680,7 +661,7 @@ export default function Home() {
       active = false;
       chart?.destroy();
     };
-  }, [copy.dailyExpenseSeries, copy.spendingClear, data.expenses, locale, selectedMonth.period, theme]);
+  }, [copy.dailyExpenseSeries, data.expenses, selectedMonth.period, theme]);
 
   function addExpense(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -831,25 +812,12 @@ export default function Home() {
           />
         </section>
 
-        <section className="daily-chart-panel" aria-labelledby="daily-chart-title">
-          <div className="daily-chart-heading">
-            <div>
-              <p className="eyebrow">{copy.dailySpendingEyebrow}</p>
-              <h2 id="daily-chart-title">{copy.dailySpending}</h2>
-              <p>{copy.dailySpendingIntro}</p>
-            </div>
-            <div className="daily-chart-total">
-              <span>{copy.thisCycleTotal}</span>
-              <strong>{euro.format(spent)}</strong>
-            </div>
-          </div>
-          <div
-            ref={dailyChartRef}
-            className="daily-expense-chart"
-            role="img"
-            aria-label={copy.dailySpendingChartLabel}
-          />
-        </section>
+        <div
+          ref={dailyChartRef}
+          className="daily-expense-chart"
+          role="img"
+          aria-label={copy.dailySpendingChartLabel}
+        />
 
         <section className="hero" id="top" aria-labelledby="page-title">
           <div className="hero-copy">

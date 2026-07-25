@@ -1,5 +1,5 @@
 {
-  "version": 4,
+  "version": 5,
   "maxMonths": 12,
   "currency": "EUR",
   "timezone": "Europe/Vilnius",
@@ -18,7 +18,7 @@
       "currency": "EUR",
       "timezone": "Europe/Vilnius",
       "updatedAt": "2026-07-25",
-      "revision": 18,
+      "revision": 19,
       "salary": 2150,
       "savingsGoal": 200,
       "expenses": [
@@ -34,7 +34,8 @@
           "category": "Debt & repayments",
           "source": "chat",
           "recurring": true,
-          "frequency": "monthly"
+          "frequency": "monthly",
+          "paymentMethod": "debit"
         },
         {
           "id": "2026-07-chatgpt",
@@ -48,7 +49,8 @@
           "category": "Subscriptions & services",
           "source": "chat",
           "recurring": true,
-          "frequency": "monthly"
+          "frequency": "monthly",
+          "paymentMethod": "debit"
         },
         {
           "id": "2026-07-youtube",
@@ -62,7 +64,8 @@
           "category": "Subscriptions & services",
           "source": "chat",
           "recurring": true,
-          "frequency": "monthly"
+          "frequency": "monthly",
+          "paymentMethod": "debit"
         },
         {
           "id": "2026-07-slite",
@@ -76,7 +79,8 @@
           "category": "Subscriptions & services",
           "source": "chat",
           "recurring": true,
-          "frequency": "monthly"
+          "frequency": "monthly",
+          "paymentMethod": "debit"
         },
         {
           "id": "2026-07-apartment-debt",
@@ -90,7 +94,8 @@
           "category": "Debt & repayments",
           "source": "chat",
           "recurring": true,
-          "frequency": "monthly"
+          "frequency": "monthly",
+          "paymentMethod": "debit"
         },
         {
           "id": "2026-07-laptop",
@@ -104,7 +109,8 @@
           "category": "Devices & installments",
           "source": "chat",
           "recurring": true,
-          "frequency": "monthly"
+          "frequency": "monthly",
+          "paymentMethod": "debit"
         },
         {
           "id": "2026-07-revolut-debt",
@@ -118,7 +124,8 @@
           "category": "Debt & repayments",
           "source": "chat",
           "recurring": true,
-          "frequency": "monthly"
+          "frequency": "monthly",
+          "paymentMethod": "debit"
         },
         {
           "id": "2026-07-apple-devices",
@@ -132,7 +139,8 @@
           "category": "Devices & installments",
           "source": "chat",
           "recurring": true,
-          "frequency": "monthly"
+          "frequency": "monthly",
+          "paymentMethod": "debit"
         },
         {
           "id": "2026-07-ipad",
@@ -146,7 +154,8 @@
           "category": "Devices & installments",
           "source": "chat",
           "recurring": true,
-          "frequency": "monthly"
+          "frequency": "monthly",
+          "paymentMethod": "debit"
         },
         {
           "id": "2026-07-icloud-plus",
@@ -160,7 +169,8 @@
           "category": "Subscriptions & services",
           "source": "chat",
           "recurring": true,
-          "frequency": "monthly"
+          "frequency": "monthly",
+          "paymentMethod": "debit"
         },
         {
           "id": "2026-07-microsoft-365",
@@ -174,7 +184,8 @@
           "category": "Subscriptions & services",
           "source": "chat",
           "recurring": true,
-          "frequency": "monthly"
+          "frequency": "monthly",
+          "paymentMethod": "debit"
         },
         {
           "id": "2026-07-adobe",
@@ -188,7 +199,8 @@
           "category": "Subscriptions & services",
           "source": "chat",
           "recurring": true,
-          "frequency": "monthly"
+          "frequency": "monthly",
+          "paymentMethod": "debit"
         },
         {
           "id": "2026-07-g-suite",
@@ -202,7 +214,8 @@
           "category": "Subscriptions & services",
           "source": "chat",
           "recurring": true,
-          "frequency": "monthly"
+          "frequency": "monthly",
+          "paymentMethod": "debit"
         },
         {
           "id": "2026-07-buses",
@@ -216,7 +229,8 @@
           "category": "Transport & Travel",
           "source": "chat",
           "recurring": true,
-          "frequency": "monthly"
+          "frequency": "monthly",
+          "paymentMethod": "debit"
         },
         {
           "id": "2026-07-istorijos-001",
@@ -237,10 +251,11 @@
           "originalAmount": 6,
           "receiptReference": "6774",
           "orderNumber": "4648",
-          "paymentMethod": "Credit card",
+          "paymentMethod": "debit",
           "transactionTime": "11:52:56",
           "vatRate": 21,
-          "vatAmount": 1.04
+          "vatAmount": 1.04,
+          "receiptPaymentDescription": "Credit card"
         },
         {
           "id": "2026-07-maxima-cider-001",
@@ -260,7 +275,7 @@
           "originalCurrency": "EUR",
           "originalAmount": 1.99,
           "receiptReference": "00320265",
-          "paymentMethod": "Contactless debit Mastercard",
+          "paymentMethod": "debit",
           "transactionTime": "19:32:26",
           "vatRate": 21,
           "vatAmount": 0.33,
@@ -274,7 +289,8 @@
               "description": "Refundable can deposit",
               "amount": 0.1
             }
-          ]
+          ],
+          "receiptPaymentDescription": "Contactless debit Mastercard"
         }
       ]
     }

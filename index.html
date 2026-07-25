@@ -19,6 +19,15 @@
   <body>
     <main>
       <div class="shell">
+        <section class="credit-alert" id="credit-alert" role="alert" aria-live="assertive" hidden>
+          <span class="credit-alert-icon" aria-hidden="true">CC</span>
+          <div>
+            <strong id="credit-alert-title">Outstanding credit</strong>
+            <p id="credit-alert-detail">Credit spending is awaiting repayment.</p>
+          </div>
+          <strong class="credit-alert-total" id="credit-alert-total">€0.00</strong>
+        </section>
+
         <section class="spending-alert" role="status" aria-live="polite">
           <span class="spending-alert-icon" aria-hidden="true">!</span>
           <div>
@@ -181,6 +190,12 @@
                 <option value="Devices & installments" data-category-option="Devices & installments">Devices &amp; installments</option>
                 <option value="Transport & Travel" data-category-option="Transport & Travel">Transport &amp; Travel</option>
                 <option value="Alcohol & nightlife" data-category-option="Alcohol & nightlife">Alcohol &amp; nightlife</option>
+              </select>
+
+              <label for="payment-method" data-i18n="paymentMethod">Payment method</label>
+              <select id="payment-method">
+                <option value="debit" data-i18n="debit">Debit</option>
+                <option value="credit" data-i18n="credit">Credit</option>
               </select>
 
               <label for="note" data-i18n="whatFor">What was it for?</label>

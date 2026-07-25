@@ -47,6 +47,12 @@ const TRANSLATIONS = {
     formIntro: "Log something now, or simply send the amount in our chat.",
     amount: "Amount",
     category: "Category",
+    paymentMethod: "Payment method",
+    debit: "Debit",
+    credit: "Credit",
+    creditRepaid: "Credit repaid",
+    outstandingCredit: "Outstanding credit",
+    outstandingCreditDetail: "Credit spending is awaiting repayment.",
     whatFor: "What was it for?",
     notePlaceholder: "Coffee, Netflix, new shoes…",
     chatHint: "In chat, send a number or receipt photo and it will be added and categorised here.",
@@ -128,6 +134,12 @@ const TRANSLATIONS = {
     formIntro: "Добавьте расход здесь или просто отправьте сумму в чате.",
     amount: "Сумма",
     category: "Категория",
+    paymentMethod: "Способ оплаты",
+    debit: "Дебетовая карта",
+    credit: "Кредитная карта",
+    creditRepaid: "Кредит погашен",
+    outstandingCredit: "Непогашенный кредит",
+    outstandingCreditDetail: "Расходы по кредитной карте ожидают погашения.",
     whatFor: "На что потрачено?",
     notePlaceholder: "Кофе, Netflix, новая обувь…",
     chatHint: "Отправьте в чат сумму или фото чека: расход будет добавлен и распределён по категории.",
@@ -214,6 +226,14 @@ function sourceLabel(source) {
   if (source === "receipt") return t("receipt");
   if (source === "chat") return t("chat");
   return t("here");
+}
+
+function paymentLabel(expense) {
+  const paymentMethod = expense.paymentMethod ?? "debit";
+  if (paymentMethod === "credit" && expense.creditStatus === "repaid") {
+    return t("creditRepaid");
+  }
+  return t(paymentMethod);
 }
 
 function locale() {
@@ -439,6 +459,26 @@ function storageKey(month) {
   return `kinance:${month.month}:${month.updatedAt}:r${month.revision}`;
 }
 
+function renderCreditAlert() {
+  const alert = element("credit-alert");
+  const outstandingTotal = history
+    .flatMap((month) =>
+      month.month === selectedMonth.month ? data.expenses : month.expenses,
+    )
+    .filter(
+      (expense) =>
+        expense.paymentMethod === "credit" && expense.creditStatus !== "repaid",
+    )
+    .reduce((sum, expense) => sum + safeNumber(expense.amount), 0);
+
+  alert.hidden = outstandingTotal <= 0;
+  if (alert.hidden) return;
+
+  element("credit-alert-title").textContent = t("outstandingCredit");
+  element("credit-alert-detail").textContent = t("outstandingCreditDetail");
+  element("credit-alert-total").textContent = formatEuro(outstandingTotal);
+}
+
 function legacyStorageKey(month) {
   return `euroscope:${month.month}:${month.updatedAt}:r${month.revision}`;
 }
@@ -561,15 +601,25 @@ function createExpenseList(expenses) {
       month: "short",
     });
     const item = document.createElement("li");
+    const paymentMethod = expense.paymentMethod ?? "debit";
+    const paymentClass =
+      paymentMethod === "credit"
+        ? expense.creditStatus === "repaid"
+          ? "credit-repaid"
+          : "credit-outstanding"
+        : "debit";
     item.innerHTML = `
       <span class="expense-monogram" aria-hidden="true">${code}</span>
       <span class="expense-info">
-        <strong></strong>
+        <span class="expense-title-row">
+          <strong></strong>
+          <span class="payment-badge ${paymentClass}">${paymentLabel(expense)}</span>
+        </span>
         <small>${categoryLabel(expense.category)} · ${expense.recurring ? `${t("monthly")} · ` : ""}${sourceLabel(expense.source)} · ${date}</small>
       </span>
       <strong class="expense-amount">−${formatEuro(safeNumber(expense.amount))}</strong>
     `;
-    item.querySelector(".expense-info strong").textContent = expenseNoteLabel(expense);
+    item.querySelector(".expense-title-row strong").textContent = expenseNoteLabel(expense);
     list.append(item);
   });
   return list;
@@ -694,6 +744,7 @@ function render() {
   element("daily-pace").textContent = `${formatEuro(Math.max(remaining, 0) / daysLeft, true)} ${t("perDay")}`;
 
   applyTranslations();
+  renderCreditAlert();
   renderSpendingAlert();
   renderHistory();
   renderCategories();
@@ -737,6 +788,7 @@ function bindControls() {
     const amount = safeNumber(amountInput.value.replace(",", "."));
     if (!amount) return;
     const category = element("category").value;
+    const paymentMethod = element("payment-method").value;
     const noteInput = element("note");
     data.expenses.unshift({
       id: crypto.randomUUID(),
@@ -745,9 +797,12 @@ function bindControls() {
       date: selectedMonth.updatedAt,
       category,
       source: "site",
+      paymentMethod,
+      ...(paymentMethod === "credit" ? { creditStatus: "outstanding" } : {}),
     });
     amountInput.value = "";
     noteInput.value = "";
+    element("payment-method").value = "debit";
     save();
     render();
   });

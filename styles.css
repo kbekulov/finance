@@ -176,6 +176,79 @@ main::before {
 
 /* Dynamic guidance */
 
+.credit-alert {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  min-height: 68px;
+  overflow: hidden;
+  margin-bottom: 10px;
+  border: 1px solid rgba(255, 69, 58, 0.62);
+  border-radius: 20px;
+  background:
+    linear-gradient(105deg, rgba(255, 69, 58, 0.25), rgba(120, 12, 24, 0.16) 62%, transparent),
+    var(--glass-strong);
+  padding: 12px 16px;
+  box-shadow:
+    inset 0 1px rgba(255, 255, 255, 0.12),
+    0 0 28px rgba(255, 69, 58, 0.2);
+  animation: credit-alert-pulse 1.45s ease-in-out infinite alternate;
+  -webkit-backdrop-filter: blur(30px) saturate(170%);
+  backdrop-filter: blur(30px) saturate(170%);
+}
+
+.credit-alert[hidden] {
+  display: none;
+}
+
+.credit-alert-icon {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border-radius: 12px;
+  background: linear-gradient(145deg, #ff6258, #c81424);
+  color: white;
+  font-size: 11px;
+  font-weight: 850;
+  letter-spacing: 0.04em;
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.34);
+}
+
+.credit-alert strong:not(.credit-alert-total) {
+  display: block;
+  margin-bottom: 3px;
+  color: #ffd3d0;
+  font-size: 13px;
+}
+
+.credit-alert p {
+  margin: 0;
+  color: rgba(255, 244, 244, 0.82);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.credit-alert-total {
+  color: #fff0ef;
+  font-size: clamp(19px, 2.5vw, 25px);
+  letter-spacing: -0.035em;
+  white-space: nowrap;
+}
+
+@keyframes credit-alert-pulse {
+  from {
+    border-color: rgba(255, 69, 58, 0.46);
+    box-shadow: inset 0 1px rgba(255, 255, 255, 0.1), 0 0 15px rgba(255, 69, 58, 0.12);
+  }
+  to {
+    border-color: rgba(255, 105, 97, 0.92);
+    box-shadow: inset 0 1px rgba(255, 255, 255, 0.15), 0 0 34px rgba(255, 69, 58, 0.38);
+  }
+}
+
 .spending-alert {
   position: relative;
   display: flex;
@@ -474,6 +547,22 @@ main::before {
   background: linear-gradient(100deg, rgba(238, 180, 119, 0.2), rgba(255, 255, 255, 0.6) 62%), var(--glass);
 }
 
+:root[data-theme="nier-automata"] .credit-alert {
+  border-color: rgba(151, 53, 45, 0.58);
+  background:
+    linear-gradient(105deg, rgba(167, 71, 60, 0.2), rgba(255, 255, 255, 0.58)),
+    rgba(247, 249, 248, 0.9);
+}
+
+:root[data-theme="nier-automata"] .credit-alert strong:not(.credit-alert-total),
+:root[data-theme="nier-automata"] .credit-alert-total {
+  color: #741f1a;
+}
+
+:root[data-theme="nier-automata"] .credit-alert p {
+  color: #63433f;
+}
+
 :root[data-theme="nier-automata"] .spending-alert strong {
   color: #86491f;
 }
@@ -612,6 +701,14 @@ main::before {
 :root[data-theme="tohsaka-rin"] .spending-alert {
   border-color: rgba(242, 169, 79, 0.34);
   background: linear-gradient(105deg, rgba(225, 25, 70, 0.16), rgba(118, 43, 168, 0.08) 62%), var(--glass);
+}
+
+:root[data-theme="tohsaka-rin"] .credit-alert {
+  border-color: rgba(255, 55, 95, 0.7);
+  background:
+    linear-gradient(105deg, rgba(255, 55, 95, 0.28), rgba(94, 12, 48, 0.28)),
+    rgba(35, 14, 40, 0.86);
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.12), 0 0 32px rgba(229, 42, 85, 0.28);
 }
 
 :root[data-theme="tohsaka-rin"] .progress-ring {
@@ -1584,6 +1681,20 @@ h1 em {
   min-width: 0;
 }
 
+.expense-title-row {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 7px;
+}
+
+.expense-title-row > strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .expense-info strong,
 .expense-info small {
   display: block;
@@ -1603,6 +1714,51 @@ h1 em {
 .expense-info small {
   color: var(--tertiary);
   font-size: 10px;
+}
+
+.payment-badge {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  border: 1px solid var(--separator);
+  border-radius: 999px;
+  padding: 2px 6px;
+  font-size: 8px;
+  font-weight: 760;
+  letter-spacing: 0.055em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  vertical-align: 1px;
+}
+
+.payment-badge.debit {
+  border-color: rgba(48, 209, 88, 0.22);
+  background: rgba(48, 209, 88, 0.1);
+  color: #7ee699;
+}
+
+.payment-badge.credit-outstanding {
+  border-color: rgba(255, 69, 58, 0.42);
+  background: rgba(255, 69, 58, 0.16);
+  color: #ff8c85;
+}
+
+.payment-badge.credit-repaid {
+  border-color: rgba(118, 118, 128, 0.26);
+  background: rgba(118, 118, 128, 0.12);
+  color: var(--secondary);
+}
+
+:root[data-theme="nier-automata"] .payment-badge.debit {
+  border-color: rgba(82, 120, 102, 0.34);
+  background: rgba(82, 120, 102, 0.12);
+  color: #365b49;
+}
+
+:root[data-theme="nier-automata"] .payment-badge.credit-outstanding {
+  border-color: rgba(167, 71, 60, 0.38);
+  background: rgba(167, 71, 60, 0.12);
+  color: #87372f;
 }
 
 .expense-amount {
@@ -1836,6 +1992,15 @@ footer p {
 }
 
 @media (max-width: 640px) {
+  .credit-alert {
+    grid-template-columns: auto minmax(0, 1fr);
+    padding: 12px 13px;
+  }
+
+  .credit-alert-total {
+    grid-column: 2;
+    font-size: 19px;
+  }
   :root {
     --radius-outer: 26px;
     --radius-card: 21px;
@@ -2108,6 +2273,10 @@ footer p {
   *::after {
     scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
+  }
+
+  .credit-alert {
+    animation: none !important;
   }
 }
 

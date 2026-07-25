@@ -28,6 +28,9 @@ type Expense = {
   date: string;
   category: Category;
   source: "chat" | "site" | "receipt";
+  paymentMethod: "debit" | "credit";
+  creditStatus?: "outstanding" | "repaid";
+  repaidAt?: string;
   recurring?: boolean;
   frequency?: "monthly";
 };
@@ -106,6 +109,12 @@ const COPY = {
     formIntro: "Log something now, or simply send the amount in our chat.",
     amount: "Amount",
     category: "Category",
+    paymentMethod: "Payment method",
+    debit: "Debit",
+    credit: "Credit",
+    creditRepaid: "Credit repaid",
+    outstandingCredit: "Outstanding credit",
+    outstandingCreditDetail: "Credit spending is awaiting repayment.",
     what: "What was it for?",
     placeholder: "Coffee, Netflix, new shoes…",
     hint: "In chat, send a number or a receipt photo and it will be added and categorised here.",
@@ -175,6 +184,12 @@ const COPY = {
     formIntro: "Добавьте расход здесь или просто отправьте сумму в чате.",
     amount: "Сумма",
     category: "Категория",
+    paymentMethod: "Способ оплаты",
+    debit: "Дебетовая карта",
+    credit: "Кредитная карта",
+    creditRepaid: "Кредит погашен",
+    outstandingCredit: "Непогашенный кредит",
+    outstandingCreditDetail: "Расходы по кредитной карте ожидают погашения.",
     what: "На что потрачено?",
     placeholder: "Кофе, Netflix, новая обувь…",
     hint: "Отправьте в чат сумму или фото чека: расход будет добавлен и распределён по категории.",
@@ -313,6 +328,7 @@ export default function Home() {
   const [amount, setAmount] = useState("");
   const [note, setNote] = useState("");
   const [category, setCategory] = useState<Category>("Food");
+  const [paymentMethod, setPaymentMethod] = useState<"debit" | "credit">("debit");
   const [isReady, setIsReady] = useState(false);
   const [language, setLanguage] = useState<Language>("en");
   const [theme, setTheme] = useState<ThemeId>("kinance");
@@ -382,6 +398,15 @@ export default function Home() {
     (sum, expense) => sum + expense.amount,
     0,
   );
+  const outstandingCreditTotal = HISTORY
+    .flatMap((record) =>
+      record.month === selectedMonth.month ? data.expenses : record.expenses,
+    )
+    .filter(
+      (expense) =>
+        expense.paymentMethod === "credit" && expense.creditStatus !== "repaid",
+    )
+    .reduce((sum, expense) => sum + expense.amount, 0);
   const spendable = Math.max(data.salary - data.savingsGoal, 0);
   const remaining = data.salary - data.savingsGoal - spent;
   const usedPercent = spendable > 0 ? Math.min((spent / spendable) * 100, 100) : 0;
@@ -469,6 +494,12 @@ export default function Home() {
   const categoryLabel = (name: Category) => CATEGORY_LABELS[language][name];
   const expenseNoteLabel = (expense: Expense) =>
     expense.noteTranslations?.[language] ?? expense.note;
+  const paymentLabel = (expense: Expense) => {
+    if (expense.paymentMethod === "credit" && expense.creditStatus === "repaid") {
+      return copy.creditRepaid;
+    }
+    return expense.paymentMethod === "credit" ? copy.credit : copy.debit;
+  };
   const expenseList = (expenses: Expense[]) => (
     <ul className="expense-list">
       {expenses.map((expense) => (
@@ -477,7 +508,20 @@ export default function Home() {
             {categorySymbol(expense.category)}
           </span>
           <span className="expense-info">
-            <strong>{expenseNoteLabel(expense)}</strong>
+            <span className="expense-title-row">
+              <strong>{expenseNoteLabel(expense)}</strong>
+              <span
+                className={`payment-badge ${
+                  expense.paymentMethod === "credit"
+                    ? expense.creditStatus === "repaid"
+                      ? "credit-repaid"
+                      : "credit-outstanding"
+                    : "debit"
+                }`}
+              >
+                {paymentLabel(expense)}
+              </span>
+            </span>
             <small>
               {categoryLabel(expense.category)} ·{" "}
               {expense.recurring ? `${copy.monthly} · ` : ""}
@@ -541,17 +585,33 @@ export default function Home() {
           date: selectedMonth.updatedAt,
           category,
           source: "site",
+          paymentMethod,
+          ...(paymentMethod === "credit" ? { creditStatus: "outstanding" as const } : {}),
         },
         ...current.expenses,
       ],
     }));
     setAmount("");
     setNote("");
+    setPaymentMethod("debit");
   }
 
   return (
     <main>
       <div className="shell">
+        {outstandingCreditTotal > 0 && (
+          <section className="credit-alert" role="alert" aria-live="assertive">
+            <span className="credit-alert-icon" aria-hidden="true">CC</span>
+            <div>
+              <strong>{copy.outstandingCredit}</strong>
+              <p>{copy.outstandingCreditDetail}</p>
+            </div>
+            <strong className="credit-alert-total">
+              {euro.format(outstandingCreditTotal)}
+            </strong>
+          </section>
+        )}
+
         <section className="spending-alert" role="status" aria-live="polite">
           <span className="spending-alert-icon" aria-hidden="true">!</span>
           <div>
@@ -901,6 +961,18 @@ export default function Home() {
                 {CATEGORIES.map((name) => (
                   <option key={name} value={name}>{categoryLabel(name)}</option>
                 ))}
+              </select>
+              <label htmlFor="payment-method">{copy.paymentMethod}</label>
+              <select
+                id="payment-method"
+                name="paymentMethod"
+                value={paymentMethod}
+                onChange={(event) =>
+                  setPaymentMethod(event.target.value as "debit" | "credit")
+                }
+              >
+                <option value="debit">{copy.debit}</option>
+                <option value="credit">{copy.credit}</option>
               </select>
               <label htmlFor="note">{copy.what}</label>
               <input

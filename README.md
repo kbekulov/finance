@@ -67,10 +67,13 @@ Every expense record must preserve all known details:
 - `date`: actual expense date in `YYYY-MM-DD`
 - `category`: one supported stable English category value
 - `source`: `chat`, `site`, or `receipt`
+- `paymentMethod`: required `debit` or `credit`; use `debit` unless the user explicitly identifies the expense as credit
+- `creditStatus`: required for credit expenses, either `outstanding` or `repaid`
+- `repaidAt`: repayment date in `YYYY-MM-DD`, required once a credit expense is repaid
 - `recurring`: boolean when known
 - `frequency`: `monthly` for monthly recurring expenses
 
-When more information is actually available, preserve it with clearly named optional fields rather than discarding it, for example `merchant`, `description`, `originalCurrency`, `originalAmount`, `receiptReference`, or `paymentMethod`. Use `null` only when the distinction between “known empty” and “not supplied” matters. Never invent missing receipt, merchant, time, or payment details.
+When more information is actually available, preserve it with clearly named optional fields rather than discarding it, for example `merchant`, `description`, `originalCurrency`, `originalAmount`, or `receiptReference`. Use `null` only when the distinction between “known empty” and “not supplied” matters. Never invent missing receipt, merchant, time, or payment details.
 
 Do not store derived totals in JSON. Total spent, remaining balance, category totals, percentages, daily pace, and warning guidance must be recalculated from canonical salary, savings, expenses, and calendar dates so they cannot drift.
 
@@ -85,6 +88,7 @@ A message whose financial intent is simply a number means: add that amount in eu
 - Use today’s date unless the user specifies another date.
 - Choose the most reasonable supported category from context.
 - Use `source: "chat"`.
+- Set `paymentMethod: "debit"` unless the user explicitly says the expense was paid on credit.
 - Do not mark it recurring unless the user says it repeats.
 - If the purpose is genuinely unknown, use a neutral note such as `Unspecified expense`; do not fabricate a merchant.
 
@@ -93,6 +97,7 @@ A message whose financial intent is simply a number means: add that amount in eu
 Read the final amount actually paid, not subtotal, tax, savings, balance due before payment, or a single line item.
 
 - Use `source: "receipt"`.
+- Set `paymentMethod: "debit"` unless the user explicitly says that purchase was paid on credit. Do not infer credit merely from a card receipt.
 - Record merchant and receipt-specific details when visible.
 - Preserve the receipt currency and convert only when the user requests conversion or a reliable conversion value is available.
 - Classify the purchase using an existing supported category when one accurately fits. If the receipt reveals a meaningful, reusable type of spending that none of the existing categories represents, create a new stable category without waiting for separate approval.
@@ -112,6 +117,16 @@ When the user changes the monthly savings requirement, replace the current salar
 ### Rename or correct an expense
 
 Edit the existing record instead of adding a duplicate. Preserve its amount, date, recurrence, source, and category unless the user changes them. Update both database-level `noteTranslations` values with every rename.
+
+### Debit, credit, and repayment
+
+Debit is the universal default. Every new purchase, receipt, subscription, debt payment, or other expense must be stored with `paymentMethod: "debit"` unless the user explicitly says it was paid with a credit card or on credit. An explicitly identified credit purchase must use `paymentMethod: "credit"` and `creditStatus: "outstanding"`.
+
+When the user says that credit has been repaid, update every currently outstanding credit expense to `creditStatus: "repaid"` and set `repaidAt` to the stated repayment date, or today when no date is supplied. Preserve the original expense amount, category, date, source, recurrence, and payment method. Credit repayment is a balance settlement, not a second purchase, so do not add another expense or count the repayment twice in spending totals.
+
+The outstanding-credit banner must remain completely hidden when the outstanding total is zero. When any outstanding credit exists in the retained finance history, show the flashing high-priority banner above the normal spending warning and calculate its euro total from all expenses where `paymentMethod` is `credit` and `creditStatus` is not `repaid`. Repaid credit stays visibly labeled in its expense table but never contributes to the banner total. The banner must keep its theme-specific palette, assertive live-region semantics, mobile layout, and reduced-motion fallback.
+
+Every expense row must display a localized payment badge: Debit, Credit, or Credit repaid. The quick-entry form must default to Debit while allowing Credit to be selected explicitly. Carry an explicitly configured payment method forward with recurring expenses.
 
 ### Recurring expenses
 

@@ -38,6 +38,8 @@ test("server-renders the current finance tracker", async () => {
   assert.match(html, />kinance<\/span>/i);
   assert.doesNotMatch(html, />euroscope<\/span>/i);
   assert.match(html, /class="spending-alert"/);
+  assert.doesNotMatch(html, /class="credit-alert"/);
+  assert.match(html, /class="payment-badge debit"/);
   assert.match(html, /Spending alert/);
   assert.match(html, /Debt &amp; repayments is your largest cost at €555\.00/);
   assert.match(html, /Apple Devices/);
@@ -91,7 +93,7 @@ test("keeps database history and translations aligned", async () => {
   const current = database.months.at(-1);
 
   assert.equal(database.maxMonths, 12);
-  assert.equal(database.version, 4);
+  assert.equal(database.version, 5);
   assert.deepEqual(database.salarySchedule, {
     dayOfMonth: 12,
     weekendRule: "previousFriday",
@@ -100,7 +102,7 @@ test("keeps database history and translations aligned", async () => {
   assert.equal(database.currency, "EUR");
   assert.equal(database.timezone, "Europe/Vilnius");
   assert.equal(current.updatedAt, "2026-07-25");
-  assert.equal(current.revision, 18);
+  assert.equal(current.revision, 19);
   assert.equal(current.savingsGoal, 200);
   assert.deepEqual(current.period, {
     start: "2026-07-10",
@@ -126,6 +128,8 @@ test("keeps database history and translations aligned", async () => {
   for (const expense of current.expenses) {
     assert.ok(expense.date >= current.period.start);
     assert.ok(expense.date <= current.period.end);
+    assert.equal(expense.paymentMethod, "debit");
+    assert.equal(expense.creditStatus, undefined);
   }
   assert.equal(
     current.expenses.find((expense) => expense.id === "2026-07-apple-devices")
@@ -152,6 +156,7 @@ test("keeps database history and translations aligned", async () => {
       source: "chat",
       recurring: true,
       frequency: "monthly",
+      paymentMethod: "debit",
     },
   );
   assert.deepEqual(
@@ -169,6 +174,7 @@ test("keeps database history and translations aligned", async () => {
       source: "chat",
       recurring: true,
       frequency: "monthly",
+      paymentMethod: "debit",
     },
   );
   assert.equal(
@@ -210,6 +216,7 @@ test("keeps database history and translations aligned", async () => {
       source: "chat",
       recurring: true,
       frequency: "monthly",
+      paymentMethod: "debit",
     },
   );
   for (const [id, amount] of [
@@ -249,10 +256,11 @@ test("keeps database history and translations aligned", async () => {
       originalAmount: 6,
       receiptReference: "6774",
       orderNumber: "4648",
-      paymentMethod: "Credit card",
+      paymentMethod: "debit",
       transactionTime: "11:52:56",
       vatRate: 21,
       vatAmount: 1.04,
+      receiptPaymentDescription: "Credit card",
     },
   );
   assert.deepEqual(
@@ -277,11 +285,12 @@ test("keeps database history and translations aligned", async () => {
       originalCurrency: "EUR",
       originalAmount: 1.99,
       receiptReference: "00320265",
-      paymentMethod: "Contactless debit Mastercard",
+      paymentMethod: "debit",
       transactionTime: "19:32:26",
       vatRate: 21,
       vatAmount: 0.33,
       containerDeposit: 0.1,
+      receiptPaymentDescription: "Contactless debit Mastercard",
       lineItems: [
         {
           description: "Shelton's pear cider",
@@ -323,9 +332,17 @@ test("keeps database history and translations aligned", async () => {
     assert.match(source, /nier-automata/);
     assert.match(source, /tohsaka-rin/);
     assert.match(source, /kinance:theme/);
+    assert.match(source, /outstandingCredit/);
+    assert.match(source, /paymentMethod/);
+    assert.match(source, /creditStatus !== "repaid"/);
+    assert.match(source, /creditStatus: "outstanding"/);
   }
   assert.match(index, /id="theme-select"/);
   assert.match(index, /data-current-theme="kinance"/);
+  assert.match(index, /id="credit-alert"[^>]*hidden/);
+  assert.match(index, /id="payment-method"/);
+  assert.match(index, /option value="debit"/);
+  assert.match(index, /option value="credit"/);
   assert.match(index, /id="theme-banner-image"/);
   assert.match(index, /theme-banners\/kinance\.png/);
   for (const source of [page, script]) {
@@ -335,6 +352,9 @@ test("keeps database history and translations aligned", async () => {
     assert.match(source, /theme-banners\/tohsaka-rin\.png/);
   }
   assert.match(styles, /\.theme-banner\s*\{/);
+  assert.match(styles, /@keyframes credit-alert-pulse/);
+  assert.match(styles, /\.payment-badge\.credit-outstanding/);
+  assert.match(styles, /prefers-reduced-motion[\s\S]*\.credit-alert[\s\S]*animation:\s*none/);
   assert.match(styles, /\.theme-banner img\s*\{[^}]*object-fit:\s*cover/s);
   assert.match(styles, /:root\[data-theme="nier-automata"\]/);
   assert.match(styles, /:root\[data-theme="tohsaka-rin"\]/);

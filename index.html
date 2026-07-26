@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="ru">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -13,9 +13,9 @@
     <meta property="og:image" content="https://finance.bekulov.com/public/og.png" />
     <title>Kinance</title>
     <link rel="icon" type="image/jpeg" href="/kinance-favicon.jpg" />
-    <link rel="stylesheet" href="/styles.css?v=36" />
+    <link rel="stylesheet" href="/styles.css?v=37" />
     <script src="/public/vendor/apexcharts.min.js?v=21" defer></script>
-    <script src="/script.js?v=38" defer></script>
+    <script src="/script.js?v=39" defer></script>
   </head>
   <body>
     <main>
@@ -49,8 +49,8 @@
               <select id="theme-select" aria-label="Theme" data-i18n-aria-label="themeLabel"></select>
             </label>
             <div class="language-switch" role="group" aria-label="Language" data-i18n-aria-label="languageLabel">
-              <button type="button" data-language="en" class="active">EN</button>
-              <button type="button" data-language="ru">RU</button>
+              <button type="button" data-language="en">EN</button>
+              <button type="button" data-language="ru" class="active">RU</button>
             </div>
             <div class="month-pill">
               <span class="month-dot" aria-hidden="true"></span>
@@ -73,11 +73,11 @@
           </div>
         </section>
 
-        <section class="theme-banner" aria-label="Kinance character banner">
+        <section class="theme-banner" aria-label="Kinance theme artwork">
           <img
             id="theme-banner-image"
             src="/public/theme-banners/kinance.png?v=3"
-            alt="Kinance character banner"
+            alt="Kinance theme artwork"
             width="2048"
             height="683"
             fetchpriority="high"
@@ -89,7 +89,7 @@
           id="daily-expense-chart"
           class="daily-expense-chart"
           role="img"
-          aria-label="Daily non-recurring expense movement"
+          aria-label="Daily non-recurring expense movement with daily allowance guides"
           data-i18n-aria-label="dailySpendingChartLabel"
         ></div>
 

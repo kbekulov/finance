@@ -8,7 +8,17 @@ const CATEGORIES = [
   "Alcohol & nightlife",
 ];
 
-const CATEGORY_ICON_POOLS = {
+const KINANCE_CATEGORY_ICONS = {
+  Food: "/public/category-icons/food-item.png?v=1",
+  "Subscriptions & services": "/public/category-icons/subscriptions-item.png?v=1",
+  "Luxury purchases": "/public/category-icons/luxury-item.png?v=1",
+  "Debt & repayments": "/public/category-icons/debt-item.png?v=1",
+  "Devices & installments": "/public/category-icons/devices-item.png?v=1",
+  "Transport & Travel": "/public/category-icons/transport-item.png?v=1",
+  "Alcohol & nightlife": "/public/category-icons/alcohol-item.png?v=1",
+};
+
+const CHARACTER_CATEGORY_ICON_POOLS = {
   Food: [
     "/public/category-icons/food.png?v=5",
     "/public/category-icons/food-kohaku.png?v=1",
@@ -47,7 +57,11 @@ const CATEGORY_ICON_POOLS = {
 };
 
 function categoryIconFor(expense) {
-  const pool = CATEGORY_ICON_POOLS[expense.category];
+  if (theme === "kinance") {
+    return KINANCE_CATEGORY_ICONS[expense.category];
+  }
+
+  const pool = CHARACTER_CATEGORY_ICON_POOLS[expense.category];
   let hash = 2166136261;
   for (const character of expense.id) {
     hash ^= character.charCodeAt(0);
@@ -63,9 +77,28 @@ function categoryIconFor(expense) {
 
 const THEMES = [
   { id: "kinance", label: "Kinance", banner: "/public/theme-banners/kinance.png?v=3" },
+  { id: "kinance-moon", label: "Kinance Moon", banner: "/public/theme-banners/kinance.png?v=3" },
   { id: "nier-automata", label: "NieR:Automata", banner: "/public/theme-banners/nier-automata.png" },
   { id: "tohsaka-rin", label: "Tohsaka Rin", banner: "/public/theme-banners/tohsaka-rin.png" },
 ];
+
+const PREFERENCE_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
+const THEME_COOKIE = "kinance_theme";
+const LANGUAGE_COOKIE = "kinance_language";
+
+function readPreferenceCookie(name) {
+  const prefix = `${encodeURIComponent(name)}=`;
+  const entry = document.cookie
+    .split(";")
+    .map((part) => part.trim())
+    .find((part) => part.startsWith(prefix));
+  return entry ? decodeURIComponent(entry.slice(prefix.length)) : null;
+}
+
+function writePreferenceCookie(name, value) {
+  const secure = window.location.protocol === "https:" ? "; Secure" : "";
+  document.cookie = `${encodeURIComponent(name)}=${encodeURIComponent(value)}; Max-Age=${PREFERENCE_COOKIE_MAX_AGE}; Path=/; SameSite=Lax${secure}`;
+}
 
 const TRANSLATIONS = {
   en: {
@@ -82,7 +115,7 @@ const TRANSLATIONS = {
     dailySpendingIntro: "What left your account each day this salary cycle",
     thisCycleTotal: "This cycle",
     dailyExpenseSeries: "Daily spending",
-    dailySpendingChartLabel: "Daily non-recurring expense movement",
+    dailySpendingChartLabel: "Daily non-recurring expense movement with daily allowance guides",
     tapToEdit: "Tap the amount to edit",
     savingsRequirement: "SAVINGS REQUIREMENT",
     protectedSpending: "Protected from spending",
@@ -137,7 +170,7 @@ const TRANSLATIONS = {
     kinanceHome: "Kinance home",
     languageLabel: "Language",
     themeLabel: "Theme",
-    themeBannerLabel: "{theme} character banner",
+    themeBannerLabel: "{theme} theme artwork",
     financeHistoryLabel: "Salary cycle history",
     monthlyTimelineLabel: "Salary cycle timeline",
     monthlyPlanLabel: "Salary cycle plan balance",
@@ -171,7 +204,7 @@ const TRANSLATIONS = {
     dailySpendingIntro: "Сколько уходило со счёта каждый день этого цикла зарплаты",
     thisCycleTotal: "За цикл",
     dailyExpenseSeries: "Расходы за день",
-    dailySpendingChartLabel: "Динамика разовых расходов по дням",
+    dailySpendingChartLabel: "Динамика разовых расходов с ориентирами дневных лимитов",
     tapToEdit: "Нажмите на сумму, чтобы изменить",
     savingsRequirement: "ЦЕЛЬ НАКОПЛЕНИЙ",
     protectedSpending: "Защищено от расходов",
@@ -226,7 +259,7 @@ const TRANSLATIONS = {
     kinanceHome: "Главная Kinance",
     languageLabel: "Язык",
     themeLabel: "Тема",
-    themeBannerLabel: "Баннер с персонажами темы {theme}",
+    themeBannerLabel: "Оформление темы {theme}",
     financeHistoryLabel: "История циклов зарплаты",
     monthlyTimelineLabel: "Шкала цикла зарплаты",
     monthlyPlanLabel: "Баланс цикла зарплаты",
@@ -253,16 +286,14 @@ let selectedMonth = null;
 let data = null;
 let dailyExpenseChart = null;
 let salarySchedule = { dayOfMonth: 12, weekendRule: "previousFriday" };
-let theme = THEMES.some(
-  ({ id }) => id === localStorage.getItem("kinance:theme"),
-)
-  ? localStorage.getItem("kinance:theme")
+const savedThemePreference = readPreferenceCookie(THEME_COOKIE);
+let theme = THEMES.some(({ id }) => id === savedThemePreference)
+  ? savedThemePreference
   : "kinance";
-let language =
-  (localStorage.getItem("kinance:language") ??
-    localStorage.getItem("euroscope:language")) === "ru"
-    ? "ru"
-    : "en";
+const savedLanguagePreference = readPreferenceCookie(LANGUAGE_COOKIE);
+let language = savedLanguagePreference === "en" ? "en" : "ru";
+writePreferenceCookie(THEME_COOKIE, theme);
+writePreferenceCookie(LANGUAGE_COOKIE, language);
 
 function t(key, replacements = {}) {
   let value = TRANSLATIONS[language][key] ?? TRANSLATIONS.en[key] ?? key;
@@ -825,7 +856,7 @@ function dailyExpensePoints(expenses, period, asOfDate) {
   return points;
 }
 
-function renderDailyExpenseChart() {
+function renderDailyExpenseChart(allFundsDailyPace, savingsSafeDailyPace) {
   const container = element("daily-expense-chart");
   dailyExpenseChart?.destroy();
   dailyExpenseChart = null;
@@ -839,6 +870,19 @@ function renderDailyExpenseChart() {
   const themeStyles = getComputedStyle(document.documentElement);
   const accent = themeStyles.getPropertyValue("--chart-accent").trim() || "#5ac8fa";
   const glow = themeStyles.getPropertyValue("--chart-glow").trim() || accent;
+  const allFundsColor = themeStyles.getPropertyValue("--red").trim() || "#ff453a";
+  const savingsSafeColor = themeStyles.getPropertyValue("--green").trim() || "#30d158";
+  const points = dailyExpensePoints(
+    data.expenses.filter((expense) => !expense.recurring),
+    selectedMonth.period,
+    todayInVilnius(),
+  );
+  const chartMaximum = Math.max(
+    ...points.map(({ y }) => y),
+    allFundsDailyPace,
+    savingsSafeDailyPace,
+    1,
+  ) * 1.08;
 
   dailyExpenseChart = new window.ApexCharts(container, {
     chart: {
@@ -854,12 +898,28 @@ function renderDailyExpenseChart() {
     },
     series: [{
       name: t("dailyExpenseSeries"),
-      data: dailyExpensePoints(
-        data.expenses.filter((expense) => !expense.recurring),
-        selectedMonth.period,
-        todayInVilnius(),
-      ),
+      data: points,
     }],
+    annotations: {
+      yaxis: [
+        {
+          y: allFundsDailyPace,
+          borderColor: allFundsColor,
+          borderWidth: 1.4,
+          strokeDashArray: 5,
+          opacity: 0.82,
+          label: { show: false },
+        },
+        {
+          y: savingsSafeDailyPace,
+          borderColor: savingsSafeColor,
+          borderWidth: 1.4,
+          strokeDashArray: 3,
+          opacity: 0.9,
+          label: { show: false },
+        },
+      ],
+    },
     colors: [accent],
     stroke: { curve: "smooth", width: 2.25, lineCap: "round" },
     fill: {
@@ -875,7 +935,7 @@ function renderDailyExpenseChart() {
     dataLabels: { enabled: false },
     grid: { show: false, padding: { left: 3, right: 3, top: 8, bottom: 1 } },
     xaxis: { type: "datetime" },
-    yaxis: { min: 0 },
+    yaxis: { min: 0, max: chartMaximum },
     tooltip: { enabled: false },
   });
   dailyExpenseChart.render();
@@ -939,7 +999,10 @@ function render() {
   element("daily-pace-safe").textContent = `${formatEuro(Math.max(safeRemaining, 0) / daysLeft, true)} ${t("perDay")}`;
 
   applyTranslations();
-  renderDailyExpenseChart();
+  renderDailyExpenseChart(
+    Math.max(cashRemaining, 0) / daysLeft,
+    Math.max(safeRemaining, 0) / daysLeft,
+  );
   renderCreditAlert();
   renderSpendingAlert();
   renderHistory();
@@ -955,14 +1018,14 @@ function bindControls() {
     theme = THEMES.some(({ id }) => id === event.target.value)
       ? event.target.value
       : "kinance";
-    localStorage.setItem("kinance:theme", theme);
+    writePreferenceCookie(THEME_COOKIE, theme);
     applyTheme();
-    if (data) renderDailyExpenseChart();
+    if (data) render();
   });
   document.querySelectorAll("[data-language]").forEach((button) => {
     button.addEventListener("click", () => {
       language = button.dataset.language;
-      localStorage.setItem("kinance:language", language);
+      writePreferenceCookie(LANGUAGE_COOKIE, language);
       applyTranslations();
       applyTheme();
       if (data) render();

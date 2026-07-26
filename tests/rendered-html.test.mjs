@@ -30,7 +30,9 @@ test("server-renders the current finance tracker", async () => {
 
   const html = await response.text();
   assert.match(html, /<title>Kinance<\/title>/i);
-  assert.match(html, /aria-label="Theme"/);
+  assert.match(html, /<html lang="ru">/);
+  assert.match(html, /aria-label="Тема"/);
+  assert.match(html, /<option value="kinance" selected="">Kinance<\/option><option value="kinance-moon">Kinance Moon<\/option>/);
   assert.match(html, /NieR:Automata/);
   assert.match(html, /Tohsaka Rin/);
   assert.doesNotMatch(html, /—|&mdash;|&#8212;|&#x2014;/i);
@@ -42,11 +44,11 @@ test("server-renders the current finance tracker", async () => {
   assert.match(html, /class="payment-badge debit"/);
   assert.match(html, /class="payment-badge credit-repaid"/);
   assert.doesNotMatch(html, /class="payment-badge credit-outstanding"/);
-  assert.match(html, /Spending alert/);
-  assert.match(html, /Debt &amp; repayments is your largest cost at €555\.00/);
-  assert.match(html, /Apple Devices/);
+  assert.match(html, /Контроль расходов/);
+  assert.match(html, /Самая крупная статья: Долги и выплаты, 555,00/);
+  assert.match(html, /Устройства Apple/);
   assert.match(html, /iPad/);
-  assert.match(html, /Updated 26 July 2026/);
+  assert.match(html, /Обновлено 26 июля 2026 г\./);
   const vilniusDateParts = Object.fromEntries(
     new Intl.DateTimeFormat("en-GB", {
       timeZone: "Europe/Vilnius",
@@ -60,15 +62,15 @@ test("server-renders the current finance tracker", async () => {
   );
   assert.match(
     html,
-    new RegExp(`Today<!-- --> · <!-- -->${vilniusDateParts.day} Jul`),
+    new RegExp(`Сегодня<!-- --> · <!-- -->${vilniusDateParts.day} июл`),
   );
-  assert.match(html, /10 Jul/i);
-  assert.match(html, /11 Aug/i);
-  assert.match(html, /<h1 id="page-title">DEBIT BALANCE<\/h1>/);
+  assert.match(html, /10 ИЮЛ/i);
+  assert.match(html, /11 АВГ/i);
+  assert.match(html, /<h1 id="page-title">БАЛАНС ДЕБЕТОВОЙ КАРТЫ<\/h1>/);
   assert.doesNotMatch(html, /Past 3-cycle comparison appears when history is available/);
-  assert.match(html, /on card until next salary/);
-  assert.match(html, /Buses/);
-  assert.match(html, /Transport &amp; Travel/);
+  assert.match(html, /на карте до следующей зарплаты/);
+  assert.match(html, /Автобусы/);
+  assert.match(html, /Транспорт и путешествия/);
   assert.match(html, /iCloud\+/);
   assert.doesNotMatch(html, /Mercury Weather/);
   assert.match(html, /Microsoft 365/);
@@ -79,29 +81,29 @@ test("server-renders the current finance tracker", async () => {
   assert.match(html, /class="expense-table one-time-expenses-table"/);
   assert.match(html, /<details[^>]*class="expense-table recurring-expenses"/);
   assert.match(html, /<summary class="expense-table-summary"/);
-  assert.match(html, /One-time expenses/);
-  assert.match(html, /€995\.71/);
-  assert.match(html, /Expected monthly expenses/);
-  assert.equal((html.match(/Expected monthly expenses/g) ?? []).length, 1);
+  assert.match(html, /Разовые расходы/);
+  assert.match(html, /995,71.{0,8}€/);
+  assert.match(html, /Ожидаемые ежемесячные расходы/);
+  assert.equal((html.match(/Ожидаемые ежемесячные расходы/g) ?? []).length, 1);
   assert.doesNotMatch(html, /Expected monthly total/);
   assert.doesNotMatch(html, /class="recurring-total"/);
   assert.doesNotMatch(html, /class="category-strip"/);
   assert.doesNotMatch(html, /class="month-history"/);
-  assert.match(html, /€936\.47/);
-  assert.match(html, /One-time expenses/);
-  assert.match(html, /Gaming laptop/);
-  assert.match(html, /Mortgage/);
+  assert.match(html, /936,47.{0,8}€/);
+  assert.match(html, /Разовые расходы/);
+  assert.match(html, /Игровой ноутбук/);
+  assert.match(html, /Ипотека/);
   assert.doesNotMatch(html, /Apartment debt/);
-  assert.match(html, /Keturi vėjai 0\.4 l/);
-  assert.match(html, /Shelton&#x27;s pear cider/);
-  assert.match(html, /Alcohol &amp; nightlife/);
+  assert.match(html, /Keturi vėjai, 0,4 л/);
+  assert.match(html, /Грушевый сидр Shelton&#x27;s/);
+  assert.match(html, /Алкоголь и ночная жизнь/);
   assert.match(html, /Alita Spritz Limon/);
-  assert.match(html, /€1,932\.18/);
-  assert.match(html, /€217\.82/);
-  assert.match(html, /€17\.82/);
-  assert.match(html, /90%<!-- --> <!-- -->SPENT|90% SPENT/);
-  assert.match(html, /All funds/);
-  assert.match(html, /Savings safe/);
+  assert.match(html, /1.{0,4}932,18.{0,8}€/);
+  assert.match(html, /217,82.{0,8}€/);
+  assert.match(html, /17,82.{0,8}€/);
+  assert.match(html, /90%<!-- --> <!-- -->ПОТРАЧЕНО|90% ПОТРАЧЕНО/);
+  assert.match(html, /Все средства/);
+  assert.match(html, /Сохранить накопления/);
   assert.match(html, /class="pace-limit pace-limit-all"/);
   assert.match(html, /class="pace-limit pace-limit-safe"/);
   const todayUtc = Date.UTC(
@@ -118,27 +120,27 @@ test("server-renders the current finance tracker", async () => {
   const renderedSavingsSafePace = Math.round(17.82 / renderedRemainingDays);
   assert.match(
     html,
-    new RegExp(`€${renderedAllFundsPace}(?:<!-- --> <!-- -->)?/ day`),
+    new RegExp(`${renderedAllFundsPace}.{0,12}€(?:<!-- --> <!-- -->)?/ день`),
   );
   assert.match(
     html,
-    new RegExp(`€${renderedSavingsSafePace}(?:<!-- --> <!-- -->)?/ day`),
+    new RegExp(`${renderedSavingsSafePace}.{0,12}€(?:<!-- --> <!-- -->)?/ день`),
   );
-  assert.match(html, /Beer/);
-  assert.match(html, /Ice cream/);
+  assert.match(html, /Пиво/);
+  assert.match(html, /Мороженое/);
   assert.match(html, /class="stat-card salary salary-locked"/);
-  assert.match(html, /SALARY THIS CYCLE/);
-  assert.match(html, /Locked to this salary cycle/);
+  assert.match(html, /ДОХОД В ЭТОМ ЦИКЛЕ/);
+  assert.match(html, /Зафиксировано для этого цикла зарплаты/);
   assert.doesNotMatch(html, /Monthly salary in euros[^<]*<\/span>\s*<span[^>]*>€<\/span>\s*<input/s);
   assert.doesNotMatch(html, /class="daily-chart-panel"/);
   assert.match(html, /class="daily-expense-chart"/);
   assert.match(html, /class="expense-category-icon"/);
   assert.match(
     html,
-    /category-icons\/(?:debt-repayments|debt-mash|debt-shiki-ryougi)\.png/,
+    /category-icons\/debt-item\.png/,
   );
   assert.doesNotMatch(html, /class="expense-monogram"/);
-  assert.match(html, /aria-label="Daily non-recurring expense movement"/);
+  assert.match(html, /aria-label="Динамика разовых расходов с ориентирами дневных лимитов"/);
   assert.doesNotMatch(html, /Your site is taking shape|Building your site/);
 });
 
@@ -170,16 +172,21 @@ test("keeps database history and translations aligned", async () => {
   assert.match(manual, /never misdate it into the current cycle/);
   assert.match(manual, /Synthetic expense history is exceptional/);
   assert.match(manual, /`synthetic: true` and a stable shared `backfillBatch` identifier/);
-  assert.match(manual, /category-relevant transparent Type-Moon chibi PNG/);
+  assert.match(manual, /default `kinance` theme uses one bold, item-only chibi icon per category/);
   assert.match(manual, /Every expense-recording request that adds at least one new canonical expense/);
   assert.match(manual, /Generate one fresh banner per request/);
-  assert.match(manual, /increment the Kinance banner query version in `index\.html`, `script\.js`, and `app\/page\.tsx`/);
+  assert.match(manual, /increment the shared banner query version for both `kinance` and `kinance-moon`/);
   assert.match(manual, /Finance accuracy takes priority/);
   assert.match(manual, /Taiga Fujimura, Kohaku, and Soujuurou Shizuki for Food/);
   assert.match(manual, /Lancer Cu Chulainn, Shuten-Douji, and Aoko Aozaki for Alcohol & nightlife/);
   assert.match(manual, /stable expense-ID hash/);
   assert.match(manual, /create new concepts from a blank canvas instead of tracing an older icon/);
   assert.match(manual, /sits entirely over the lower 168 pixels of the character artwork/);
+  assert.match(manual, /red long-dashed rule for all available funds/);
+  assert.match(manual, /green short-dashed rule for the savings-safe allowance/);
+  assert.match(manual, /Russian is the default language when no preference exists/);
+  assert.match(manual, /`kinance_language` cookie/);
+  assert.match(manual, /`kinance_theme` cookie/);
   assert.equal(current.updatedAt, "2026-07-26");
   assert.equal(current.revision, 25);
   assert.equal(current.savingsGoal, 200);
@@ -587,7 +594,13 @@ test("keeps database history and translations aligned", async () => {
     assert.match(source, /selectedIndex - 3/);
     assert.match(source, /nier-automata/);
     assert.match(source, /tohsaka-rin/);
-    assert.match(source, /kinance:theme/);
+    assert.match(source, /kinance-moon/);
+    assert.match(source, /kinance_theme/);
+    assert.match(source, /kinance_language/);
+    assert.match(source, /SameSite=Lax/);
+    assert.match(source, /Max-Age=/);
+    assert.match(source, /document\.documentElement\.lang = language/);
+    assert.doesNotMatch(source, /localStorage\.(?:getItem|setItem)\("kinance:(?:theme|language)/);
     assert.match(source, /outstandingCredit/);
     assert.match(source, /paymentMethod/);
     assert.match(source, /creditStatus !== "repaid"/);
@@ -603,9 +616,10 @@ test("keeps database history and translations aligned", async () => {
     assert.doesNotMatch(source, /const TODAY\s*=/);
   }
   assert.match(index, /id="theme-select"/);
-  assert.match(index, /styles\.css\?v=36/);
+  assert.match(index, /<html lang="ru">/);
+  assert.match(index, /styles\.css\?v=37/);
   assert.match(index, /public\/vendor\/apexcharts\.min\.js\?v=21/);
-  assert.match(index, /script\.js\?v=38/);
+  assert.match(index, /script\.js\?v=39/);
   assert.match(index, /data-current-theme="kinance"/);
   assert.match(index, /id="credit-alert"[^>]*hidden/);
   assert.match(index, /id="payment-method"/);
@@ -618,13 +632,16 @@ test("keeps database history and translations aligned", async () => {
   assert.match(index, /public\/theme-banners\/kinance\.png\?v=3/);
   assert.match(script, /public\/theme-banners\/kinance\.png\?v=3/);
   assert.match(page, /theme-banners\/kinance\.png\?v=3/);
+  assert.match(script, /id: "kinance-moon", label: "Kinance Moon"/);
+  assert.match(page, /id: "kinance-moon", label: "Kinance Moon"/);
   assert.match(script, /public\/theme-banners\/nier-automata\.png/);
   assert.match(script, /public\/theme-banners\/tohsaka-rin\.png/);
   assert.match(script, /public\/category-icons\/food\.png/);
   assert.match(script, /public\/category-icons\/alcohol-nightlife\.png/);
   assert.match(script, /category-icons\/food\.png\?v=5/);
   assert.match(script, /category-icons\/subscriptions-services\.png\?v=5/);
-  assert.match(script, /const CATEGORY_ICON_POOLS/);
+  assert.match(script, /const KINANCE_CATEGORY_ICONS/);
+  assert.match(script, /const CHARACTER_CATEGORY_ICON_POOLS/);
   assert.match(script, /function categoryIconFor\(expense\)/);
   assert.match(script, /Math\.imul\(hash, 16777619\)/);
   for (const source of [page]) {
@@ -636,16 +653,17 @@ test("keeps database history and translations aligned", async () => {
     assert.match(source, /category-icons\/alcohol-nightlife\.png/);
     assert.match(source, /category-icons\/food\.png\?v=5/);
     assert.match(source, /category-icons\/subscriptions-services\.png\?v=5/);
-    assert.match(source, /const CATEGORY_ICON_POOLS/);
-    assert.match(source, /function categoryIconFor\(expense: Expense\)/);
+    assert.match(source, /const KINANCE_CATEGORY_ICONS/);
+    assert.match(source, /const CHARACTER_CATEGORY_ICON_POOLS/);
+    assert.match(source, /function categoryIconFor\(expense: Expense, selectedTheme: ThemeId\)/);
     assert.match(source, /Math\.imul\(hash, 16777619\)/);
     assert.doesNotMatch(source, /className="hero-copy"/);
     assert.doesNotMatch(source, /className="hero-intro"/);
   }
   assert.equal((script.match(/category-icons\/[\w-]+\.png\?v=5/g) ?? []).length, 7);
   assert.equal((page.match(/category-icons\/[\w-]+\.png\?v=5/g) ?? []).length, 7);
-  assert.equal((script.match(/category-icons\/[\w-]+\.png\?v=1/g) ?? []).length, 14);
-  assert.equal((page.match(/category-icons\/[\w-]+\.png\?v=1/g) ?? []).length, 14);
+  assert.equal((script.match(/category-icons\/[\w-]+\.png\?v=1/g) ?? []).length, 21);
+  assert.equal((page.match(/category-icons\/[\w-]+\.png\?v=1/g) ?? []).length, 21);
   for (const filename of [
     "food.png",
     "subscriptions-services.png",
@@ -668,6 +686,13 @@ test("keeps database history and translations aligned", async () => {
     "transport-shiki-tohno.png",
     "alcohol-shuten.png",
     "alcohol-aoko.png",
+    "food-item.png",
+    "subscriptions-item.png",
+    "luxury-item.png",
+    "debt-item.png",
+    "devices-item.png",
+    "transport-item.png",
+    "alcohol-item.png",
   ]) {
     const icon = await readFile(
       new URL(`../public/category-icons/${filename}`, import.meta.url),
@@ -698,6 +723,7 @@ test("keeps database history and translations aligned", async () => {
   assert.doesNotMatch(styles, /\.breakdown-item\s*\{[^}]*background:/s);
   assert.doesNotMatch(styles, /\.expense-monogram/);
   assert.match(styles, /--chart-accent:\s*#5ac8fa/);
+  assert.match(styles, /data-current-theme="kinance-moon"/);
   assert.match(styles, /:root\[data-theme="nier-automata"\][^{]*\{[^}]*--chart-accent:\s*#526f78/s);
   assert.match(styles, /:root\[data-theme="tohsaka-rin"\][^{]*\{[^}]*--chart-accent:\s*#ff5b82/s);
   assert.match(script, /height:\s*168/);
@@ -729,6 +755,12 @@ test("keeps database history and translations aligned", async () => {
     assert.match(source, /opacityFrom:\s*0\.52/);
     assert.match(source, /dropShadow:\s*\{\s*enabled:\s*true/);
     assert.match(source, /data\.expenses\.filter\(\(expense\) => !expense\.recurring\)/);
+    assert.match(source, /annotations:\s*\{\s*yaxis:/);
+    assert.match(source, /borderColor:\s*allFundsColor/);
+    assert.match(source, /borderColor:\s*savingsSafeColor/);
+    assert.match(source, /strokeDashArray:\s*5/);
+    assert.match(source, /strokeDashArray:\s*3/);
+    assert.match(source, /yaxis:\s*\{\s*min:\s*0,\s*max:\s*chartMaximum/);
     assert.match(source, /creditStatus !== "repaid"/);
   }
   assert.match(page, /import\("apexcharts"\)/);

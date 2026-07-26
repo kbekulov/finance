@@ -411,6 +411,12 @@ main::before {
   box-shadow: 0 0 0 3px rgba(115, 143, 153, 0.1);
 }
 
+.theme-switcher[data-current-theme="kinance-moon"]::before {
+  border-color: rgba(178, 185, 255, 0.34);
+  background: radial-gradient(circle at 67% 34%, #dfe5ff 0 26%, #5965aa 28% 42%, #111329 44%);
+  box-shadow: 0 0 0 3px rgba(126, 139, 255, 0.1);
+}
+
 .theme-switcher[data-current-theme="tohsaka-rin"]::before {
   background: linear-gradient(135deg, #e11946 0 50%, #5a2387 50%);
   box-shadow: 0 0 0 3px rgba(225, 25, 70, 0.1);

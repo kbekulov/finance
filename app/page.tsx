@@ -15,10 +15,15 @@ type Language = "en" | "ru";
 
 const THEMES = [
   { id: "kinance", label: "Kinance", banner: "/theme-banners/kinance.png?v=3" },
+  { id: "kinance-moon", label: "Kinance Moon", banner: "/theme-banners/kinance.png?v=3" },
   { id: "nier-automata", label: "NieR:Automata", banner: "/theme-banners/nier-automata.png" },
   { id: "tohsaka-rin", label: "Tohsaka Rin", banner: "/theme-banners/tohsaka-rin.png" },
 ] as const;
 type ThemeId = (typeof THEMES)[number]["id"];
+
+const PREFERENCE_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
+const THEME_COOKIE = "kinance_theme";
+const LANGUAGE_COOKIE = "kinance_language";
 
 type Expense = {
   id: string;
@@ -66,7 +71,17 @@ const CATEGORIES: Category[] = [
   "Alcohol & nightlife",
 ];
 
-const CATEGORY_ICON_POOLS: Record<Category, readonly string[]> = {
+const KINANCE_CATEGORY_ICONS: Record<Category, string> = {
+  Food: "/category-icons/food-item.png?v=1",
+  "Subscriptions & services": "/category-icons/subscriptions-item.png?v=1",
+  "Luxury purchases": "/category-icons/luxury-item.png?v=1",
+  "Debt & repayments": "/category-icons/debt-item.png?v=1",
+  "Devices & installments": "/category-icons/devices-item.png?v=1",
+  "Transport & Travel": "/category-icons/transport-item.png?v=1",
+  "Alcohol & nightlife": "/category-icons/alcohol-item.png?v=1",
+};
+
+const CHARACTER_CATEGORY_ICON_POOLS: Record<Category, readonly string[]> = {
   Food: [
     "/category-icons/food.png?v=5",
     "/category-icons/food-kohaku.png?v=1",
@@ -104,8 +119,12 @@ const CATEGORY_ICON_POOLS: Record<Category, readonly string[]> = {
   ],
 };
 
-function categoryIconFor(expense: Expense) {
-  const pool = CATEGORY_ICON_POOLS[expense.category];
+function categoryIconFor(expense: Expense, selectedTheme: ThemeId) {
+  if (selectedTheme === "kinance") {
+    return KINANCE_CATEGORY_ICONS[expense.category];
+  }
+
+  const pool = CHARACTER_CATEGORY_ICON_POOLS[expense.category];
   let hash = 2166136261;
   for (const character of expense.id) {
     hash ^= character.charCodeAt(0);
@@ -117,6 +136,21 @@ function categoryIconFor(expense: Expense) {
   hash = Math.imul(hash, 0x846ca68b);
   hash ^= hash >>> 16;
   return pool[(hash >>> 0) % pool.length];
+}
+
+function readPreferenceCookie(name: string) {
+  if (typeof document === "undefined") return null;
+  const prefix = `${encodeURIComponent(name)}=`;
+  const entry = document.cookie
+    .split(";")
+    .map((part) => part.trim())
+    .find((part) => part.startsWith(prefix));
+  return entry ? decodeURIComponent(entry.slice(prefix.length)) : null;
+}
+
+function writePreferenceCookie(name: string, value: string) {
+  const secure = window.location.protocol === "https:" ? "; Secure" : "";
+  document.cookie = `${encodeURIComponent(name)}=${encodeURIComponent(value)}; Max-Age=${PREFERENCE_COOKIE_MAX_AGE}; Path=/; SameSite=Lax${secure}`;
 }
 
 const COPY = {
@@ -136,7 +170,7 @@ const COPY = {
     dailySpendingIntro: "What left your account each day this salary cycle",
     thisCycleTotal: "This cycle",
     dailyExpenseSeries: "Daily spending",
-    dailySpendingChartLabel: "Daily non-recurring expense movement",
+    dailySpendingChartLabel: "Daily non-recurring expense movement with daily allowance guides",
     edit: "Tap the amount to edit",
     savings: "SAVINGS REQUIREMENT",
     protected: "Protected from spending",
@@ -187,7 +221,7 @@ const COPY = {
     kinanceHome: "Kinance home",
     languageLabel: "Language",
     themeLabel: "Theme",
-    themeBannerLabel: "{theme} character banner",
+    themeBannerLabel: "{theme} theme artwork",
     financeHistoryLabel: "Salary cycle history",
     monthlyPlanLabel: "Salary cycle plan balance",
     monthlyTotalsLabel: "Salary cycle totals",
@@ -212,7 +246,7 @@ const COPY = {
     dailySpendingIntro: "Сколько уходило со счёта каждый день этого цикла зарплаты",
     thisCycleTotal: "За цикл",
     dailyExpenseSeries: "Расходы за день",
-    dailySpendingChartLabel: "Динамика разовых расходов по дням",
+    dailySpendingChartLabel: "Динамика разовых расходов с ориентирами дневных лимитов",
     edit: "Нажмите на сумму, чтобы изменить",
     savings: "ЦЕЛЬ НАКОПЛЕНИЙ",
     protected: "Защищено от расходов",
@@ -263,7 +297,7 @@ const COPY = {
     kinanceHome: "Главная Kinance",
     languageLabel: "Язык",
     themeLabel: "Тема",
-    themeBannerLabel: "Баннер с персонажами темы {theme}",
+    themeBannerLabel: "Оформление темы {theme}",
     financeHistoryLabel: "История циклов зарплаты",
     monthlyPlanLabel: "Баланс цикла зарплаты",
     monthlyTotalsLabel: "Итоги цикла зарплаты",
@@ -455,7 +489,7 @@ export default function Home() {
   const [category, setCategory] = useState<Category>("Food");
   const [paymentMethod, setPaymentMethod] = useState<"debit" | "credit">("debit");
   const [hydratedStorageKey, setHydratedStorageKey] = useState("");
-  const [language, setLanguage] = useState<Language>("en");
+  const [language, setLanguage] = useState<Language>("ru");
   const [theme, setTheme] = useState<ThemeId>("kinance");
   const [recurringExpanded, setRecurringExpanded] = useState(true);
   const [oneTimeExpanded, setOneTimeExpanded] = useState(true);
@@ -465,23 +499,28 @@ export default function Home() {
   const legacySelectedStorageKey =
     `euroscope:${selectedMonth.month}:${selectedMonth.updatedAt}:r${selectedMonth.revision}`;
 
-  /* Device-local preferences and entries hydrate only after the client mounts. */
+  /* Cookie preferences and device-local entries hydrate only after the client mounts. */
   /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
-    const savedLanguage =
-      localStorage.getItem("kinance:language") ??
-      localStorage.getItem("euroscope:language");
-    if (savedLanguage === "ru") setLanguage("ru");
+    const savedLanguage = readPreferenceCookie(LANGUAGE_COOKIE);
+    const nextLanguage: Language = savedLanguage === "en" ? "en" : "ru";
+    setLanguage(nextLanguage);
+    writePreferenceCookie(LANGUAGE_COOKIE, nextLanguage);
   }, []);
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem("kinance:theme");
+    const savedTheme = readPreferenceCookie(THEME_COOKIE);
     const nextTheme = THEMES.some(({ id }) => id === savedTheme)
       ? (savedTheme as ThemeId)
       : "kinance";
     setTheme(nextTheme);
     document.documentElement.dataset.theme = nextTheme;
+    writePreferenceCookie(THEME_COOKIE, nextTheme);
   }, []);
+
+  useEffect(() => {
+    document.documentElement.lang = language;
+  }, [language]);
 
   useEffect(() => {
     let savedData: Partial<SavedFinanceData> | null = null;
@@ -672,7 +711,7 @@ export default function Home() {
             {/* Category art is decorative because the localized category name follows in text. */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={categoryIconFor(expense)}
+              src={categoryIconFor(expense, theme)}
               alt=""
               width={256}
               height={256}
@@ -754,6 +793,19 @@ export default function Home() {
       const themeStyles = getComputedStyle(document.documentElement);
       const accent = themeStyles.getPropertyValue("--chart-accent").trim() || "#5ac8fa";
       const glow = themeStyles.getPropertyValue("--chart-glow").trim() || accent;
+      const allFundsColor = themeStyles.getPropertyValue("--red").trim() || "#ff453a";
+      const savingsSafeColor = themeStyles.getPropertyValue("--green").trim() || "#30d158";
+      const points = dailyExpensePoints(
+        data.expenses.filter((expense) => !expense.recurring),
+        selectedMonth.period,
+        todayKey,
+      );
+      const chartMaximum = Math.max(
+        ...points.map(({ y }) => y),
+        allFundsDailyPace,
+        savingsSafeDailyPace,
+        1,
+      ) * 1.08;
 
       chart = new ApexCharts(container, {
         chart: {
@@ -769,12 +821,28 @@ export default function Home() {
         },
         series: [{
           name: copy.dailyExpenseSeries,
-          data: dailyExpensePoints(
-            data.expenses.filter((expense) => !expense.recurring),
-            selectedMonth.period,
-            todayKey,
-          ),
+          data: points,
         }],
+        annotations: {
+          yaxis: [
+            {
+              y: allFundsDailyPace,
+              borderColor: allFundsColor,
+              borderWidth: 1.4,
+              strokeDashArray: 5,
+              opacity: 0.82,
+              label: { show: false },
+            },
+            {
+              y: savingsSafeDailyPace,
+              borderColor: savingsSafeColor,
+              borderWidth: 1.4,
+              strokeDashArray: 3,
+              opacity: 0.9,
+              label: { show: false },
+            },
+          ],
+        },
         colors: [accent],
         stroke: { curve: "smooth", width: 2.25, lineCap: "round" },
         fill: {
@@ -790,7 +858,7 @@ export default function Home() {
         dataLabels: { enabled: false },
         grid: { show: false, padding: { left: 3, right: 3, top: 8, bottom: 1 } },
         xaxis: { type: "datetime" },
-        yaxis: { min: 0 },
+        yaxis: { min: 0, max: chartMaximum },
         tooltip: { enabled: false },
       });
       await (chart as { render: () => Promise<void> }).render();
@@ -801,7 +869,15 @@ export default function Home() {
       active = false;
       chart?.destroy();
     };
-  }, [copy.dailyExpenseSeries, data.expenses, selectedMonth.period, theme, todayKey]);
+  }, [
+    allFundsDailyPace,
+    copy.dailyExpenseSeries,
+    data.expenses,
+    savingsSafeDailyPace,
+    selectedMonth.period,
+    theme,
+    todayKey,
+  ]);
 
   function addExpense(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -869,7 +945,7 @@ export default function Home() {
                   const nextTheme = event.target.value as ThemeId;
                   setTheme(nextTheme);
                   document.documentElement.dataset.theme = nextTheme;
-                  localStorage.setItem("kinance:theme", nextTheme);
+                  writePreferenceCookie(THEME_COOKIE, nextTheme);
                 }}
               >
                 {THEMES.map((item) => (
@@ -888,7 +964,7 @@ export default function Home() {
                   aria-pressed={language === item}
                   onClick={() => {
                     setLanguage(item);
-                    localStorage.setItem("kinance:language", item);
+                    writePreferenceCookie(LANGUAGE_COOKIE, item);
                   }}
                 >
                   {item.toUpperCase()}

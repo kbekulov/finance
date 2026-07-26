@@ -161,7 +161,7 @@ test("server-renders the current finance tracker", async () => {
   assert.match(html, /ОТНОСИТЕЛЬНАЯ СИЛА/);
   assert.match(html, /<strong>5,0<\/strong>/);
   assert.match(html, /aria-label="Главный сержант-майор, ранг силы 9 из 20\.[^"]*Имперский стиль[^"]*"/);
-  assert.match(html, /class="strength-rank-icon"[^>]*background-position:75% 33\.333333333333336%/);
+  assert.match(html, /class="strength-rank-icon"[^>]*background-position:calc\(75% \+ 5px\) 33\.333333333333336%/);
   assert.match(html, /<small>CSM<\/small>/);
   assert.match(html, /<strong>51<small>кг<\/small><\/strong>/);
   assert.match(html, /Подтягивания<\/span><strong>8<small class="strength-target"[^>]*>.*?23<\/small><\/strong>/);
@@ -255,6 +255,7 @@ test("keeps database history and translations aligned", async () => {
   assert.match(manual, /personal bodyweight strength-endurance index/);
   assert.match(manual, /Formula version 3/);
   assert.match(manual, /insignia and its HTML abbreviation must share the exact horizontal center axis/);
+  assert.match(manual, /correct optical misalignment inside an atlas cell through the sprite's background position/);
   assert.match(manual, /Spending insight` disclosure between the Kinance brand and the theme selector/);
   assert.match(manual, /clicking anywhere outside it or pressing Escape closes it/);
   assert.match(manual, /Do not place debit, credit, or other finance-series legends inside the Relative Strength card/);
@@ -882,7 +883,7 @@ test("keeps database history and translations aligned", async () => {
   assert.doesNotMatch(index, /property="og:|name="twitter:/);
   assert.match(index, /styles\.css\?v=50/);
   assert.match(index, /public\/vendor\/apexcharts\.min\.js\?v=21/);
-  assert.match(index, /script\.js\?v=52/);
+  assert.match(index, /script\.js\?v=53/);
   assert.match(index, /id="strength-pull-ups-target"/);
   assert.match(index, /id="strength-push-ups-target"/);
   assert.match(index, /rank-icons\/rank-insignia-atlas\.png\?v=1/);
@@ -1095,6 +1096,8 @@ test("keeps database history and translations aligned", async () => {
   assert.doesNotMatch(styles, /\.strength-rank::after/);
   assert.doesNotMatch(styles, /\.strength-metrics\s*>\s*\.strength-rank/);
   for (const source of [script, page]) {
+    assert.match(source, /const STRENGTH_RANK_OPTICAL_X_PX = 5/);
+    assert.match(source, /backgroundPosition: `calc\(\$\{\(index % 5\) \* 25\}% \+ \$\{STRENGTH_RANK_OPTICAL_X_PX\}px\)/);
     assert.match(source, /const RANK_INSIGNIA_SETS/);
     assert.match(source, /kinance_rank_insignia_set/);
     assert.match(source, /rank-insignia-south-korea\.png/);

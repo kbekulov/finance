@@ -12,6 +12,7 @@ const STRENGTH_REFERENCE_BODY_MASS_KG = 75;
 const STRENGTH_ALLOMETRIC_EXPONENT = 1 / 3;
 const STRENGTH_PULL_UP_TARGET_REPS = 20;
 const STRENGTH_PUSH_UP_TARGET_REPS = 50;
+const STRENGTH_RANK_OPTICAL_X_PX = 5;
 const STRENGTH_RANKS = [
   { threshold: 1, abbreviation: "Pvt.", en: "Private", ru: "Рядовой" },
   { threshold: 1.5, abbreviation: "Sr. Pvt.", en: "Senior Private", ru: "Старший рядовой" },
@@ -997,7 +998,7 @@ function relativeStrengthRank(score) {
   return {
     ...STRENGTH_RANKS[index],
     level: index + 1,
-    backgroundPosition: `${(index % 5) * 25}% ${(Math.floor(index / 5) * 100) / 3}%`,
+    backgroundPosition: `calc(${(index % 5) * 25}% + ${STRENGTH_RANK_OPTICAL_X_PX}px) ${(Math.floor(index / 5) * 100) / 3}%`,
   };
 }
 

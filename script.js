@@ -9,13 +9,13 @@ const CATEGORIES = [
 ];
 
 const KINANCE_CATEGORY_ICONS = {
-  Food: "/public/category-icons/food-item.png?v=1",
-  "Subscriptions & services": "/public/category-icons/subscriptions-item.png?v=2",
-  "Luxury purchases": "/public/category-icons/luxury-item.png?v=2",
-  "Debt & repayments": "/public/category-icons/debt-item.png?v=2",
-  "Devices & installments": "/public/category-icons/devices-item.png?v=2",
-  "Transport & Travel": "/public/category-icons/transport-item.png?v=2",
-  "Alcohol & nightlife": "/public/category-icons/alcohol-item.png?v=2",
+  Food: "/public/category-icons/food-rpg.png?v=1",
+  "Subscriptions & services": "/public/category-icons/services-rpg.png?v=1",
+  "Luxury purchases": "/public/category-icons/luxury-rpg.png?v=1",
+  "Debt & repayments": "/public/category-icons/debt-rpg.png?v=1",
+  "Devices & installments": "/public/category-icons/devices-rpg.png?v=1",
+  "Transport & Travel": "/public/category-icons/transport-rpg.png?v=1",
+  "Alcohol & nightlife": "/public/category-icons/alcohol-rpg.png?v=1",
 };
 
 const CHARACTER_CATEGORY_ICON_POOLS = {
@@ -76,10 +76,10 @@ function categoryIconFor(expense) {
 }
 
 const THEMES = [
-  { id: "kinance", label: "Kinance", banner: "/public/theme-banners/kinance.png?v=6" },
-  { id: "kinance-moon", label: "Kinance Moon", banner: "/public/theme-banners/kinance.png?v=6" },
-  { id: "nier-automata", label: "NieR:Automata", banner: "/public/theme-banners/nier-automata.png" },
-  { id: "tohsaka-rin", label: "Tohsaka Rin", banner: "/public/theme-banners/tohsaka-rin.png" },
+  { id: "kinance", label: "Kinance", banners: ["/public/theme-banners/kinance.png?v=7", "/public/theme-banners/kinance-frame-2.png?v=7"] },
+  { id: "kinance-moon", label: "Kinance Moon", banners: ["/public/theme-banners/kinance.png?v=7", "/public/theme-banners/kinance-frame-2.png?v=7"] },
+  { id: "nier-automata", label: "NieR:Automata", banners: ["/public/theme-banners/nier-automata.png"] },
+  { id: "tohsaka-rin", label: "Tohsaka Rin", banners: ["/public/theme-banners/tohsaka-rin.png"] },
 ];
 
 const PREFERENCE_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
@@ -119,9 +119,10 @@ const TRANSLATIONS = {
     dailySpending: "Daily expenses",
     dailySpendingIntro: "What left your account each day this salary cycle",
     thisCycleTotal: "This cycle",
-    dailyExpenseSeries: "Daily spending",
+    dailyExpenseSeries: "Debit spending",
+    creditExpenseSeries: "Credit spending",
     relativeStrengthSeries: "Relative strength",
-    dailySpendingChartLabel: "Daily spending bars with relative strength and daily allowance guides",
+    dailySpendingChartLabel: "Stacked debit and credit spending bars with relative strength and daily allowance guides",
     strengthTitle: "RELATIVE STRENGTH",
     strengthScore: "CURRENT SCORE",
     strengthNoAttempts: "Log an attempt to establish your baseline",
@@ -225,9 +226,10 @@ const TRANSLATIONS = {
     dailySpending: "Расходы по дням",
     dailySpendingIntro: "Сколько списывалось со счёта каждый день текущего зарплатного цикла",
     thisCycleTotal: "За текущий цикл",
-    dailyExpenseSeries: "Расходы за день",
+    dailyExpenseSeries: "Расходы по дебету",
+    creditExpenseSeries: "Расходы по кредиту",
     relativeStrengthSeries: "Относительная сила",
-    dailySpendingChartLabel: "Расходы по дням в виде столбцов, график относительной силы и линии дневных лимитов",
+    dailySpendingChartLabel: "Составные столбцы расходов по дебету и кредиту, график относительной силы и линии дневных лимитов",
     strengthTitle: "ОТНОСИТЕЛЬНАЯ СИЛА",
     strengthScore: "ТЕКУЩИЙ БАЛЛ",
     strengthNoAttempts: "Добавьте попытку, чтобы определить исходный уровень",
@@ -319,6 +321,8 @@ let history = [];
 let selectedMonth = null;
 let data = null;
 let dailyExpenseChart = null;
+let themeBannerTimer = null;
+let themeBannerFrame = 0;
 let strengthEntries = [];
 let salarySchedule = { dayOfMonth: 12, weekendRule: "previousFriday" };
 const savedThemePreference = readPreferenceCookie(THEME_COOKIE);
@@ -441,10 +445,33 @@ function applyTheme() {
   document.querySelector(".theme-switcher").dataset.currentTheme = theme;
   const selectedTheme = THEMES.find(({ id }) => id === theme) ?? THEMES[0];
   const banner = element("theme-banner-image");
-  banner.hidden = false;
-  banner.src = selectedTheme.banner;
   banner.alt = t("themeBannerLabel", { theme: selectedTheme.label });
   banner.closest(".theme-banner").setAttribute("aria-label", banner.alt);
+  startThemeBannerAnimation(selectedTheme);
+}
+
+function startThemeBannerAnimation(selectedTheme) {
+  window.clearInterval(themeBannerTimer);
+  themeBannerFrame = 0;
+  const banner = element("theme-banner-image");
+  const showFrame = () => {
+    banner.hidden = false;
+    banner.src = selectedTheme.banners[themeBannerFrame % selectedTheme.banners.length];
+  };
+  selectedTheme.banners.forEach((src) => {
+    const image = new Image();
+    image.src = src;
+  });
+  showFrame();
+  if (
+    selectedTheme.banners.length > 1 &&
+    !window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  ) {
+    themeBannerTimer = window.setInterval(() => {
+      themeBannerFrame = (themeBannerFrame + 1) % selectedTheme.banners.length;
+      showFrame();
+    }, 1000);
+  }
 }
 
 function safeNumber(value) {
@@ -841,8 +868,9 @@ function renderLedger() {
   container.append(oneTime);
 }
 
-function dailyExpensePoints(expenses, period, asOfDate) {
+function dailyExpensePoints(expenses, period, asOfDate, paymentMethod) {
   const totals = expenses.reduce((daily, expense) => {
+    if (paymentMethod && (expense.paymentMethod ?? "debit") !== paymentMethod) return daily;
     daily.set(expense.date, (daily.get(expense.date) ?? 0) + toCents(expense.amount));
     return daily;
   }, new Map());
@@ -934,12 +962,24 @@ function renderDailyExpenseChart(allFundsDailyPace, savingsSafeDailyPace) {
 
   const themeStyles = getComputedStyle(document.documentElement);
   const accent = themeStyles.getPropertyValue("--chart-accent").trim() || "#5ac8fa";
-  const glow = themeStyles.getPropertyValue("--chart-glow").trim() || accent;
+  const creditAccent = themeStyles.getPropertyValue("--red").trim() || "#ff453a";
   const strengthAccent = themeStyles.getPropertyValue("--strength-accent").trim() || "#bf5af2";
   const spendingPoints = dailyExpensePoints(
     data.expenses.filter((expense) => !expense.recurring),
     selectedMonth.period,
     todayInVilnius(),
+  );
+  const debitPoints = dailyExpensePoints(
+    data.expenses.filter((expense) => !expense.recurring),
+    selectedMonth.period,
+    todayInVilnius(),
+    "debit",
+  );
+  const creditPoints = dailyExpensePoints(
+    data.expenses.filter((expense) => !expense.recurring),
+    selectedMonth.period,
+    todayInVilnius(),
+    "credit",
   );
   const strengthPoints = dailyStrengthPoints(
     strengthEntries,
@@ -970,30 +1010,32 @@ function renderDailyExpenseChart(allFundsDailyPace, savingsSafeDailyPace) {
     chart: {
       type: "line",
       height: 168,
+      stacked: true,
+      stackOnlyBar: true,
       background: "transparent",
       fontFamily: getComputedStyle(document.documentElement).getPropertyValue("--font-family"),
       animations: { enabled: !window.matchMedia("(prefers-reduced-motion: reduce)").matches },
       sparkline: { enabled: true },
-      dropShadow: { enabled: true, top: 2, left: 0, blur: 4, color: glow, opacity: 0.2 },
       toolbar: { show: false },
       zoom: { enabled: false },
     },
     series: [
-      { name: t("dailyExpenseSeries"), type: "column", data: spendingPoints },
+      { name: t("dailyExpenseSeries"), type: "column", data: debitPoints },
+      { name: t("creditExpenseSeries"), type: "column", data: creditPoints },
       { name: t("relativeStrengthSeries"), type: "line", data: strengthPoints },
     ],
-    colors: [accent, strengthAccent],
+    colors: [accent, creditAccent, strengthAccent],
     plotOptions: {
       bar: { columnWidth: "48%", borderRadius: 4, borderRadiusApplication: "end" },
     },
-    stroke: { curve: ["straight", "smooth"], width: [0, 2.5], lineCap: "round" },
-    fill: { opacity: [0.68, 1] },
-    markers: { size: [0, 3.5], strokeWidth: 0, hover: { sizeOffset: 2 } },
+    stroke: { curve: ["straight", "straight", "smooth"], width: [0, 0, 2.5], lineCap: "round" },
+    fill: { opacity: [0.68, 0.84, 1] },
+    markers: { size: [0, 0, 3.5], strokeWidth: 0, hover: { sizeOffset: 2 } },
     dataLabels: { enabled: false },
     grid: { show: false, padding: { left: 3, right: 3, top: 8, bottom: 1 } },
     xaxis: { type: "datetime" },
     yaxis: [
-      { seriesName: t("dailyExpenseSeries"), min: 0, max: chartMaximum, show: false },
+      { seriesName: [t("dailyExpenseSeries"), t("creditExpenseSeries")], min: 0, max: chartMaximum, show: false },
       { seriesName: t("relativeStrengthSeries"), min: 1, max: 10, opposite: true, show: false },
     ],
     tooltip: { enabled: false },

@@ -13,9 +13,9 @@
     <meta property="og:image" content="https://finance.bekulov.com/public/og.png" />
     <title>Kinance</title>
     <link rel="icon" type="image/jpeg" href="/kinance-favicon.jpg" />
-    <link rel="stylesheet" href="/styles.css?v=41" />
+    <link rel="stylesheet" href="/styles.css?v=42" />
     <script src="/public/vendor/apexcharts.min.js?v=21" defer></script>
-    <script src="/script.js?v=47" defer></script>
+    <script src="/script.js?v=48" defer></script>
   </head>
   <body>
     <main>
@@ -76,7 +76,7 @@
         <section class="theme-banner" aria-label="Kinance theme artwork">
           <img
             id="theme-banner-image"
-            src="/public/theme-banners/kinance.png?v=6"
+            src="/public/theme-banners/kinance.png?v=7"
             alt="Kinance theme artwork"
             width="2048"
             height="683"
@@ -89,7 +89,7 @@
           id="daily-expense-chart"
           class="daily-expense-chart"
           role="img"
-          aria-label="Daily spending bars with relative strength and daily allowance guides"
+          aria-label="Stacked debit and credit spending bars with relative strength and daily allowance guides"
           data-i18n-aria-label="dailySpendingChartLabel"
         >
           <div id="daily-expense-chart-canvas" class="daily-expense-chart-canvas" aria-hidden="true"></div>
@@ -113,7 +113,8 @@
             <div><span data-i18n="strengthPushUps">Best push-up set</span><strong id="strength-push-ups-value">0</strong></div>
           </div>
           <div class="strength-meta">
-            <span><i class="spending-key"></i><span data-i18n="dailyExpenseSeries">Daily spending</span></span>
+            <span><i class="spending-key"></i><span data-i18n="dailyExpenseSeries">Debit spending</span></span>
+            <span><i class="credit-key"></i><span data-i18n="creditExpenseSeries">Credit spending</span></span>
             <span><i class="strength-key"></i><span data-i18n="relativeStrengthSeries">Relative strength</span></span>
             <small data-i18n="strengthNote">Best single set per exercise · sets are not added together</small>
           </div>

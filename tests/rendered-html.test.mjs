@@ -146,10 +146,10 @@ test("server-renders the current finance tracker", async () => {
   assert.match(html, /class="expense-category-icon"/);
   assert.match(
     html,
-    /category-icons\/debt-item\.png/,
+    /category-icons\/debt-rpg\.png/,
   );
   assert.doesNotMatch(html, /class="expense-monogram"/);
-  assert.match(html, /aria-label="Расходы по дням в виде столбцов, график относительной силы и линии дневных лимитов"/);
+  assert.match(html, /aria-label="Составные столбцы расходов по дебету и кредиту, график относительной силы и линии дневных лимитов"/);
   assert.match(html, /class="strength-panel"/);
   assert.match(html, /ОТНОСИТЕЛЬНАЯ СИЛА/);
   assert.match(html, /<strong>4,4<\/strong>/);
@@ -197,22 +197,27 @@ test("keeps database history and translations aligned", async () => {
   assert.match(manual, /never misdate it into the current cycle/);
   assert.match(manual, /Synthetic expense history is exceptional/);
   assert.match(manual, /`synthetic: true` and a stable shared `backfillBatch` identifier/);
-  assert.match(manual, /default `kinance` theme uses one bold, item-only chibi icon per category/);
+  assert.match(manual, /default `kinance` theme uses one bold, item-only RPGMaker-inspired pixel inventory icon per category/);
+  assert.match(manual, /Type-Moon-style modern urban-occult story logic/);
   assert.match(manual, /Every expense-recording request that adds at least one new canonical expense/);
-  assert.match(manual, /Generate one fresh banner per request/);
+  assert.match(manual, /Generate one fresh two-frame banner set per request/);
   assert.match(manual, /Every new banner must meaningfully represent the topic of the expense/);
   assert.match(manual, /RPGMaker-style in-game moment/);
   assert.match(manual, /character visibly performing the activity related to the newly recorded expense/);
   assert.match(manual, /increment the shared banner query version for both `kinance` and `kinance-moon`/);
   assert.match(manual, /Finance accuracy takes priority/);
+  assert.match(manual, /consecutive frames of a deliberately low-frame-rate idle animation/);
+  assert.match(manual, /Alternate the frames with a hard pixel-art cut every 1000 milliseconds/);
   assert.match(manual, /Taiga Fujimura, Kohaku, and Soujuurou Shizuki for Food/);
   assert.match(manual, /Lancer Cu Chulainn, Shuten-Douji, and Aoko Aozaki for Alcohol & nightlife/);
   assert.match(manual, /stable expense-ID hash/);
   assert.match(manual, /create new concepts from a blank canvas instead of tracing an older icon/);
   assert.match(manual, /sits entirely over the lower 168 pixels of the banner artwork/);
+  assert.match(manual, /red upper segment is credit/);
+  assert.match(manual, /whether its `creditStatus` is `outstanding` or `repaid`/);
   assert.match(manual, /red long-dashed rule for the all-funds allowance/);
   assert.match(manual, /green short-dashed rule for the savings-safe allowance/);
-  assert.match(manual, /visually `line, text, line`/);
+  assert.match(manual, /visually `short line, text, long line`/);
   assert.match(manual, /no pill, badge, outline, or floating callout/);
   assert.match(manual, /edge-faded canvas mask/);
   assert.match(manual, /`data\/strength-history\.json`/);
@@ -804,9 +809,9 @@ test("keeps database history and translations aligned", async () => {
   }
   assert.match(index, /id="theme-select"/);
   assert.match(index, /<html lang="ru">/);
-  assert.match(index, /styles\.css\?v=41/);
+  assert.match(index, /styles\.css\?v=42/);
   assert.match(index, /public\/vendor\/apexcharts\.min\.js\?v=21/);
-  assert.match(index, /script\.js\?v=47/);
+  assert.match(index, /script\.js\?v=48/);
   assert.match(index, /data-current-theme="kinance"/);
   assert.match(index, /id="credit-alert"[^>]*hidden/);
   assert.doesNotMatch(index, /id="payment-method"/);
@@ -819,9 +824,11 @@ test("keeps database history and translations aligned", async () => {
   assert.doesNotMatch(index, /class="hero-copy"/);
   assert.doesNotMatch(index, /class="hero-intro"/);
   assert.match(index, /<h1 id="page-title"[^>]*data-i18n="availableAfterPlan"/);
-  assert.match(index, /public\/theme-banners\/kinance\.png\?v=6/);
-  assert.equal((script.match(/public\/theme-banners\/kinance\.png\?v=6/g) ?? []).length, 2);
-  assert.equal((page.match(/theme-banners\/kinance\.png\?v=6/g) ?? []).length, 2);
+  assert.match(index, /public\/theme-banners\/kinance\.png\?v=7/);
+  assert.equal((script.match(/public\/theme-banners\/kinance\.png\?v=7/g) ?? []).length, 2);
+  assert.equal((page.match(/theme-banners\/kinance\.png\?v=7/g) ?? []).length, 2);
+  assert.equal((script.match(/public\/theme-banners\/kinance-frame-2\.png\?v=7/g) ?? []).length, 2);
+  assert.equal((page.match(/theme-banners\/kinance-frame-2\.png\?v=7/g) ?? []).length, 2);
   assert.match(script, /id: "kinance-moon", label: "Kinance Moon"/);
   assert.match(page, /id: "kinance-moon", label: "Kinance Moon"/);
   assert.match(script, /public\/theme-banners\/nier-automata\.png/);
@@ -852,10 +859,10 @@ test("keeps database history and translations aligned", async () => {
   }
   assert.equal((script.match(/category-icons\/[\w-]+\.png\?v=5/g) ?? []).length, 7);
   assert.equal((page.match(/category-icons\/[\w-]+\.png\?v=5/g) ?? []).length, 7);
-  assert.equal((script.match(/category-icons\/[\w-]+\.png\?v=1/g) ?? []).length, 15);
-  assert.equal((page.match(/category-icons\/[\w-]+\.png\?v=1/g) ?? []).length, 15);
-  assert.equal((script.match(/category-icons\/[\w-]+\.png\?v=2/g) ?? []).length, 6);
-  assert.equal((page.match(/category-icons\/[\w-]+\.png\?v=2/g) ?? []).length, 6);
+  assert.equal((script.match(/category-icons\/[\w-]+\.png\?v=1/g) ?? []).length, 21);
+  assert.equal((page.match(/category-icons\/[\w-]+\.png\?v=1/g) ?? []).length, 21);
+  assert.equal((script.match(/category-icons\/[\w-]+\.png\?v=2/g) ?? []).length, 0);
+  assert.equal((page.match(/category-icons\/[\w-]+\.png\?v=2/g) ?? []).length, 0);
   for (const filename of [
     "food.png",
     "subscriptions-services.png",
@@ -878,13 +885,13 @@ test("keeps database history and translations aligned", async () => {
     "transport-shiki-tohno.png",
     "alcohol-shuten.png",
     "alcohol-aoko.png",
-    "food-item.png",
-    "subscriptions-item.png",
-    "luxury-item.png",
-    "debt-item.png",
-    "devices-item.png",
-    "transport-item.png",
-    "alcohol-item.png",
+    "food-rpg.png",
+    "services-rpg.png",
+    "luxury-rpg.png",
+    "debt-rpg.png",
+    "devices-rpg.png",
+    "transport-rpg.png",
+    "alcohol-rpg.png",
   ]) {
     const icon = await readFile(
       new URL(`../public/category-icons/${filename}`, import.meta.url),
@@ -910,6 +917,7 @@ test("keeps database history and translations aligned", async () => {
   assert.match(styles, /\.pace-limit-all strong\s*\{[^}]*color:\s*var\(--red\)/s);
   assert.match(styles, /\.pace-limit-safe strong\s*\{[^}]*color:\s*var\(--green\)/s);
   assert.match(styles, /\.expense-category-icon\s*\{[^}]*width:\s*48px[^}]*height:\s*48px/s);
+  assert.match(styles, /\.expense-category-icon img\s*\{[^}]*image-rendering:\s*pixelated/s);
   assert.match(styles, /\.breakdown-bar\s*\{[^}]*height:\s*16px/s);
   assert.match(styles, /\.breakdown-legend\s*\{[^}]*display:\s*flex[^}]*flex-wrap:\s*wrap/s);
   assert.doesNotMatch(styles, /\.breakdown-item\s*\{[^}]*background:/s);
@@ -919,11 +927,11 @@ test("keeps database history and translations aligned", async () => {
   assert.match(styles, /:root\[data-theme="nier-automata"\][^{]*\{[^}]*--chart-accent:\s*#526f78/s);
   assert.match(styles, /:root\[data-theme="tohsaka-rin"\][^{]*\{[^}]*--chart-accent:\s*#ff5b82/s);
   assert.match(script, /height:\s*168/);
-  assert.match(script, /stroke:\s*\{\s*curve:\s*\["straight",\s*"smooth"\],\s*width:\s*\[0,\s*2\.5\]/);
+  assert.match(script, /stroke:\s*\{\s*curve:\s*\["straight",\s*"straight",\s*"smooth"\],\s*width:\s*\[0,\s*0,\s*2\.5\]/);
   assert.match(script, /allowance-guide-all-label/);
   assert.match(script, /allowance-guide-safe-label/);
   assert.match(page, /height:\s*168/);
-  assert.match(page, /stroke:\s*\{\s*curve:\s*\["straight",\s*"smooth"\],\s*width:\s*\[0,\s*2\.5\]/);
+  assert.match(page, /stroke:\s*\{\s*curve:\s*\["straight",\s*"straight",\s*"smooth"\],\s*width:\s*\[0,\s*0,\s*2\.5\]/);
   for (const source of [script, page]) {
     assert.match(source, /relativeStrengthScore/);
     assert.match(source, /dailyStrengthPoints/);
@@ -940,6 +948,8 @@ test("keeps database history and translations aligned", async () => {
   }
   assert.match(styles, /\.allowance-guide\s*\{/);
   assert.match(styles, /\.allowance-guide i\s*\{/);
+  assert.match(styles, /\.allowance-guide i:first-child\s*\{[^}]*flex:\s*0 0 24px/s);
+  assert.match(styles, /\.allowance-guide span\s*\{[^}]*text-align:\s*left/s);
   assert.match(styles, /\.strength-panel\s*\{/);
   assert.doesNotMatch(styles, /\.allowance-guide-label/);
   assert.doesNotMatch(styles, /\.apexcharts-yaxis-annotations rect\s*\{/);
@@ -965,12 +975,22 @@ test("keeps database history and translations aligned", async () => {
     assert.match(source, /type:\s*"datetime"/);
     assert.match(source, /sparkline:\s*\{\s*enabled:\s*true/);
     assert.match(source, /tooltip:\s*\{\s*enabled:\s*false/);
-    assert.match(source, /fill:\s*\{\s*opacity:\s*\[0\.68,\s*1\]/);
-    assert.match(source, /dropShadow:\s*\{\s*enabled:\s*true/);
+    assert.match(source, /fill:\s*\{\s*opacity:\s*\[0\.68,\s*0\.84,\s*1\]/);
+    assert.doesNotMatch(source, /dropShadow/);
     assert.match(source, /data\.expenses\.filter\(\(expense\) => !expense\.recurring\)/);
+    assert.match(source, /paymentMethod && \(expense\.paymentMethod \?\? "debit"\) !== paymentMethod/);
+    assert.match(source, /"credit"/);
+    assert.match(source, /stacked:\s*true/);
+    assert.match(source, /stackOnlyBar:\s*true/);
     assert.match(source, /seriesName:[\s\S]{0,120}min:\s*0,[\s\S]{0,80}max:\s*(?:drawChartMaximum|chartMaximum)/);
     assert.match(source, /creditStatus !== "repaid"/);
   }
+  assert.match(index, /class="credit-key"/);
+  assert.match(styles, /\.credit-key\s*\{[^}]*background:\s*var\(--red\)/s);
+  assert.doesNotMatch(styles, /--chart-glow|drop-shadow\(0 0|text-shadow:\s*0 0/);
+  assert.match(script, /window\.setInterval[\s\S]{0,180}1000/);
+  assert.match(page, /window\.setInterval[\s\S]{0,180}1000/);
+  assert.match(script, /prefers-reduced-motion:\s*reduce/);
   assert.match(page, /import\("apexcharts"\)/);
   assert.match(page, /new Intl\.NumberFormat\(locale/);
   assert.match(styles, /:root\[data-theme="nier-automata"\]/);

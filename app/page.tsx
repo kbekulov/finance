@@ -15,10 +15,10 @@ type Category =
 type Language = "en" | "ru";
 
 const THEMES = [
-  { id: "kinance", label: "Kinance", banner: "/theme-banners/kinance.png?v=6" },
-  { id: "kinance-moon", label: "Kinance Moon", banner: "/theme-banners/kinance.png?v=6" },
-  { id: "nier-automata", label: "NieR:Automata", banner: "/theme-banners/nier-automata.png" },
-  { id: "tohsaka-rin", label: "Tohsaka Rin", banner: "/theme-banners/tohsaka-rin.png" },
+  { id: "kinance", label: "Kinance", banners: ["/theme-banners/kinance.png?v=7", "/theme-banners/kinance-frame-2.png?v=7"] },
+  { id: "kinance-moon", label: "Kinance Moon", banners: ["/theme-banners/kinance.png?v=7", "/theme-banners/kinance-frame-2.png?v=7"] },
+  { id: "nier-automata", label: "NieR:Automata", banners: ["/theme-banners/nier-automata.png"] },
+  { id: "tohsaka-rin", label: "Tohsaka Rin", banners: ["/theme-banners/tohsaka-rin.png"] },
 ] as const;
 type ThemeId = (typeof THEMES)[number]["id"];
 
@@ -90,13 +90,13 @@ const CATEGORIES: Category[] = [
 ];
 
 const KINANCE_CATEGORY_ICONS: Record<Category, string> = {
-  Food: "/category-icons/food-item.png?v=1",
-  "Subscriptions & services": "/category-icons/subscriptions-item.png?v=2",
-  "Luxury purchases": "/category-icons/luxury-item.png?v=2",
-  "Debt & repayments": "/category-icons/debt-item.png?v=2",
-  "Devices & installments": "/category-icons/devices-item.png?v=2",
-  "Transport & Travel": "/category-icons/transport-item.png?v=2",
-  "Alcohol & nightlife": "/category-icons/alcohol-item.png?v=2",
+  Food: "/category-icons/food-rpg.png?v=1",
+  "Subscriptions & services": "/category-icons/services-rpg.png?v=1",
+  "Luxury purchases": "/category-icons/luxury-rpg.png?v=1",
+  "Debt & repayments": "/category-icons/debt-rpg.png?v=1",
+  "Devices & installments": "/category-icons/devices-rpg.png?v=1",
+  "Transport & Travel": "/category-icons/transport-rpg.png?v=1",
+  "Alcohol & nightlife": "/category-icons/alcohol-rpg.png?v=1",
 };
 
 const CHARACTER_CATEGORY_ICON_POOLS: Record<Category, readonly string[]> = {
@@ -192,9 +192,10 @@ const COPY = {
     dailySpending: "Daily expenses",
     dailySpendingIntro: "What left your account each day this salary cycle",
     thisCycleTotal: "This cycle",
-    dailyExpenseSeries: "Daily spending",
+    dailyExpenseSeries: "Debit spending",
+    creditExpenseSeries: "Credit spending",
     relativeStrengthSeries: "Relative strength",
-    dailySpendingChartLabel: "Daily spending bars with relative strength and daily allowance guides",
+    dailySpendingChartLabel: "Stacked debit and credit spending bars with relative strength and daily allowance guides",
     strengthTitle: "RELATIVE STRENGTH",
     strengthScore: "CURRENT SCORE",
     strengthNoAttempts: "Log an attempt to establish your baseline",
@@ -285,9 +286,10 @@ const COPY = {
     dailySpending: "Расходы по дням",
     dailySpendingIntro: "Сколько списывалось со счёта каждый день текущего зарплатного цикла",
     thisCycleTotal: "За текущий цикл",
-    dailyExpenseSeries: "Расходы за день",
+    dailyExpenseSeries: "Расходы по дебету",
+    creditExpenseSeries: "Расходы по кредиту",
     relativeStrengthSeries: "Относительная сила",
-    dailySpendingChartLabel: "Расходы по дням в виде столбцов, график относительной силы и линии дневных лимитов",
+    dailySpendingChartLabel: "Составные столбцы расходов по дебету и кредиту, график относительной силы и линии дневных лимитов",
     strengthTitle: "ОТНОСИТЕЛЬНАЯ СИЛА",
     strengthScore: "ТЕКУЩИЙ БАЛЛ",
     strengthNoAttempts: "Добавьте попытку, чтобы определить исходный уровень",
@@ -500,8 +502,10 @@ function dailyExpensePoints(
   expenses: Expense[],
   period: MonthRecord["period"],
   asOfDate: string,
+  paymentMethod?: Expense["paymentMethod"],
 ) {
   const totals = expenses.reduce((daily, expense) => {
+    if (paymentMethod && (expense.paymentMethod ?? "debit") !== paymentMethod) return daily;
     daily.set(expense.date, (daily.get(expense.date) ?? 0) + toCents(expense.amount));
     return daily;
   }, new Map<string, number>());
@@ -578,6 +582,7 @@ export default function Home() {
   const data = financeDataForMonth(selectedMonth);
   const [language, setLanguage] = useState<Language>("ru");
   const [theme, setTheme] = useState<ThemeId>("kinance");
+  const [bannerFrame, setBannerFrame] = useState(0);
   const [recurringExpanded, setRecurringExpanded] = useState(true);
   const [oneTimeExpanded, setOneTimeExpanded] = useState(true);
   const dailyChartRef = useRef<HTMLDivElement>(null);
@@ -682,6 +687,22 @@ export default function Home() {
   );
   const copy = COPY[language];
   const selectedTheme = THEMES.find(({ id }) => id === theme) ?? THEMES[0];
+  const themeBannerSrc = selectedTheme.banners[bannerFrame % selectedTheme.banners.length];
+  useEffect(() => {
+    selectedTheme.banners.forEach((src) => {
+      const image = new Image();
+      image.src = src;
+    });
+    if (
+      selectedTheme.banners.length < 2 ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) return;
+    const timer = window.setInterval(
+      () => setBannerFrame((frame) => (frame + 1) % selectedTheme.banners.length),
+      1000,
+    );
+    return () => window.clearInterval(timer);
+  }, [selectedTheme]);
   const themeBannerLabel = fillTemplate(copy.themeBannerLabel, {
     theme: selectedTheme.label,
   });
@@ -887,12 +908,24 @@ export default function Home() {
       if (!active) return;
       const themeStyles = getComputedStyle(document.documentElement);
       const accent = themeStyles.getPropertyValue("--chart-accent").trim() || "#5ac8fa";
-      const glow = themeStyles.getPropertyValue("--chart-glow").trim() || accent;
+      const creditAccent = themeStyles.getPropertyValue("--red").trim() || "#ff453a";
       const strengthAccent = themeStyles.getPropertyValue("--strength-accent").trim() || "#bf5af2";
       const spendingPoints = dailyExpensePoints(
         data.expenses.filter((expense) => !expense.recurring),
         selectedMonth.period,
         todayKey,
+      );
+      const debitPoints = dailyExpensePoints(
+        data.expenses.filter((expense) => !expense.recurring),
+        selectedMonth.period,
+        todayKey,
+        "debit",
+      );
+      const creditPoints = dailyExpensePoints(
+        data.expenses.filter((expense) => !expense.recurring),
+        selectedMonth.period,
+        todayKey,
+        "credit",
       );
       const strengthPoints = dailyStrengthPoints(
         STRENGTH_ENTRIES,
@@ -910,30 +943,32 @@ export default function Home() {
         chart: {
           type: "line",
           height: 168,
+          stacked: true,
+          stackOnlyBar: true,
           background: "transparent",
           fontFamily: getComputedStyle(document.documentElement).getPropertyValue("--font-family"),
           animations: { enabled: !window.matchMedia("(prefers-reduced-motion: reduce)").matches },
           sparkline: { enabled: true },
-          dropShadow: { enabled: true, top: 2, left: 0, blur: 4, color: glow, opacity: 0.2 },
           toolbar: { show: false },
           zoom: { enabled: false },
         },
         series: [
-          { name: copy.dailyExpenseSeries, type: "column", data: spendingPoints },
+          { name: copy.dailyExpenseSeries, type: "column", data: debitPoints },
+          { name: copy.creditExpenseSeries, type: "column", data: creditPoints },
           { name: copy.relativeStrengthSeries, type: "line", data: strengthPoints },
         ],
-        colors: [accent, strengthAccent],
+        colors: [accent, creditAccent, strengthAccent],
         plotOptions: {
           bar: { columnWidth: "48%", borderRadius: 4, borderRadiusApplication: "end" },
         },
-        stroke: { curve: ["straight", "smooth"], width: [0, 2.5], lineCap: "round" },
-        fill: { opacity: [0.68, 1] },
-        markers: { size: [0, 3.5], strokeWidth: 0, hover: { sizeOffset: 2 } },
+        stroke: { curve: ["straight", "straight", "smooth"], width: [0, 0, 2.5], lineCap: "round" },
+        fill: { opacity: [0.68, 0.84, 1] },
+        markers: { size: [0, 0, 3.5], strokeWidth: 0, hover: { sizeOffset: 2 } },
         dataLabels: { enabled: false },
         grid: { show: false, padding: { left: 3, right: 3, top: 8, bottom: 1 } },
         xaxis: { type: "datetime" },
         yaxis: [
-          { seriesName: copy.dailyExpenseSeries, min: 0, max: drawChartMaximum, show: false },
+          { seriesName: [copy.dailyExpenseSeries, copy.creditExpenseSeries], min: 0, max: drawChartMaximum, show: false },
           { seriesName: copy.relativeStrengthSeries, min: 1, max: 10, opposite: true, show: false },
         ],
         tooltip: { enabled: false },
@@ -948,6 +983,7 @@ export default function Home() {
     };
   }, [
     copy.dailyExpenseSeries,
+    copy.creditExpenseSeries,
     copy.relativeStrengthSeries,
     allFundsDailyPace,
     data.expenses,
@@ -1069,8 +1105,8 @@ export default function Home() {
           {/* Theme artwork is served as a direct PNG so data-driven theme paths stay portable. */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            key={selectedTheme.id}
-            src={selectedTheme.banner}
+            key={`${selectedTheme.id}-${themeBannerSrc}`}
+            src={themeBannerSrc}
             alt={themeBannerLabel}
             width={2048}
             height={683}
@@ -1120,6 +1156,7 @@ export default function Home() {
           </div>
           <div className="strength-meta">
             <span><i className="spending-key" />{copy.dailyExpenseSeries}</span>
+            <span><i className="credit-key" />{copy.creditExpenseSeries}</span>
             <span><i className="strength-key" />{copy.relativeStrengthSeries}</span>
             <small>{copy.strengthNote}</small>
           </div>

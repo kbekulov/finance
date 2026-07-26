@@ -29,7 +29,6 @@
   --display-font: var(--font-family);
   --banner-fade: #050506;
   --chart-accent: #5ac8fa;
-  --chart-glow: #0a84ff;
   --strength-accent: #bf5af2;
 }
 
@@ -63,7 +62,6 @@
   --display-font: Georgia, "Times New Roman", serif;
   --banner-fade: #e7eff1;
   --chart-accent: #526f78;
-  --chart-glow: #8eabb3;
   --strength-accent: #715f86;
 }
 
@@ -87,12 +85,11 @@
   --red: #ff375f;
   --purple: #a84fe3;
   --cyan: #54d8e8;
-  --shadow-card: 0 24px 70px rgba(46, 0, 31, 0.46);
-  --shadow-glass: 0 14px 40px rgba(62, 0, 42, 0.38);
+  --shadow-card: 0 24px 70px rgba(0, 0, 0, 0.42);
+  --shadow-glass: 0 14px 40px rgba(0, 0, 0, 0.3);
   --display-font: Georgia, "Times New Roman", serif;
   --banner-fade: #080713;
   --chart-accent: #ff5b82;
-  --chart-glow: #e52a55;
   --strength-accent: #f2b94b;
 }
 
@@ -203,9 +200,7 @@ main::before {
     linear-gradient(105deg, rgba(255, 69, 58, 0.25), rgba(120, 12, 24, 0.16) 62%, transparent),
     var(--glass-strong);
   padding: 12px 16px;
-  box-shadow:
-    inset 0 1px rgba(255, 255, 255, 0.12),
-    0 0 28px rgba(255, 69, 58, 0.2);
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.12);
   animation: credit-alert-pulse 1.45s ease-in-out infinite alternate;
   -webkit-backdrop-filter: blur(30px) saturate(170%);
   backdrop-filter: blur(30px) saturate(170%);
@@ -253,11 +248,11 @@ main::before {
 @keyframes credit-alert-pulse {
   from {
     border-color: rgba(255, 69, 58, 0.46);
-    box-shadow: inset 0 1px rgba(255, 255, 255, 0.1), 0 0 15px rgba(255, 69, 58, 0.12);
+    box-shadow: inset 0 1px rgba(255, 255, 255, 0.1);
   }
   to {
     border-color: rgba(255, 105, 97, 0.92);
-    box-shadow: inset 0 1px rgba(255, 255, 255, 0.15), 0 0 34px rgba(255, 69, 58, 0.38);
+    box-shadow: inset 0 1px rgba(255, 255, 255, 0.15);
   }
 }
 
@@ -302,9 +297,7 @@ main::before {
   color: #211506;
   font-size: 17px;
   font-weight: 800;
-  box-shadow:
-    inset 0 1px 1px rgba(255, 255, 255, 0.45),
-    0 0 0 6px rgba(255, 159, 10, 0.08);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.45);
 }
 
 .spending-alert strong {
@@ -369,7 +362,7 @@ main::before {
   font-weight: 600;
   box-shadow:
     inset 0 1px rgba(255, 255, 255, 0.38),
-    0 7px 20px rgba(10, 132, 255, 0.28);
+    0 7px 20px rgba(0, 0, 0, 0.28);
 }
 
 .header-meta {
@@ -404,25 +397,21 @@ main::before {
   background: linear-gradient(135deg, #0a84ff 0 50%, #bf5af2 50%);
   content: "";
   pointer-events: none;
-  box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.08);
 }
 
 .theme-switcher[data-current-theme="nier-automata"]::before {
   border-color: rgba(22, 31, 35, 0.28);
   border-radius: 50%;
   background: linear-gradient(135deg, #f9fcfc 0 48%, #9eb2ba 50% 72%, #171b1e 74%);
-  box-shadow: 0 0 0 3px rgba(115, 143, 153, 0.1);
 }
 
 .theme-switcher[data-current-theme="kinance-moon"]::before {
   border-color: rgba(178, 185, 255, 0.34);
   background: radial-gradient(circle at 67% 34%, #dfe5ff 0 26%, #5965aa 28% 42%, #111329 44%);
-  box-shadow: 0 0 0 3px rgba(126, 139, 255, 0.1);
 }
 
 .theme-switcher[data-current-theme="tohsaka-rin"]::before {
   background: linear-gradient(135deg, #e11946 0 50%, #5a2387 50%);
-  box-shadow: 0 0 0 3px rgba(225, 25, 70, 0.1);
 }
 
 .theme-switcher::after {
@@ -629,7 +618,6 @@ main::before {
 
 :root[data-theme="nier-automata"] .timeline-track span {
   background: linear-gradient(90deg, #4b7480, #9bbbc3);
-  box-shadow: 0 0 12px rgba(71, 111, 123, 0.2);
 }
 
 :root[data-theme="nier-automata"] .recurring-expenses {
@@ -691,7 +679,7 @@ main::before {
   background: linear-gradient(145deg, #ff426b, #9b1235 68%);
   box-shadow:
     inset 0 1px rgba(255, 255, 255, 0.34),
-    0 0 22px rgba(225, 25, 70, 0.32);
+    0 7px 20px rgba(0, 0, 0, 0.3);
 }
 
 :root[data-theme="tohsaka-rin"] .hero h1,
@@ -703,7 +691,6 @@ main::before {
 
 :root[data-theme="tohsaka-rin"] .hero h1 em {
   color: #ff5d82;
-  text-shadow: 0 0 28px rgba(225, 25, 70, 0.28);
 }
 
 :root[data-theme="tohsaka-rin"] .theme-switcher select,
@@ -722,11 +709,7 @@ main::before {
   background:
     linear-gradient(105deg, rgba(255, 55, 95, 0.28), rgba(94, 12, 48, 0.28)),
     rgba(35, 14, 40, 0.86);
-  box-shadow: inset 0 1px rgba(255, 255, 255, 0.12), 0 0 32px rgba(229, 42, 85, 0.28);
-}
-
-:root[data-theme="tohsaka-rin"] .progress-ring {
-  filter: drop-shadow(0 0 12px rgba(225, 25, 70, 0.2));
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.12);
 }
 
 .month-pill {
@@ -750,9 +733,6 @@ main::before {
   height: 7px;
   border-radius: 50%;
   background: var(--green);
-  box-shadow:
-    0 0 0 4px rgba(48, 209, 88, 0.1),
-    0 0 12px rgba(48, 209, 88, 0.42);
 }
 
 /* Month navigation and timeline */
@@ -853,7 +833,6 @@ main::before {
   height: 100%;
   border-radius: inherit;
   background: linear-gradient(90deg, #0a84ff, #5ac8fa);
-  box-shadow: 0 0 12px rgba(10, 132, 255, 0.28);
 }
 
 .timeline-track i {
@@ -864,9 +843,6 @@ main::before {
   border: 3px solid #151517;
   border-radius: 50%;
   background: var(--green);
-  box-shadow:
-    0 0 0 2px #5ac8fa,
-    0 0 16px rgba(48, 209, 88, 0.3);
   transform: translate(-50%, -50%);
 }
 
@@ -921,7 +897,6 @@ main::before {
   margin: -168px 0 18px;
   overflow: hidden;
   transform: translateX(-50%);
-  filter: drop-shadow(0 4px 8px var(--chart-glow));
 }
 
 .daily-expense-chart-canvas {
@@ -957,6 +932,10 @@ main::before {
   opacity: 0.9;
 }
 
+.allowance-guide i:first-child {
+  flex: 0 0 24px;
+}
+
 .allowance-guide-safe i {
   background: repeating-linear-gradient(90deg, currentColor 0 5px, transparent 5px 9px);
 }
@@ -973,7 +952,7 @@ main::before {
   font-weight: 760;
   letter-spacing: 0.018em;
   line-height: 1.2;
-  text-align: center;
+  text-align: left;
   text-overflow: ellipsis;
   text-shadow:
     0 1px 2px var(--canvas),
@@ -1127,12 +1106,18 @@ main::before {
   background: var(--chart-accent);
 }
 
+.credit-key {
+  width: 7px;
+  height: 11px;
+  border-radius: 2px;
+  background: var(--red);
+}
+
 .strength-key {
   width: 13px;
   height: 3px;
   border-radius: 999px;
   background: var(--strength-accent);
-  box-shadow: 0 0 7px var(--strength-accent);
 }
 
 /* Hero */
@@ -1249,7 +1234,6 @@ p {
     rgba(118, 118, 128, 0.28) var(--spent-end) var(--savings-start),
     var(--red) var(--savings-start) 360deg
   );
-  box-shadow: 0 0 30px rgba(48, 209, 88, 0.08);
 }
 
 .progress-ring::before {
@@ -1500,7 +1484,6 @@ p {
   width: 48px;
   height: 48px;
   align-self: center;
-  filter: drop-shadow(0 5px 8px rgba(0, 0, 0, 0.2));
 }
 
 .expense-category-icon img {
@@ -1508,6 +1491,8 @@ p {
   width: 100%;
   height: 100%;
   object-fit: contain;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
 }
 
 .food,
@@ -1589,7 +1574,6 @@ p {
   border-radius: 50%;
   background: var(--secondary);
   content: "";
-  box-shadow: 0 0 0 4px rgba(142, 142, 147, 0.12);
 }
 
 .stat-comparison.favorable {
@@ -1598,7 +1582,6 @@ p {
 
 .stat-comparison.favorable::before {
   background: var(--green);
-  box-shadow: 0 0 0 4px rgba(48, 209, 88, 0.12);
 }
 
 .stat-comparison.unfavorable {
@@ -1607,7 +1590,6 @@ p {
 
 .stat-comparison.unfavorable::before {
   background: var(--orange);
-  box-shadow: 0 0 0 4px rgba(255, 159, 10, 0.12);
 }
 
 .transport,
@@ -2108,9 +2090,9 @@ p {
 .add-panel select:focus,
 .amount-field:focus-within {
   border-color: rgba(10, 132, 255, 0.7);
-  box-shadow:
-    0 0 0 3px rgba(10, 132, 255, 0.15),
-    inset 0 1px rgba(255, 255, 255, 0.05);
+  outline: 2px solid rgba(10, 132, 255, 0.48);
+  outline-offset: 1px;
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.05);
 }
 
 .amount-field {
@@ -2155,7 +2137,7 @@ p {
   font-weight: 680;
   box-shadow:
     inset 0 1px rgba(255, 255, 255, 0.3),
-    0 10px 25px rgba(10, 132, 255, 0.22);
+    0 10px 25px rgba(0, 0, 0, 0.24);
   transition:
     filter 160ms ease,
     transform 160ms ease;

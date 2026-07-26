@@ -157,10 +157,10 @@ test("server-renders the current finance tracker", async () => {
   assert.match(html, /aria-label="Составные столбцы расходов по дебету и кредиту, график относительной силы и линии дневных лимитов"/);
   assert.match(html, /class="strength-panel"/);
   assert.match(html, /ОТНОСИТЕЛЬНАЯ СИЛА/);
-  assert.match(html, /<strong>4,4<\/strong>/);
+  assert.match(html, /<strong>4,0<\/strong>/);
   assert.match(html, /<strong>51<small>кг<\/small><\/strong>/);
   assert.match(html, /Лучший подход: подтягивания<\/span><strong>5<\/strong>/);
-  assert.match(html, /Лучший подход: отжимания<\/span><strong>30<\/strong>/);
+  assert.match(html, /Лучший подход: отжимания<\/span><strong>25<\/strong>/);
   assert.match(html, /подходы не суммируются/);
   assert.doesNotMatch(html, /<form\b/);
   assert.doesNotMatch(html, /class="add-panel"/);
@@ -244,13 +244,13 @@ test("keeps database history and translations aligned", async () => {
     version: 3,
     timezone: "Europe/Vilnius",
     updatedAt: "2026-07-26",
-    revision: 3,
+    revision: 4,
     entries: [{
       id: "2026-07-26-rs-001",
       date: "2026-07-26",
       weightKg: 51,
       maxPullUpsSingleSet: 5,
-      maxPushUpsSingleSet: 30,
+      maxPushUpsSingleSet: 25,
       source: "chat",
     }],
   });

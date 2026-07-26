@@ -822,6 +822,8 @@ export default function Home() {
       const glow = themeStyles.getPropertyValue("--chart-glow").trim() || accent;
       const allFundsColor = themeStyles.getPropertyValue("--red").trim() || "#ff453a";
       const savingsSafeColor = themeStyles.getPropertyValue("--green").trim() || "#30d158";
+      const guideLabelBackground =
+        themeStyles.getPropertyValue("--banner-fade").trim() || "#050506";
       const points = dailyExpensePoints(
         data.expenses.filter((expense) => !expense.recurring),
         selectedMonth.period,
@@ -860,17 +862,18 @@ export default function Home() {
               opacity: 0.82,
               label: {
                 borderColor: "transparent",
+                borderRadius: 0,
                 position: "right",
                 offsetX: -12,
-                offsetY: -4,
+                offsetY: 5,
                 text: copy.savingsViolated,
                 style: {
-                  background: "transparent",
+                  background: guideLabelBackground,
                   color: allFundsColor,
                   cssClass: "allowance-guide-label allowance-guide-label-danger",
                   fontSize: "10px",
                   fontWeight: 800,
-                  padding: { left: 0, right: 0, top: 0, bottom: 0 },
+                  padding: { left: 5, right: 5, top: 1, bottom: 1 },
                 },
               },
             },
@@ -882,17 +885,18 @@ export default function Home() {
               opacity: 0.9,
               label: {
                 borderColor: "transparent",
+                borderRadius: 0,
                 position: "left",
                 offsetX: 142,
-                offsetY: -10,
+                offsetY: 5,
                 text: copy.savingsPreserved,
                 style: {
-                  background: "transparent",
+                  background: guideLabelBackground,
                   color: savingsSafeColor,
                   cssClass: "allowance-guide-label allowance-guide-label-safe",
                   fontSize: "10px",
                   fontWeight: 800,
-                  padding: { left: 0, right: 0, top: 0, bottom: 0 },
+                  padding: { left: 5, right: 5, top: 1, bottom: 1 },
                 },
               },
             },

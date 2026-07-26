@@ -192,7 +192,8 @@ test("keeps database history and translations aligned", async () => {
   assert.match(manual, /sits entirely over the lower 168 pixels of the character artwork/);
   assert.match(manual, /red long-dashed rule labeled `Savings violated` for all available funds/);
   assert.match(manual, /green short-dashed rule labeled `Savings preserved` for the savings-safe allowance/);
-  assert.match(manual, /plain theme-colored text with no pill, badge, background, or border/);
+  assert.match(manual, /rule reads visually as line, text, line/);
+  assert.match(manual, /must never look like a pill, badge, outlined container, or floating callout/);
   assert.match(manual, /Keep it separate from `salary` so the fixed salary and salary history remain truthful/);
   assert.match(manual, /Russian is the default language when no preference exists/);
   assert.match(manual, /`kinance_language` cookie/);
@@ -726,9 +727,9 @@ test("keeps database history and translations aligned", async () => {
   }
   assert.match(index, /id="theme-select"/);
   assert.match(index, /<html lang="ru">/);
-  assert.match(index, /styles\.css\?v=37/);
+  assert.match(index, /styles\.css\?v=38/);
   assert.match(index, /public\/vendor\/apexcharts\.min\.js\?v=21/);
-  assert.match(index, /script\.js\?v=42/);
+  assert.match(index, /script\.js\?v=43/);
   assert.match(index, /data-current-theme="kinance"/);
   assert.match(index, /id="credit-alert"[^>]*hidden/);
   assert.match(index, /id="payment-method"/);
@@ -846,13 +847,18 @@ test("keeps database history and translations aligned", async () => {
   assert.match(page, /text:\s*copy\.savingsViolated/);
   assert.match(page, /text:\s*copy\.savingsPreserved/);
   for (const source of [script, page]) {
-    assert.ok((source.match(/background:\s*"transparent"/g) ?? []).length >= 3);
     assert.equal((source.match(/borderColor:\s*"transparent"/g) ?? []).length, 2);
+    assert.equal((source.match(/borderRadius:\s*0/g) ?? []).length, 2);
+    assert.equal((source.match(/background:\s*guideLabelBackground/g) ?? []).length, 2);
+    assert.match(source, /getPropertyValue\("--banner-fade"\)/);
     assert.match(source, /position:\s*"left",\s*offsetX:\s*142/s);
+    assert.equal((source.match(/offsetY:\s*5/g) ?? []).length, 2);
+    assert.equal((source.match(/padding:\s*\{\s*left:\s*5,\s*right:\s*5,\s*top:\s*1,\s*bottom:\s*1\s*\}/g) ?? []).length, 2);
     assert.match(source, /color:\s*savingsSafeColor/);
     assert.match(source, /color:\s*allFundsColor/);
   }
   assert.match(styles, /\.allowance-guide-label\s*\{/);
+  assert.match(styles, /\.allowance-guide-label\s*\{[^}]*filter:\s*none[^}]*stroke:\s*none/s);
   assert.doesNotMatch(styles, /\.apexcharts-yaxis-annotations rect\s*\{/);
   assert.match(styles, /\.salary-locked\s*\{/);
   assert.match(styles, /\.stat-card\.salary-locked\s*\{[^}]*align-self:\s*start/s);

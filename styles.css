@@ -922,11 +922,10 @@ main::before {
 }
 
 .daily-expense-chart .allowance-guide-label {
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.78));
+  filter: none;
   letter-spacing: 0.045em;
-  paint-order: stroke;
-  stroke: rgba(0, 0, 0, 0.68);
-  stroke-width: 1.2px;
+  paint-order: normal;
+  stroke: none;
 }
 
 /* Hero */

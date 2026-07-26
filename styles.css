@@ -1113,7 +1113,7 @@ main::before {
 
 .strength-metrics {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: 68px repeat(3, minmax(0, 1fr));
   align-items: stretch;
   gap: 1px;
   overflow: hidden;
@@ -1160,6 +1160,36 @@ main::before {
   font-size: 12px;
   font-weight: 680;
   letter-spacing: -0.01em;
+}
+
+.strength-metrics > .strength-rank {
+  align-content: center;
+  justify-items: center;
+  gap: 3px;
+  padding: 6px;
+}
+
+.strength-rank-icon {
+  display: block;
+  width: 48px;
+  height: 48px;
+  background-repeat: no-repeat;
+  background-size: 500% 400%;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+.strength-rank > small {
+  overflow: hidden;
+  max-width: 100%;
+  color: var(--secondary);
+  font-size: 8px;
+  font-weight: 760;
+  letter-spacing: 0.01em;
+  line-height: 1.1;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .strength-meta {
@@ -2549,6 +2579,19 @@ footer p {
   .strength-metrics > div {
     gap: 5px;
     padding: 9px 10px;
+  }
+
+  .strength-metrics {
+    grid-template-columns: 58px repeat(3, minmax(0, 1fr));
+  }
+
+  .strength-rank-icon {
+    width: 42px;
+    height: 42px;
+  }
+
+  .strength-rank > small {
+    font-size: 7px;
   }
 
   .strength-metrics strong {

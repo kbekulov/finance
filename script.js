@@ -12,6 +12,28 @@ const STRENGTH_REFERENCE_BODY_MASS_KG = 75;
 const STRENGTH_ALLOMETRIC_EXPONENT = 1 / 3;
 const STRENGTH_PULL_UP_TARGET_REPS = 20;
 const STRENGTH_PUSH_UP_TARGET_REPS = 50;
+const STRENGTH_RANKS = [
+  { threshold: 1, abbreviation: "Pvt.", en: "Private", ru: "Рядовой" },
+  { threshold: 1.5, abbreviation: "Sr. Pvt.", en: "Senior Private", ru: "Старший рядовой" },
+  { threshold: 2, abbreviation: "Cpl.", en: "Corporal", ru: "Капрал" },
+  { threshold: 2.5, abbreviation: "Sgt.", en: "Sergeant", ru: "Сержант" },
+  { threshold: 3, abbreviation: "Sgt. Spec.", en: "Sergeant Specialist", ru: "Сержант-специалист" },
+  { threshold: 3.5, abbreviation: "SSgt.", en: "Staff Sergeant", ru: "Штаб-сержант" },
+  { threshold: 4, abbreviation: "Sgt. Maj.", en: "Sergeant Major", ru: "Сержант-майор" },
+  { threshold: 4.5, abbreviation: "MSgt.", en: "Master Sergeant", ru: "Мастер-сержант" },
+  { threshold: 5, abbreviation: "CSM", en: "Command Sergeant Major", ru: "Главный сержант-майор" },
+  { threshold: 5.5, abbreviation: "Off. Asp.", en: "Officer Aspirant", ru: "Кандидат в офицеры" },
+  { threshold: 6, abbreviation: "Jr. Lt.", en: "Junior Lieutenant", ru: "Младший лейтенант" },
+  { threshold: 6.5, abbreviation: "Lt.", en: "Lieutenant", ru: "Лейтенант" },
+  { threshold: 7, abbreviation: "Cpt.", en: "Captain", ru: "Капитан" },
+  { threshold: 7.5, abbreviation: "Maj.", en: "Major", ru: "Майор" },
+  { threshold: 8, abbreviation: "Lt. Col.", en: "Lieutenant Colonel", ru: "Подполковник" },
+  { threshold: 8.5, abbreviation: "Col.", en: "Colonel", ru: "Полковник" },
+  { threshold: 9, abbreviation: "Brig. Gen.", en: "Brigadier General", ru: "Бригадный генерал" },
+  { threshold: 9.5, abbreviation: "Maj. Gen.", en: "Major General", ru: "Генерал-майор" },
+  { threshold: 9.8, abbreviation: "Lt. Gen.", en: "Lieutenant General", ru: "Генерал-лейтенант" },
+  { threshold: 10, abbreviation: "Gen.", en: "General", ru: "Генерал" },
+];
 
 const KINANCE_CATEGORY_ICONS = {
   Food: "/public/category-icons/food-rpg.png?v=1",
@@ -136,6 +158,7 @@ const TRANSLATIONS = {
     strengthPullUps: "Best pull-up set",
     strengthPushUps: "Best push-up set",
     strengthTarget: "Target for a 10.0 score: {value}",
+    strengthRank: "{rank}, strength rank {level} of 20",
     strengthSave: "Save attempt",
     strengthNote: "Best single sets · never summed · body-mass adjusted personal index",
     strengthLatestMetrics: "Latest relative strength attempt metrics",
@@ -244,6 +267,7 @@ const TRANSLATIONS = {
     strengthPullUps: "Лучший подход: подтягивания",
     strengthPushUps: "Лучший подход: отжимания",
     strengthTarget: "Цель для оценки 10,0: {value}",
+    strengthRank: "{rank}, ранг силы {level} из 20",
     strengthSave: "Сохранить попытку",
     strengthNote: "Лучшие одиночные подходы · подходы не суммируются · персональный индекс с поправкой на массу тела",
     strengthLatestMetrics: "Показатели последней попытки относительной силы",
@@ -942,6 +966,20 @@ function relativeStrengthTargets(weightKg) {
   };
 }
 
+function relativeStrengthRank(score) {
+  if (!Number.isFinite(score)) return null;
+
+  let index = 0;
+  STRENGTH_RANKS.forEach((rank, rankIndex) => {
+    if (score >= rank.threshold) index = rankIndex;
+  });
+  return {
+    ...STRENGTH_RANKS[index],
+    level: index + 1,
+    backgroundPosition: `${(index % 5) * 25}% ${(Math.floor(index / 5) * 100) / 3}%`,
+  };
+}
+
 function dailyStrengthPoints(entries, period, asOfDate) {
   const dailyBest = new Map();
   entries.forEach((entry) => {
@@ -981,6 +1019,7 @@ function renderStrengthSummary() {
     ? relativeStrengthScore(latest.weightKg, latest.maxPullUpsSingleSet, latest.maxPushUpsSingleSet)
     : null;
   const targets = latest ? relativeStrengthTargets(latest.weightKg) : null;
+  const rank = relativeStrengthRank(score);
   element("strength-score").textContent = score === null ? "N/A" : formatScore(score);
   element("strength-status").textContent = latest
     ? t("strengthLatest", { date: formatShortDate(dateFromKey(latest.date)) })
@@ -997,6 +1036,16 @@ function renderStrengthSummary() {
   element("strength-push-ups-target-label").setAttribute(
     "aria-label",
     t("strengthTarget", { value: targets?.pushUps ?? "—" }),
+  );
+  const rankIcon = element("strength-rank-icon");
+  rankIcon.hidden = !rank;
+  rankIcon.style.backgroundPosition = rank?.backgroundPosition ?? "0% 0%";
+  element("strength-rank-abbreviation").textContent = rank?.abbreviation ?? "—";
+  element("strength-rank").setAttribute(
+    "aria-label",
+    rank
+      ? t("strengthRank", { rank: rank[language], level: rank.level })
+      : t("strengthNoAttempts"),
   );
 }
 

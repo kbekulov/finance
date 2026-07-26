@@ -2,13 +2,13 @@
   "version": 3,
   "timezone": "Europe/Vilnius",
   "updatedAt": "2026-07-26",
-  "revision": 4,
+  "revision": 5,
   "entries": [
     {
       "id": "2026-07-26-rs-001",
       "date": "2026-07-26",
       "weightKg": 51,
-      "maxPullUpsSingleSet": 5,
+      "maxPullUpsSingleSet": 8,
       "maxPushUpsSingleSet": 25,
       "source": "chat"
     }

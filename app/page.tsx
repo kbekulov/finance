@@ -18,6 +18,28 @@ const STRENGTH_REFERENCE_BODY_MASS_KG = 75;
 const STRENGTH_ALLOMETRIC_EXPONENT = 1 / 3;
 const STRENGTH_PULL_UP_TARGET_REPS = 20;
 const STRENGTH_PUSH_UP_TARGET_REPS = 50;
+const STRENGTH_RANKS = [
+  { threshold: 1, abbreviation: "Pvt.", en: "Private", ru: "Рядовой" },
+  { threshold: 1.5, abbreviation: "Sr. Pvt.", en: "Senior Private", ru: "Старший рядовой" },
+  { threshold: 2, abbreviation: "Cpl.", en: "Corporal", ru: "Капрал" },
+  { threshold: 2.5, abbreviation: "Sgt.", en: "Sergeant", ru: "Сержант" },
+  { threshold: 3, abbreviation: "Sgt. Spec.", en: "Sergeant Specialist", ru: "Сержант-специалист" },
+  { threshold: 3.5, abbreviation: "SSgt.", en: "Staff Sergeant", ru: "Штаб-сержант" },
+  { threshold: 4, abbreviation: "Sgt. Maj.", en: "Sergeant Major", ru: "Сержант-майор" },
+  { threshold: 4.5, abbreviation: "MSgt.", en: "Master Sergeant", ru: "Мастер-сержант" },
+  { threshold: 5, abbreviation: "CSM", en: "Command Sergeant Major", ru: "Главный сержант-майор" },
+  { threshold: 5.5, abbreviation: "Off. Asp.", en: "Officer Aspirant", ru: "Кандидат в офицеры" },
+  { threshold: 6, abbreviation: "Jr. Lt.", en: "Junior Lieutenant", ru: "Младший лейтенант" },
+  { threshold: 6.5, abbreviation: "Lt.", en: "Lieutenant", ru: "Лейтенант" },
+  { threshold: 7, abbreviation: "Cpt.", en: "Captain", ru: "Капитан" },
+  { threshold: 7.5, abbreviation: "Maj.", en: "Major", ru: "Майор" },
+  { threshold: 8, abbreviation: "Lt. Col.", en: "Lieutenant Colonel", ru: "Подполковник" },
+  { threshold: 8.5, abbreviation: "Col.", en: "Colonel", ru: "Полковник" },
+  { threshold: 9, abbreviation: "Brig. Gen.", en: "Brigadier General", ru: "Бригадный генерал" },
+  { threshold: 9.5, abbreviation: "Maj. Gen.", en: "Major General", ru: "Генерал-майор" },
+  { threshold: 9.8, abbreviation: "Lt. Gen.", en: "Lieutenant General", ru: "Генерал-лейтенант" },
+  { threshold: 10, abbreviation: "Gen.", en: "General", ru: "Генерал" },
+] as const;
 
 const THEMES = [
   { id: "kinance", label: "Kinance", banners: ["/theme-banners/kinance.png?v=7", "/theme-banners/kinance-frame-2.png?v=7"] },
@@ -209,6 +231,7 @@ const COPY = {
     strengthPullUps: "Best pull-up set",
     strengthPushUps: "Best push-up set",
     strengthTarget: "Target for a 10.0 score: {value}",
+    strengthRank: "{rank}, strength rank {level} of 20",
     strengthLatestMetrics: "Latest relative strength attempt metrics",
     strengthSave: "Save attempt",
     strengthNote: "Best single sets · never summed · body-mass adjusted personal index",
@@ -304,6 +327,7 @@ const COPY = {
     strengthPullUps: "Лучший подход: подтягивания",
     strengthPushUps: "Лучший подход: отжимания",
     strengthTarget: "Цель для оценки 10,0: {value}",
+    strengthRank: "{rank}, ранг силы {level} из 20",
     strengthLatestMetrics: "Показатели последней попытки относительной силы",
     strengthSave: "Сохранить попытку",
     strengthNote: "Лучшие одиночные подходы · подходы не суммируются · персональный индекс с поправкой на массу тела",
@@ -572,6 +596,20 @@ function relativeStrengthTargets(weightKg: number) {
   return {
     pullUps: Math.ceil(STRENGTH_PULL_UP_TARGET_REPS / massAdjustment - 1e-10),
     pushUps: Math.ceil(STRENGTH_PUSH_UP_TARGET_REPS / massAdjustment - 1e-10),
+  };
+}
+
+function relativeStrengthRank(score: number | null) {
+  if (score === null || !Number.isFinite(score)) return null;
+
+  let index = 0;
+  STRENGTH_RANKS.forEach((rank, rankIndex) => {
+    if (score >= rank.threshold) index = rankIndex;
+  });
+  return {
+    ...STRENGTH_RANKS[index],
+    level: index + 1,
+    backgroundPosition: `${(index % 5) * 25}% ${(Math.floor(index / 5) * 100) / 3}%`,
   };
 }
 
@@ -936,6 +974,7 @@ export default function Home() {
   const latestStrengthTargets = latestStrength
     ? relativeStrengthTargets(latestStrength.weightKg)
     : null;
+  const latestStrengthRank = relativeStrengthRank(latestStrengthScore);
   const chartMaximum = Math.max(
     ...guideSpendingPoints.map(({ y }) => y),
     allFundsDailyPace,
@@ -1222,6 +1261,26 @@ export default function Home() {
             </p>
           </div>
           <div className="strength-metrics" aria-label={copy.strengthLatestMetrics}>
+            <div
+              className="strength-rank"
+              aria-label={latestStrengthRank
+                ? fillTemplate(copy.strengthRank, {
+                    rank: latestStrengthRank[language],
+                    level: latestStrengthRank.level,
+                  })
+                : copy.strengthNoAttempts}
+            >
+              <span
+                className="strength-rank-icon"
+                aria-hidden="true"
+                hidden={!latestStrengthRank}
+                style={{
+                  backgroundImage: "url('/rank-icons/rank-insignia-atlas.png?v=1')",
+                  backgroundPosition: latestStrengthRank?.backgroundPosition ?? "0% 0%",
+                }}
+              />
+              <small>{latestStrengthRank?.abbreviation ?? "—"}</small>
+            </div>
             <div><span>{copy.strengthWeight}</span><strong>{latestStrength?.weightKg ?? 0}<small>{copy.strengthWeightUnit}</small></strong></div>
             <div><span>{copy.strengthPullUps}</span><strong>{latestStrength?.maxPullUpsSingleSet ?? 0}<small className="strength-target" aria-label={fillTemplate(copy.strengthTarget, { value: latestStrengthTargets?.pullUps ?? "—" })}><span aria-hidden="true">/</span> {latestStrengthTargets?.pullUps ?? "—"}</small></strong></div>
             <div><span>{copy.strengthPushUps}</span><strong>{latestStrength?.maxPushUpsSingleSet ?? 0}<small className="strength-target" aria-label={fillTemplate(copy.strengthTarget, { value: latestStrengthTargets?.pushUps ?? "—" })}><span aria-hidden="true">/</span> {latestStrengthTargets?.pushUps ?? "—"}</small></strong></div>

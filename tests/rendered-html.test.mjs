@@ -157,9 +157,12 @@ test("server-renders the current finance tracker", async () => {
   assert.match(html, /aria-label="Составные столбцы расходов по дебету и кредиту, график относительной силы и линии дневных лимитов"/);
   assert.match(html, /class="strength-panel"/);
   assert.match(html, /ОТНОСИТЕЛЬНАЯ СИЛА/);
-  assert.match(html, /<strong>4,0<\/strong>/);
+  assert.match(html, /<strong>4,6<\/strong>/);
+  assert.match(html, /aria-label="Мастер-сержант, ранг силы 8 из 20"/);
+  assert.match(html, /class="strength-rank-icon"[^>]*background-position:50% 33\.333333333333336%/);
+  assert.match(html, /<small>MSgt\.<\/small>/);
   assert.match(html, /<strong>51<small>кг<\/small><\/strong>/);
-  assert.match(html, /Лучший подход: подтягивания<\/span><strong>5<small class="strength-target"[^>]*>.*?23<\/small><\/strong>/);
+  assert.match(html, /Лучший подход: подтягивания<\/span><strong>8<small class="strength-target"[^>]*>.*?23<\/small><\/strong>/);
   assert.match(html, /Лучший подход: отжимания<\/span><strong>25<small class="strength-target"[^>]*>.*?57<\/small><\/strong>/);
   assert.match(html, /подходы не суммируются/);
   assert.doesNotMatch(html, /<form\b/);
@@ -244,12 +247,12 @@ test("keeps database history and translations aligned", async () => {
     version: 3,
     timezone: "Europe/Vilnius",
     updatedAt: "2026-07-26",
-    revision: 4,
+    revision: 5,
     entries: [{
       id: "2026-07-26-rs-001",
       date: "2026-07-26",
       weightKg: 51,
-      maxPullUpsSingleSet: 5,
+      maxPullUpsSingleSet: 8,
       maxPushUpsSingleSet: 25,
       source: "chat",
     }],
@@ -823,6 +826,7 @@ test("keeps database history and translations aligned", async () => {
   assert.match(index, /script\.js\?v=51/);
   assert.match(index, /id="strength-pull-ups-target"/);
   assert.match(index, /id="strength-push-ups-target"/);
+  assert.match(index, /rank-icons\/rank-insignia-atlas\.png\?v=1/);
   assert.match(index, /data-current-theme="kinance"/);
   assert.match(index, /id="credit-alert"[^>]*hidden/);
   assert.doesNotMatch(index, /id="payment-method"/);
@@ -909,6 +913,10 @@ test("keeps database history and translations aligned", async () => {
     );
     assert.equal(icon.subarray(1, 4).toString("ascii"), "PNG");
   }
+  const rankAtlas = await readFile(
+    new URL("../public/rank-icons/rank-insignia-atlas.png", import.meta.url),
+  );
+  assert.equal(rankAtlas.subarray(1, 4).toString("ascii"), "PNG");
   assert.match(styles, /\.theme-banner\s*\{/);
   assert.match(styles, /@keyframes credit-alert-pulse/);
   assert.match(styles, /\.payment-badge\.credit-outstanding/);
@@ -974,6 +982,9 @@ test("keeps database history and translations aligned", async () => {
   for (const source of [script, page]) {
     assert.match(source, /relativeStrengthScore/);
     assert.match(source, /relativeStrengthTargets/);
+    assert.match(source, /relativeStrengthRank/);
+    assert.match(source, /STRENGTH_RANKS/);
+    assert.match(source, /threshold:\s*9\.8,\s*abbreviation:\s*"Lt\. Gen\."/);
     assert.match(source, /dailyStrengthPoints/);
     assert.match(source, /strength-history\.json/);
     assert.match(source, /type:\s*"column"/);
@@ -996,6 +1007,8 @@ test("keeps database history and translations aligned", async () => {
   assert.match(styles, /\.allowance-guide i:first-child\s*\{[^}]*flex:\s*0 0 24px/s);
   assert.match(styles, /\.allowance-guide span\s*\{[^}]*text-align:\s*left/s);
   assert.match(styles, /\.strength-panel\s*\{/);
+  assert.match(styles, /\.strength-metrics\s*\{[^}]*grid-template-columns:\s*68px repeat\(3, minmax\(0, 1fr\)\)/s);
+  assert.match(styles, /\.strength-rank-icon\s*\{[^}]*background-size:\s*500% 400%[^}]*image-rendering:\s*pixelated/s);
   assert.doesNotMatch(styles, /\.allowance-guide-label/);
   assert.doesNotMatch(styles, /\.apexcharts-yaxis-annotations rect\s*\{/);
   assert.match(styles, /\.salary-locked\s*\{/);

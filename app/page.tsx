@@ -78,10 +78,6 @@ const CATEGORY_ICONS: Record<Category, string> = {
 
 const COPY = {
   en: {
-    monthGlance: "YOUR SALARY CYCLE AT A GLANCE",
-    headlineLead: "Every euro has",
-    headlineEnd: "a place.",
-    intro: "A calm, honest view of what came in, what went out, and what you’re keeping for yourself.",
     available: "DEBIT BALANCE",
     spent: "SPENT",
     left: "on card until next salary",
@@ -158,10 +154,6 @@ const COPY = {
     savingsEuroLabel: "Monthly savings requirement in euros",
   },
   ru: {
-    monthGlance: "ВАШ ЦИКЛ ЗАРПЛАТЫ В ЦИФРАХ",
-    headlineLead: "У каждого евро",
-    headlineEnd: "своё место.",
-    intro: "Спокойный и честный взгляд на доходы, расходы и деньги, которые вы сохраняете для себя.",
     available: "БАЛАНС ДЕБЕТОВОЙ КАРТЫ",
     spent: "ПОТРАЧЕНО",
     left: "на карте до следующей зарплаты",
@@ -926,20 +918,10 @@ export default function Home() {
           aria-label={copy.dailySpendingChartLabel}
         />
 
-        <section className="hero" id="top" aria-labelledby="page-title">
-          <div className="hero-copy">
-            <p className="eyebrow">{copy.monthGlance}</p>
-            <h1 id="page-title">
-              {copy.headlineLead}
-              <br />
-              <em>{copy.headlineEnd}</em>
-            </h1>
-            <p className="hero-intro">{copy.intro}</p>
-          </div>
-
-          <div className="balance-card" aria-label={copy.monthlyPlanLabel}>
+        <section className="hero" id="top">
+          <div className="balance-card" aria-labelledby="page-title">
             <div className="balance-topline">
-              <span>{copy.available}</span>
+              <h1 id="page-title">{copy.available}</h1>
               <span>
                 {spentPercent === null
                   ? copy.noSpendingBudget

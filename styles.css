@@ -918,15 +918,7 @@ main::before {
 /* Hero */
 
 .hero {
-  display: grid;
-  grid-template-columns: minmax(0, 1.02fr) minmax(390px, 0.98fr);
-  gap: clamp(38px, 6vw, 76px);
-  align-items: center;
-  padding: 68px 0 48px;
-}
-
-.hero-copy {
-  max-width: 650px;
+  padding: 18px 0 28px;
 }
 
 .eyebrow {
@@ -938,36 +930,10 @@ main::before {
   text-transform: uppercase;
 }
 
-h1,
 h2,
 h3,
 p {
   margin-top: 0;
-}
-
-h1 {
-  max-width: 700px;
-  margin-bottom: 22px;
-  color: white;
-  font-size: clamp(52px, 6.2vw, 82px);
-  font-weight: 720;
-  line-height: 0.94;
-  letter-spacing: -0.065em;
-}
-
-h1 em {
-  color: #98989f;
-  font-style: normal;
-  font-weight: 720;
-}
-
-.hero-intro {
-  max-width: 560px;
-  margin-bottom: 0;
-  color: var(--secondary);
-  font-size: clamp(15px, 1.4vw, 17px);
-  line-height: 1.55;
-  letter-spacing: -0.012em;
 }
 
 .balance-card {
@@ -1115,6 +1081,13 @@ h1 em {
   font-weight: 650;
   letter-spacing: 0.06em;
   text-transform: uppercase;
+}
+
+.balance-topline h1 {
+  margin: 0;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
 }
 
 .pace-limit strong {
@@ -1985,13 +1958,7 @@ footer p {
   }
 
   .hero {
-    grid-template-columns: 1fr;
-    gap: 32px;
-    padding: 56px 0 40px;
-  }
-
-  .hero-copy {
-    max-width: 720px;
+    padding: 18px 0 28px;
   }
 
   .balance-card {
@@ -2155,18 +2122,7 @@ footer p {
   }
 
   .hero {
-    gap: 26px;
-    padding: 44px 0 34px;
-  }
-
-  h1 {
-    max-width: 520px;
-    margin-bottom: 18px;
-    font-size: clamp(47px, 15vw, 64px);
-  }
-
-  .hero-intro {
-    font-size: 15px;
+    padding: 14px 0 24px;
   }
 
   .balance-card {

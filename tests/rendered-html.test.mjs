@@ -561,15 +561,18 @@ test("keeps database history and translations aligned", async () => {
     assert.doesNotMatch(source, /const TODAY\s*=/);
   }
   assert.match(index, /id="theme-select"/);
-  assert.match(index, /styles\.css\?v=34/);
+  assert.match(index, /styles\.css\?v=35/);
   assert.match(index, /public\/vendor\/apexcharts\.min\.js\?v=21/);
-  assert.match(index, /script\.js\?v=33/);
+  assert.match(index, /script\.js\?v=34/);
   assert.match(index, /data-current-theme="kinance"/);
   assert.match(index, /id="credit-alert"[^>]*hidden/);
   assert.match(index, /id="payment-method"/);
   assert.match(index, /option value="debit"/);
   assert.match(index, /option value="credit"/);
   assert.match(index, /id="theme-banner-image"/);
+  assert.doesNotMatch(index, /class="hero-copy"/);
+  assert.doesNotMatch(index, /class="hero-intro"/);
+  assert.match(index, /<h1 id="page-title"[^>]*data-i18n="availableAfterPlan"/);
   assert.match(index, /public\/theme-banners\/kinance\.png/);
   assert.match(script, /public\/theme-banners\/kinance\.png/);
   assert.match(script, /public\/theme-banners\/nier-automata\.png/);
@@ -587,6 +590,8 @@ test("keeps database history and translations aligned", async () => {
     assert.match(source, /category-icons\/alcohol-nightlife\.png/);
     assert.match(source, /category-icons\/food\.png\?v=2/);
     assert.match(source, /category-icons\/subscriptions-services\.png\?v=3/);
+    assert.doesNotMatch(source, /className="hero-copy"/);
+    assert.doesNotMatch(source, /className="hero-intro"/);
   }
   for (const filename of [
     "food.png",

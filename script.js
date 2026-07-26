@@ -26,9 +26,6 @@ const THEMES = [
 
 const TRANSLATIONS = {
   en: {
-    monthGlance: "YOUR SALARY CYCLE AT A GLANCE",
-    headline: "Every euro has<br><em>a place.</em>",
-    intro: "A calm, honest view of what came in, what went out, and what you’re keeping for yourself.",
     availableAfterPlan: "DEBIT BALANCE",
     leftForMonth: "on card until next salary",
     afterSavings: "after protecting savings",
@@ -118,9 +115,6 @@ const TRANSLATIONS = {
     },
   },
   ru: {
-    monthGlance: "ВАШ ЦИКЛ ЗАРПЛАТЫ В ЦИФРАХ",
-    headline: "У каждого евро<br><em>своё место.</em>",
-    intro: "Спокойный и честный взгляд на доходы, расходы и деньги, которые вы сохраняете для себя.",
     availableAfterPlan: "БАЛАНС ДЕБЕТОВОЙ КАРТЫ",
     leftForMonth: "на карте до следующей зарплаты",
     afterSavings: "после защиты накоплений",

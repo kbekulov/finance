@@ -1136,6 +1136,7 @@ main::before {
 .strength-metrics > div {
   display: grid;
   align-content: center;
+  justify-items: center;
   gap: 4px;
   min-width: 0;
   background: var(--surface-inset);
@@ -1144,18 +1145,22 @@ main::before {
 
 .strength-metrics > div > span {
   overflow: hidden;
+  width: 100%;
   color: var(--secondary);
   font-size: 9px;
   font-weight: 700;
   letter-spacing: 0.045em;
   line-height: 1.25;
+  text-align: center;
 }
 
 .strength-metrics strong {
   color: var(--label);
   display: flex;
   align-items: baseline;
+  justify-content: center;
   gap: 4px;
+  width: 100%;
   font-size: 20px;
   font-weight: 760;
   letter-spacing: -0.035em;
@@ -1203,8 +1208,11 @@ main::before {
 }
 
 .strength-rank > small {
+  position: relative;
+  z-index: 1;
   overflow: hidden;
   max-width: 100%;
+  margin-top: -14px;
   color: var(--secondary);
   font-size: 9px;
   font-weight: 760;

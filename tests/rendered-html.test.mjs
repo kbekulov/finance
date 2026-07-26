@@ -167,8 +167,8 @@ test("keeps database history and translations aligned", async () => {
   assert.match(manual, /Synthetic expense history is exceptional/);
   assert.match(manual, /`synthetic: true` and a stable shared `backfillBatch` identifier/);
   assert.match(manual, /category-specific transparent Fate\/stay night chibi PNG/);
-  assert.match(manual, /Sakura Matou for Food/);
-  assert.match(manual, /Rider for Alcohol & nightlife/);
+  assert.match(manual, /Sakura Matou as a cook with an oversized ramen bowl for Food/);
+  assert.match(manual, /Rider as a bartender with a large cocktail for Alcohol & nightlife/);
   assert.match(manual, /sits entirely over the lower 168 pixels of the character artwork/);
   assert.equal(current.updatedAt, "2026-07-26");
   assert.equal(current.revision, 24);
@@ -563,7 +563,7 @@ test("keeps database history and translations aligned", async () => {
   assert.match(index, /id="theme-select"/);
   assert.match(index, /styles\.css\?v=36/);
   assert.match(index, /public\/vendor\/apexcharts\.min\.js\?v=21/);
-  assert.match(index, /script\.js\?v=34/);
+  assert.match(index, /script\.js\?v=35/);
   assert.match(index, /data-current-theme="kinance"/);
   assert.match(index, /id="credit-alert"[^>]*hidden/);
   assert.match(index, /id="payment-method"/);
@@ -579,8 +579,8 @@ test("keeps database history and translations aligned", async () => {
   assert.match(script, /public\/theme-banners\/tohsaka-rin\.png/);
   assert.match(script, /public\/category-icons\/food\.png/);
   assert.match(script, /public\/category-icons\/alcohol-nightlife\.png/);
-  assert.match(script, /category-icons\/food\.png\?v=2/);
-  assert.match(script, /category-icons\/subscriptions-services\.png\?v=3/);
+  assert.match(script, /category-icons\/food\.png\?v=4/);
+  assert.match(script, /category-icons\/subscriptions-services\.png\?v=4/);
   for (const source of [page]) {
     assert.match(source, /themeBannerLabel/);
     assert.match(source, /theme-banners\/kinance\.png/);
@@ -588,11 +588,13 @@ test("keeps database history and translations aligned", async () => {
     assert.match(source, /theme-banners\/tohsaka-rin\.png/);
     assert.match(source, /category-icons\/food\.png/);
     assert.match(source, /category-icons\/alcohol-nightlife\.png/);
-    assert.match(source, /category-icons\/food\.png\?v=2/);
-    assert.match(source, /category-icons\/subscriptions-services\.png\?v=3/);
+    assert.match(source, /category-icons\/food\.png\?v=4/);
+    assert.match(source, /category-icons\/subscriptions-services\.png\?v=4/);
     assert.doesNotMatch(source, /className="hero-copy"/);
     assert.doesNotMatch(source, /className="hero-intro"/);
   }
+  assert.equal((script.match(/category-icons\/[\w-]+\.png\?v=4/g) ?? []).length, 7);
+  assert.equal((page.match(/category-icons\/[\w-]+\.png\?v=4/g) ?? []).length, 7);
   for (const filename of [
     "food.png",
     "subscriptions-services.png",

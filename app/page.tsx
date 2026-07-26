@@ -67,13 +67,13 @@ const CATEGORIES: Category[] = [
 ];
 
 const CATEGORY_ICONS: Record<Category, string> = {
-  Food: "/category-icons/food.png?v=2",
-  "Subscriptions & services": "/category-icons/subscriptions-services.png?v=3",
-  "Luxury purchases": "/category-icons/luxury-purchases.png?v=2",
-  "Debt & repayments": "/category-icons/debt-repayments.png?v=2",
-  "Devices & installments": "/category-icons/devices-installments.png?v=2",
-  "Transport & Travel": "/category-icons/transport-travel.png?v=2",
-  "Alcohol & nightlife": "/category-icons/alcohol-nightlife.png?v=2",
+  Food: "/category-icons/food.png?v=4",
+  "Subscriptions & services": "/category-icons/subscriptions-services.png?v=4",
+  "Luxury purchases": "/category-icons/luxury-purchases.png?v=4",
+  "Debt & repayments": "/category-icons/debt-repayments.png?v=4",
+  "Devices & installments": "/category-icons/devices-installments.png?v=4",
+  "Transport & Travel": "/category-icons/transport-travel.png?v=4",
+  "Alcohol & nightlife": "/category-icons/alcohol-nightlife.png?v=4",
 };
 
 const COPY = {

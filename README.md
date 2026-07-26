@@ -2,6 +2,8 @@
 
 This repository is a personal salary-cycle finance and physical-fitness tracker maintained through chat. This document is the operational specification for future AI maintainers. Keep it concise, current, and action-oriented. Do not replace it with marketing copy, screenshots, or a conventional end-user README.
 
+The user's latest explicit instruction always takes precedence over an older preference recorded here. When that instruction establishes a durable rule, update this manual, both implementations, and relevant tests in the same change so the conflict does not recur. Do not reinterpret a one-time exception as a permanent rule.
+
 ## 1. Golden rules
 
 1. Work on `dev`. Do not recreate or use `main` unless the user explicitly asks.
@@ -18,6 +20,7 @@ This repository is a personal salary-cycle finance and physical-fitness tracker 
 10. Commit every completed code or database change and push `dev` in the same task. Never leave completed work uncommitted or unpushed.
 11. Publish the exact pushed commit to the connected Site when Sites tools are available. Preserve `CNAME` and the complete tracker at the custom GitHub Pages domain.
 12. Finish with a clean worktree and confirm local `HEAD` equals `origin/dev`.
+13. Change source files, canonical data, and final project assets only. Do not commit generated build output, temporary image-generation sources, local logs, credentials, or unrelated workspace files.
 
 Never force-push, discard unrelated changes, overwrite a newer remote commit, or redirect the tracker to an unrelated host.
 
@@ -26,20 +29,22 @@ Never force-push, discard unrelated changes, overwrite a newer remote commit, or
 Use this sequence for every mutation:
 
 1. Inspect `dev`, `origin/dev`, the worktree, and the relevant canonical data.
-2. Determine the affected salary cycle from its inclusive date range, not from the calendar-month name or currently selected UI cycle.
-3. Make the smallest complete change:
+2. Classify the request before editing: canonical data mutation, correction/removal, presentation-only change, documentation-only change, or one-time exception. Do not mutate canonical data for a question, diagnosis, or visual-only request.
+3. For dated finance work, determine the affected salary cycle from its inclusive date range, not from the calendar-month name or currently selected UI cycle.
+4. Make the smallest complete change:
    - finance data change: update the target cycle's `updatedAt` and increment its `revision`;
    - fitness data change: update the strength root `updatedAt` and increment its `revision`;
    - visible UI copy: update English, Russian, and accessibility text in both implementations;
    - new expense: also refresh the Kinance banner pair as specified under Themes and visual assets.
-4. Keep static and React implementations behaviorally equivalent.
-5. Run the validation matrix in section 13.
-6. Review the diff and confirm only intended files changed.
-7. Fetch again if the task was long-running, integrate any remote movement safely, then commit and push `dev`.
-8. Publish when the connected Sites tools are available.
-9. Verify the live result when deployment is available, the worktree is clean, and local and remote `dev` match.
+5. Keep static and React implementations behaviorally equivalent. When static CSS, JavaScript, or a replaced asset uses a query-string version, increment only the affected reference so GitHub Pages does not serve stale content.
+6. Run the validation matrix in section 13.
+7. Review the diff and confirm only intended files changed.
+8. Fetch again if the task was long-running, integrate any remote movement safely, then commit and push `dev`.
+9. Publish when the connected Sites tools are available.
+10. Verify the live result when deployment is available, the worktree is clean, and local and remote `dev` match.
 
 Do not change a cycle's `updatedAt` or `revision` for a purely visual or documentation-only edit. Those fields describe canonical data revisions.
+For a canonical correction to an old cycle, set that cycle's `updatedAt` to the actual Vilnius date of the correction, not the historical transaction date. The transaction keeps its own original `date`.
 
 ## 3. Canonical data model
 
@@ -93,6 +98,8 @@ Every expense record contains:
 - `recurring`: boolean when known
 - `frequency`: `monthly` for monthly recurring expenses
 
+IDs are immutable, unique across their canonical file, and never reused after deletion. Store monetary values with no more than two decimal places and aggregate them as integer cents in code.
+
 Preserve known optional details with clear field names, for example `merchant`, `description`, `transactionTime`, `originalCurrency`, `originalAmount`, or `receiptReference`. Use `null` only when "known empty" must be distinguished from "not supplied". Never invent merchants, receipt details, times, payment methods, or other evidence.
 
 ### Fitness root
@@ -112,13 +119,13 @@ Store raw attempts only. Do not store the derived Relative Strength score.
 
 Salary is nominally paid on the 12th. If the 12th is Saturday or Sunday, the effective salary and reset date is the Friday immediately before that weekend. A cycle starts on that effective date and ends one calendar day before the next effective salary date. Calculate this independently for every nominal month in `Europe/Vilnius`.
 
-At the first canonical update on or after a new effective salary date:
+At the first canonical data update performed on or after a new effective salary date, ensure the current salary cycle exists before applying the requested mutation:
 
 1. Calculate the new cycle start and next cycle start using the salary rule.
 2. Create the new record with an inclusive `period.start` and `period.end`.
 3. Set `updatedAt` to the actual Vilnius date and `revision` to `1`.
 4. Carry forward the preceding cycle's salary, savings goal, and active recurring expenses as the best known starting values.
-5. Give carried expenses new cycle-specific IDs and appropriate dates.
+5. Give carried expenses new cycle-specific IDs and dates inside the new cycle. Use the effective cycle start when no separate future billing date is known; never retain an out-of-cycle date.
 6. Do not copy one-time expenses, synthetic backfill entries, or non-recurring additional income.
 7. Keep cycles oldest to newest and remove only the oldest when the array exceeds 12.
 8. Verify navigation, totals, timeline, chart, and insights for current and historical cycles.
@@ -140,7 +147,7 @@ The salary card must be visually distinctive, compact, locked, and non-editable.
 
 ### New expense
 
-A message whose financial intent is simply an amount means to add that amount in euros as a new expense in the current salary cycle.
+A terse message that clearly presents an amount as spending or a purchase means to add that amount in euros as a new expense in the current salary cycle. A bare number in a question, comparison, target, or correction is not automatically a new expense.
 
 - Create a new stable ID.
 - Use the actual Vilnius date unless the user specifies another date.
@@ -189,7 +196,7 @@ Synthetic expense history is exceptional. Add it only when the user explicitly r
 
 ### Additional income
 
-Record item-sale proceeds, hobby-service payments, gifts, refunds treated as income, or other non-salary inflows in the applicable cycle's `additionalIncome` array.
+Record item-sale proceeds, hobby-service payments, gifts, or other non-salary inflows in the applicable cycle's `additionalIncome` array. Treat a refund as income only when the user explicitly wants that treatment; otherwise correct or reverse the related expense so spending is not overstated.
 
 - Keep it separate from `salary` so the fixed salary and salary history remain truthful.
 - Use the actual Vilnius receipt date and the cycle containing that date.
@@ -232,6 +239,10 @@ Every expense row displays a localized Debit, Credit, or Credit repaid badge. Re
 
 Store a recurring charge as a normal expense with `recurring: true` and `frequency: "monthly"`. Carry active charges into a new cycle with new IDs and dates, then apply cancellations or amount corrections requested by the user.
 
+- A cancellation stops future carry-forward and does not rewrite closed historical cycles unless the user explicitly corrects history.
+- A newly carried credit-card charge is a new `outstanding` credit expense. Never copy a prior cycle's `repaidAt` or `repaid` status onto it.
+- Do not create a second recurring row in the same cycle when the user is correcting the existing charge's name or amount.
+
 ## 6. Supported categories
 
 Stable internal keys are:
@@ -265,6 +276,8 @@ Use integer cents for all monetary aggregation. For the selected cycle:
 - `cashRemaining = totalIncome - spent`
 - `safeRemaining = cashRemaining - savingsGoal`
 
+Here `spent` means committed cycle spending: it includes both one-time expenses and expected recurring obligations because both reduce the usable cycle budget. The activity chart intentionally excludes recurring obligations so it remains a record of daily non-recurring activity rather than pretending planned charges occurred on their data-entry date.
+
 Required behavior:
 
 - Read salary from the selected cycle only. Never leak another cycle's salary.
@@ -275,7 +288,7 @@ Required behavior:
 - When total income is zero and spending is positive, show a no-budget state rather than a false `0%`.
 - All-funds daily pace is non-negative `cashRemaining` divided by the remaining salary-cycle days and is red because following it consumes protected savings.
 - Savings-safe daily pace is non-negative `safeRemaining` divided by the same remaining days and is green.
-- Use the days after today through `period.end`; never use calendar-month end.
+- Use the calendar days after today through `period.end`, floored to one day on or after the final cycle day; never use calendar-month end and never divide by zero.
 - A negative `safeRemaining` is a savings breach and must display red. Zero or positive remains green.
 - Insights must use the same category totals as the breakdown.
 - Category-breakdown widths must be proportional to their totals.
@@ -385,11 +398,15 @@ The EN/RU switch exposes identical information and functionality.
 - Russian must be idiomatic native UI language. Review agreement, case government, register, terminology, and singular/few/many behavior. Prefer `зарплатный цикл` to the literal `цикл зарплаты`. Rewrite count-dependent phrases when interpolation would produce bad declension.
 - Never use em dashes in visible site copy, metadata, or titles.
 
-The product name and document, Open Graph, and X/Twitter titles are exactly `Kinance` unless the user explicitly renames the product. The page title contains no subtitle or extra phrase. Preserve the configured favicon.
+The product name, document title, and metadata description are exactly `Kinance` unless the user explicitly renames the product. Keep metadata intentionally minimal for this personal site: no subtitle, promotional description, keywords, Open Graph block, X/Twitter block, or social-card requirement. Preserve the configured favicon and required technical metadata such as charset, viewport, and theme color.
 
 Maintain semantic structure, visible theme-appropriate keyboard focus, sufficient contrast, readable touch targets, reduced-motion support, and localized accessibility names.
 
 ## 11. Themes and visual assets
+
+### Viewport and layout
+
+The whole application uses a centered 430-pixel maximum phone canvas on wider screens. Desktop preserves the same single-column composition, control sizing, chart width, banner width, and content hierarchy as the phone view instead of expanding into a separate dashboard. Full-bleed elements go edge to edge within the app canvas, not the physical monitor. Keep the document background outside that canvas visually quiet.
 
 ### Theme behavior
 
@@ -515,9 +532,7 @@ Calculate the displayed 10.0 targets from the same mass adjustment: `pullUpTarge
 
 Relative Strength has 20 attainable rank bands. Promote from Private at 1.0 through Major General at 9.5 in 0.5-point steps, then use 9.8 for Lieutenant General and exactly 10.0 for General. The final split is necessary because the inclusive 1.0-to-10.0 scale contains only 19 half-point values. Keep the rank list, thresholds, English and Russian full names, and visible abbreviations identical in JavaScript and React.
 
-The rank control cycles through ten complete 20-rank RPGMaker-style pixel atlases when clicked or tapped: Imperial blend, Modern Russia, France, Britain, China, Japan, Germany, Italy, Poland, and South Korea. Persist the selected ID in the one-year site-wide `kinance_rank_insignia_set` cookie with `SameSite=Lax` and `Secure` on HTTPS. Every atlas uses isolated realistic metal rank components without fabric shoulder boards, epaulettes, flags, labels, or exact official state emblems. Keep the rank abbreviation as real HTML text beneath the decorative sprite and expose the localized full rank, level, selected set, and change action accessibly.
-
-The whole application uses a centered 430-pixel maximum phone canvas on wider screens. Desktop must preserve the same single-column composition, control sizing, chart width, banner width, and content hierarchy as the phone view instead of expanding into a separate desktop dashboard. Full-bleed elements go edge to edge within the app canvas, not the physical monitor.
+The rank control cycles through ten complete 20-rank RPGMaker-style pixel atlases when clicked, tapped, or activated from the keyboard: Imperial blend, Modern Russia, France, Britain, China, Japan, Germany, Italy, Poland, and South Korea. Persist the selected ID in the one-year site-wide `kinance_rank_insignia_set` cookie with `SameSite=Lax` and `Secure` on HTTPS. Every atlas uses isolated realistic metal rank components without fabric shoulder boards, epaulettes, flags, labels, or exact official state emblems. Keep the rank abbreviation as real HTML text raised slightly over the sprite's lower edge and expose the localized full rank, level, selected set, and change action accessibly.
 
 The 20- and 50-repetition anchors calibrate this personal display and are not population norms. Recompute all historical scores from raw attempts with the current formula. If the formula changes, increment the strength schema version, document the formula version, and update regression fixtures. Version 3 introduced allometric adjustment and equal weighting; version 2 used the discontinued `0.12` clamped mass factor and 60/40 weighting.
 
@@ -536,11 +551,12 @@ node --check script.js
 node -e "JSON.parse(require('fs').readFileSync('data/finance-history.json','utf8'))"
 node -e "JSON.parse(require('fs').readFileSync('data/strength-history.json','utf8'))"
 npm run lint
-node --test tests/rendered-html.test.mjs
-npm run build
+npm test
 ```
 
-Use the bundled runtime or established Vinext command if the default executable is unavailable. Do not rely on obsolete starter-template tests.
+`npm test` is cross-platform, builds first, and then runs the rendered-HTML regression suite; do not reverse that order or test stale `dist` output. Keep package scripts portable across Windows and Unix shells rather than embedding shell-specific environment assignment syntax. Use the bundled runtime when the default executable is unavailable. Do not rely on obsolete starter-template tests.
+
+For a documentation-only change, run at least `git diff --check` and every automated test that asserts README rules. Run the full matrix whenever documentation changes a product contract, data rule, calculation, asset workflow, or release procedure.
 
 For canonical data changes, also inspect the rendered HTML or bundle for:
 
@@ -553,7 +569,7 @@ For canonical data changes, also inspect the rendered HTML or bundle for:
 For UI changes, verify:
 
 - static and React parity;
-- desktop and 375-pixel mobile layouts;
+- the centered 430-pixel desktop phone canvas and a 375-pixel mobile viewport;
 - all built-in themes;
 - English and Russian;
 - keyboard operation, focus, tooltip/disclosure behavior, reduced motion, and contrast;

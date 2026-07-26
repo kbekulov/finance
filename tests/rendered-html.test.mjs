@@ -30,6 +30,7 @@ test("server-renders the current finance tracker", async () => {
 
   const html = await response.text();
   assert.match(html, /<title>Kinance<\/title>/i);
+  assert.match(html, /<meta name="description" content="Kinance"\/>/i);
   assert.match(html, /<html lang="ru">/);
   assert.match(html, /aria-label="Тема"/);
   assert.match(html, /<option value="kinance" selected="">Kinance<\/option><option value="kinance-moon">Kinance Moon<\/option>/);
@@ -217,6 +218,12 @@ test("keeps database history and translations aligned", async () => {
   assert.match(manual, /Finance accuracy takes priority/);
   assert.match(manual, /consecutive frames of a deliberately low-frame-rate idle animation/);
   assert.match(manual, /Alternate the frames with a hard pixel-art cut every 1000 milliseconds/);
+  assert.match(manual, /latest explicit instruction always takes precedence/);
+  assert.match(manual, /Do not reinterpret a one-time exception as a permanent rule/);
+  assert.match(manual, /committed cycle spending/);
+  assert.match(manual, /new `outstanding` credit expense/);
+  assert.match(manual, /metadata intentionally minimal/);
+  assert.match(manual, /`npm test` is cross-platform, builds first/);
   assert.match(manual, /Taiga Fujimura, Kohaku, and Soujuurou Shizuki for Food/);
   assert.match(manual, /Lancer Cu Chulainn, Shuten-Douji, and Aoko Aozaki for Alcohol & nightlife/);
   assert.match(manual, /stable expense-ID hash/);
@@ -822,6 +829,8 @@ test("keeps database history and translations aligned", async () => {
   }
   assert.match(index, /id="theme-select"/);
   assert.match(index, /<html lang="ru">/);
+  assert.match(index, /<meta name="description" content="Kinance" \/>/);
+  assert.doesNotMatch(index, /property="og:|name="twitter:/);
   assert.match(index, /styles\.css\?v=49/);
   assert.match(index, /public\/vendor\/apexcharts\.min\.js\?v=21/);
   assert.match(index, /script\.js\?v=52/);
@@ -1058,6 +1067,10 @@ test("keeps database history and translations aligned", async () => {
     assert.doesNotMatch(source, /expense-form|strength-form|editable-value/);
   }
   assert.match(page, /import strengthHistoryJson from "@\/data\/strength-history\.json"/);
+  const layout = await readFile(new URL("../app/layout.tsx", import.meta.url), "utf8");
+  assert.match(layout, /title:\s*"Kinance"/);
+  assert.match(layout, /description:\s*"Kinance"/);
+  assert.doesNotMatch(layout, /openGraph|twitter|metadataBase|generateMetadata/);
   assert.match(script, /fetch\("\/data\/strength-history\.json"/);
   for (const source of [page, script]) {
     assert.match(source, /dailyExpensePoints/);

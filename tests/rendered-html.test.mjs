@@ -818,7 +818,7 @@ test("keeps database history and translations aligned", async () => {
   }
   assert.match(index, /id="theme-select"/);
   assert.match(index, /<html lang="ru">/);
-  assert.match(index, /styles\.css\?v=43/);
+  assert.match(index, /styles\.css\?v=44/);
   assert.match(index, /public\/vendor\/apexcharts\.min\.js\?v=21/);
   assert.match(index, /script\.js\?v=50/);
   assert.match(index, /data-current-theme="kinance"/);
@@ -925,7 +925,8 @@ test("keeps database history and translations aligned", async () => {
   assert.match(styles, /var\(--green\) 0 var\(--safe-spent-end\)/);
   assert.match(styles, /var\(--red\) var\(--safe-spent-end\) var\(--spent-end\)/);
   assert.match(styles, /rgba\(118, 118, 128, 0\.28\) var\(--spent-end\) 360deg/);
-  assert.match(styles, /\.progress-threshold\s*\{[^}]*transform:\s*rotate\(var\(--savings-start\)\)/s);
+  assert.match(styles, /\.progress-threshold\s*\{[^}]*conic-gradient\([^}]*from var\(--savings-start\)/s);
+  assert.match(styles, /\.progress-threshold\s*\{[^}]*mask:\s*radial-gradient/s);
   assert.match(styles, /\.balance-safe-caption b\.is-negative\s*\{[^}]*color:\s*var\(--red\)/s);
   assert.match(index, /class="progress-threshold"/);
   for (const source of [script, page]) {
@@ -943,6 +944,22 @@ test("keeps database history and translations aligned", async () => {
   assert.doesNotMatch(styles, /\.breakdown-item\s*\{[^}]*background:/s);
   assert.doesNotMatch(styles, /\.expense-monogram/);
   assert.match(styles, /--chart-accent:\s*#5ac8fa/);
+  assert.match(styles, /--focus-ring:\s*#4ba3ff/);
+  assert.match(styles, /--timeline-start:\s*#0a84ff/);
+  assert.match(styles, /--bar-divider:\s*#111113/);
+  assert.match(styles, /:root\[data-theme="kinance-moon"\]\s*\{[^}]*--focus-ring:\s*#8c9dff[^}]*--timeline-start:\s*#6f9cff/s);
+  assert.match(styles, /:root\[data-theme="nier-automata"\]\s*\{[^}]*--tertiary:\s*#607178[^}]*--bar-divider:\s*#d5dfe2/s);
+  assert.match(styles, /:root\[data-theme="tohsaka-rin"\]\s*\{[^}]*--timeline-start:\s*#c91d49[^}]*--bar-divider:\s*#160a1b/s);
+  assert.match(styles, /\.timeline-track span\s*\{[^}]*var\(--timeline-start\)[^}]*var\(--timeline-end\)/s);
+  assert.match(styles, /\.timeline-copy strong\s*\{[^}]*color:\s*var\(--timeline-label\)/s);
+  assert.match(styles, /\.breakdown-bar\s*\{[^}]*border:\s*2px solid var\(--bar-divider\)/s);
+  assert.match(styles, /\.expense-table-summary:focus-visible\s*\{[^}]*var\(--focus-ring\)/s);
+  assert.match(styles, /data-theme="nier-automata"\]\s+\.stat-card:hover\s*\{[^}]*background-color:\s*rgba\(255, 255, 255, 0\.94\)/s);
+  assert.match(styles, /data-theme="tohsaka-rin"\]\s+\.balance-card\s*\{[^}]*rgba\(229, 42, 85, 0\.2\)/s);
+  assert.match(styles, /@media \(max-width:\s*640px\)[\s\S]*\.balance-main\s*\{[^}]*gap:\s*12px/s);
+  assert.match(styles, /\.balance-main > div:first-child\s*\{[^}]*min-width:\s*0/s);
+  assert.doesNotMatch(styles, /text-shadow:/);
+  assert.doesNotMatch(styles, /var\(--accent\)/);
   assert.match(styles, /data-current-theme="kinance-moon"/);
   assert.match(styles, /:root\[data-theme="nier-automata"\][^{]*\{[^}]*--chart-accent:\s*#526f78/s);
   assert.match(styles, /:root\[data-theme="tohsaka-rin"\][^{]*\{[^}]*--chart-accent:\s*#ff5b82/s);

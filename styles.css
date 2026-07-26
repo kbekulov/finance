@@ -1156,6 +1156,12 @@ main::before {
   letter-spacing: 0;
 }
 
+.strength-metrics strong .strength-target {
+  font-size: 12px;
+  font-weight: 680;
+  letter-spacing: -0.01em;
+}
+
 .strength-meta {
   grid-column: 1 / -1;
   display: flex;

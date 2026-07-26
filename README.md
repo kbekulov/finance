@@ -495,6 +495,7 @@ The card must remain compact and scannable:
 
 - score and latest date form the first hierarchy;
 - weight, pull-ups, and push-ups receive equal emphasis;
+- pull-up and push-up metrics show `current / target`, where the target is the minimum whole-number repetition count required for a 10.0 score at the recorded body weight;
 - long labels wrap instead of truncating;
 - the Relative Strength line key and methodology remain secondary but readable;
 - locale controls the decimal separator.
@@ -508,6 +509,8 @@ Formula version 3 must match in JavaScript and React:
 5. `pushComponent = clamp(adjustedPushUps / 50, 0, 1)`
 6. `average = (pullComponent + pushComponent) / 2`
 7. `score = roundToOneDecimal(clamp(1 + 9 * average, 1, 10))`
+
+Calculate the displayed 10.0 targets from the same mass adjustment: `pullUpTarget = ceil(20 / massAdjustment)` and `pushUpTarget = ceil(50 / massAdjustment)`. Derive them at render time from the latest recorded weight; never store or hard-code them.
 
 The 20- and 50-repetition anchors calibrate this personal display and are not population norms. Recompute all historical scores from raw attempts with the current formula. If the formula changes, increment the strength schema version, document the formula version, and update regression fixtures. Version 3 introduced allometric adjustment and equal weighting; version 2 used the discontinued `0.12` clamped mass factor and 60/40 weighting.
 

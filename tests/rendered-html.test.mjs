@@ -159,8 +159,8 @@ test("server-renders the current finance tracker", async () => {
   assert.match(html, /ОТНОСИТЕЛЬНАЯ СИЛА/);
   assert.match(html, /<strong>4,0<\/strong>/);
   assert.match(html, /<strong>51<small>кг<\/small><\/strong>/);
-  assert.match(html, /Лучший подход: подтягивания<\/span><strong>5<\/strong>/);
-  assert.match(html, /Лучший подход: отжимания<\/span><strong>25<\/strong>/);
+  assert.match(html, /Лучший подход: подтягивания<\/span><strong>5<small class="strength-target"[^>]*>.*?23<\/small><\/strong>/);
+  assert.match(html, /Лучший подход: отжимания<\/span><strong>25<small class="strength-target"[^>]*>.*?57<\/small><\/strong>/);
   assert.match(html, /подходы не суммируются/);
   assert.doesNotMatch(html, /<form\b/);
   assert.doesNotMatch(html, /class="add-panel"/);
@@ -818,9 +818,11 @@ test("keeps database history and translations aligned", async () => {
   }
   assert.match(index, /id="theme-select"/);
   assert.match(index, /<html lang="ru">/);
-  assert.match(index, /styles\.css\?v=44/);
+  assert.match(index, /styles\.css\?v=45/);
   assert.match(index, /public\/vendor\/apexcharts\.min\.js\?v=21/);
-  assert.match(index, /script\.js\?v=50/);
+  assert.match(index, /script\.js\?v=51/);
+  assert.match(index, /id="strength-pull-ups-target"/);
+  assert.match(index, /id="strength-push-ups-target"/);
   assert.match(index, /data-current-theme="kinance"/);
   assert.match(index, /id="credit-alert"[^>]*hidden/);
   assert.doesNotMatch(index, /id="payment-method"/);
@@ -971,6 +973,7 @@ test("keeps database history and translations aligned", async () => {
   assert.match(page, /stroke:\s*\{\s*curve:\s*\["straight",\s*"straight",\s*"smooth"\],\s*width:\s*\[0,\s*0,\s*2\.5\]/);
   for (const source of [script, page]) {
     assert.match(source, /relativeStrengthScore/);
+    assert.match(source, /relativeStrengthTargets/);
     assert.match(source, /dailyStrengthPoints/);
     assert.match(source, /strength-history\.json/);
     assert.match(source, /type:\s*"column"/);
@@ -980,6 +983,8 @@ test("keeps database history and translations aligned", async () => {
     assert.match(source, /STRENGTH_ALLOMETRIC_EXPONENT = 1 \/ 3/);
     assert.match(source, /STRENGTH_PULL_UP_TARGET_REPS = 20/);
     assert.match(source, /STRENGTH_PUSH_UP_TARGET_REPS = 50/);
+    assert.match(source, /Math\.ceil\(STRENGTH_PULL_UP_TARGET_REPS \/ massAdjustment/);
+    assert.match(source, /Math\.ceil\(STRENGTH_PUSH_UP_TARGET_REPS \/ massAdjustment/);
     assert.match(source, /safePullUps \* massAdjustment/);
     assert.match(source, /safePushUps \* massAdjustment/);
     assert.match(source, /\(pullComponent \+ pushComponent\) \/ 2/);

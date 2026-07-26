@@ -208,6 +208,7 @@ const COPY = {
     strengthWeight: "Weight",
     strengthPullUps: "Best pull-up set",
     strengthPushUps: "Best push-up set",
+    strengthTarget: "Target for a 10.0 score: {value}",
     strengthLatestMetrics: "Latest relative strength attempt metrics",
     strengthSave: "Save attempt",
     strengthNote: "Best single sets · never summed · body-mass adjusted personal index",
@@ -302,6 +303,7 @@ const COPY = {
     strengthWeight: "Вес",
     strengthPullUps: "Лучший подход: подтягивания",
     strengthPushUps: "Лучший подход: отжимания",
+    strengthTarget: "Цель для оценки 10,0: {value}",
     strengthLatestMetrics: "Показатели последней попытки относительной силы",
     strengthSave: "Сохранить попытку",
     strengthNote: "Лучшие одиночные подходы · подходы не суммируются · персональный индекс с поправкой на массу тела",
@@ -559,6 +561,18 @@ function relativeStrengthScore(
   );
   const score = 1 + 9 * ((pullComponent + pushComponent) / 2);
   return Math.round(Math.min(Math.max(score, 1), 10) * 10) / 10;
+}
+
+function relativeStrengthTargets(weightKg: number) {
+  const safeWeightKg = Number.isFinite(weightKg) ? Math.max(weightKg, 0) : 0;
+  if (safeWeightKg === 0) return null;
+
+  const massAdjustment =
+    (safeWeightKg / STRENGTH_REFERENCE_BODY_MASS_KG) ** STRENGTH_ALLOMETRIC_EXPONENT;
+  return {
+    pullUps: Math.ceil(STRENGTH_PULL_UP_TARGET_REPS / massAdjustment - 1e-10),
+    pushUps: Math.ceil(STRENGTH_PUSH_UP_TARGET_REPS / massAdjustment - 1e-10),
+  };
 }
 
 function dailyStrengthPoints(
@@ -919,6 +933,9 @@ export default function Home() {
         latestStrength.maxPushUpsSingleSet,
       )
     : null;
+  const latestStrengthTargets = latestStrength
+    ? relativeStrengthTargets(latestStrength.weightKg)
+    : null;
   const chartMaximum = Math.max(
     ...guideSpendingPoints.map(({ y }) => y),
     allFundsDailyPace,
@@ -1206,8 +1223,8 @@ export default function Home() {
           </div>
           <div className="strength-metrics" aria-label={copy.strengthLatestMetrics}>
             <div><span>{copy.strengthWeight}</span><strong>{latestStrength?.weightKg ?? 0}<small>{copy.strengthWeightUnit}</small></strong></div>
-            <div><span>{copy.strengthPullUps}</span><strong>{latestStrength?.maxPullUpsSingleSet ?? 0}</strong></div>
-            <div><span>{copy.strengthPushUps}</span><strong>{latestStrength?.maxPushUpsSingleSet ?? 0}</strong></div>
+            <div><span>{copy.strengthPullUps}</span><strong>{latestStrength?.maxPullUpsSingleSet ?? 0}<small className="strength-target" aria-label={fillTemplate(copy.strengthTarget, { value: latestStrengthTargets?.pullUps ?? "—" })}><span aria-hidden="true">/</span> {latestStrengthTargets?.pullUps ?? "—"}</small></strong></div>
+            <div><span>{copy.strengthPushUps}</span><strong>{latestStrength?.maxPushUpsSingleSet ?? 0}<small className="strength-target" aria-label={fillTemplate(copy.strengthTarget, { value: latestStrengthTargets?.pushUps ?? "—" })}><span aria-hidden="true">/</span> {latestStrengthTargets?.pushUps ?? "—"}</small></strong></div>
           </div>
           <div className="strength-meta">
             <span><i className="strength-key" />{copy.relativeStrengthSeries}</span>

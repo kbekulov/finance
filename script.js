@@ -135,6 +135,7 @@ const TRANSLATIONS = {
     strengthWeight: "Weight",
     strengthPullUps: "Best pull-up set",
     strengthPushUps: "Best push-up set",
+    strengthTarget: "Target for a 10.0 score: {value}",
     strengthSave: "Save attempt",
     strengthNote: "Best single sets · never summed · body-mass adjusted personal index",
     strengthLatestMetrics: "Latest relative strength attempt metrics",
@@ -242,6 +243,7 @@ const TRANSLATIONS = {
     strengthWeight: "Вес",
     strengthPullUps: "Лучший подход: подтягивания",
     strengthPushUps: "Лучший подход: отжимания",
+    strengthTarget: "Цель для оценки 10,0: {value}",
     strengthSave: "Сохранить попытку",
     strengthNote: "Лучшие одиночные подходы · подходы не суммируются · персональный индекс с поправкой на массу тела",
     strengthLatestMetrics: "Показатели последней попытки относительной силы",
@@ -928,6 +930,18 @@ function relativeStrengthScore(weightKg, maxPullUpsSingleSet, maxPushUpsSingleSe
   return Math.round(Math.min(Math.max(score, 1), 10) * 10) / 10;
 }
 
+function relativeStrengthTargets(weightKg) {
+  const safeWeightKg = Number.isFinite(weightKg) ? Math.max(weightKg, 0) : 0;
+  if (safeWeightKg === 0) return null;
+
+  const massAdjustment =
+    (safeWeightKg / STRENGTH_REFERENCE_BODY_MASS_KG) ** STRENGTH_ALLOMETRIC_EXPONENT;
+  return {
+    pullUps: Math.ceil(STRENGTH_PULL_UP_TARGET_REPS / massAdjustment - 1e-10),
+    pushUps: Math.ceil(STRENGTH_PUSH_UP_TARGET_REPS / massAdjustment - 1e-10),
+  };
+}
+
 function dailyStrengthPoints(entries, period, asOfDate) {
   const dailyBest = new Map();
   entries.forEach((entry) => {
@@ -966,6 +980,7 @@ function renderStrengthSummary() {
   const score = latest
     ? relativeStrengthScore(latest.weightKg, latest.maxPullUpsSingleSet, latest.maxPushUpsSingleSet)
     : null;
+  const targets = latest ? relativeStrengthTargets(latest.weightKg) : null;
   element("strength-score").textContent = score === null ? "N/A" : formatScore(score);
   element("strength-status").textContent = latest
     ? t("strengthLatest", { date: formatShortDate(dateFromKey(latest.date)) })
@@ -973,6 +988,16 @@ function renderStrengthSummary() {
   element("strength-weight-value").textContent = String(latest?.weightKg ?? 0);
   element("strength-pull-ups-value").textContent = String(latest?.maxPullUpsSingleSet ?? 0);
   element("strength-push-ups-value").textContent = String(latest?.maxPushUpsSingleSet ?? 0);
+  element("strength-pull-ups-target").textContent = targets ? String(targets.pullUps) : "—";
+  element("strength-push-ups-target").textContent = targets ? String(targets.pushUps) : "—";
+  element("strength-pull-ups-target-label").setAttribute(
+    "aria-label",
+    t("strengthTarget", { value: targets?.pullUps ?? "—" }),
+  );
+  element("strength-push-ups-target-label").setAttribute(
+    "aria-label",
+    t("strengthTarget", { value: targets?.pushUps ?? "—" }),
+  );
 }
 
 function renderDailyExpenseChart(allFundsDailyPace, savingsSafeDailyPace) {

@@ -21,7 +21,8 @@ The user's latest explicit instruction always takes precedence over an older pre
 11. Publish the exact pushed commit to the connected Site when Sites tools are available. Preserve `CNAME` and the complete tracker at the custom GitHub Pages domain.
 12. Finish with a clean worktree and confirm local `HEAD` equals `origin/dev`.
 13. Change source files, canonical data, and final project assets only. Do not commit generated build output, temporary image-generation sources, local logs, credentials, or unrelated workspace files.
-14. Apply strict receipt privacy: never persist or display a merchant, shop, store, business, legal-entity, address, or purchase-location identity. A receipt may be inspected transiently, but those details must not enter canonical data, tests, UI copy, asset prompts, or generated assets.
+14. Apply strict expense and receipt privacy: never persist or display merchants, shops, businesses, legal entities, addresses, locations, names of people, or other identifying context. A receipt may be inspected transiently, but raw private details must never enter canonical data, tests, UI copy, asset prompts, or generated assets.
+15. Apply a mandatory pre-write privacy gate to every submitted expense and receipt. Record the actual item or service name when useful, otherwise its generic purchase type, plus how much was paid and when. Keep only standard Kinance fields required for accounting, and write nothing until every key and value has been sanitized.
 
 Never force-push, discard unrelated changes, overwrite a newer remote commit, or redirect the tracker to an unrelated host.
 
@@ -31,18 +32,19 @@ Use this sequence for every mutation:
 
 1. Inspect `dev`, `origin/dev`, the worktree, and the relevant canonical data.
 2. Classify the request before editing: canonical data mutation, correction/removal, presentation-only change, documentation-only change, or one-time exception. Do not mutate canonical data for a question, diagnosis, or visual-only request.
-3. For dated finance work, determine the affected salary cycle from its inclusive date range, not from the calendar-month name or currently selected UI cycle.
-4. Make the smallest complete change:
+3. For every new expense or receipt, build and inspect a sanitized candidate record before writing JSON. Never write raw OCR, a raw receipt transcription, or unsanitized user text into canonical data.
+4. For dated finance work, determine the affected salary cycle from its inclusive date range, not from the calendar-month name or currently selected UI cycle.
+5. Make the smallest complete change:
    - finance data change: update the target cycle's `updatedAt` and increment its `revision`;
    - fitness data change: update the strength root `updatedAt` and increment its `revision`;
    - visible UI copy: update English, Russian, and accessibility text in both implementations;
    - new expense: also refresh the Kinance banner pair as specified under Themes and visual assets.
-5. Keep static and React implementations behaviorally equivalent. When static CSS, JavaScript, or a replaced asset uses a query-string version, increment only the affected reference so GitHub Pages does not serve stale content.
-6. Run the validation matrix in section 13.
-7. Review the diff and confirm only intended files changed.
-8. Fetch again if the task was long-running, integrate any remote movement safely, then commit and push `dev`.
-9. Publish when the connected Sites tools are available.
-10. Verify the live result when deployment is available, the worktree is clean, and local and remote `dev` match.
+6. Keep static and React implementations behaviorally equivalent. When static CSS, JavaScript, or a replaced asset uses a query-string version, increment only the affected reference so GitHub Pages does not serve stale content.
+7. Run the validation matrix in section 13.
+8. Review the diff and confirm only intended files changed.
+9. Fetch again if the task was long-running, integrate any remote movement safely, then commit and push `dev`.
+10. Publish when the connected Sites tools are available.
+11. Verify the live result when deployment is available, the worktree is clean, and local and remote `dev` match.
 
 Do not change a cycle's `updatedAt` or `revision` for a purely visual or documentation-only edit. Those fields describe canonical data revisions.
 For a canonical correction to an old cycle, set that cycle's `updatedAt` to the actual Vilnius date of the correction, not the historical transaction date. The transaction keeps its own original `date`.
@@ -101,14 +103,15 @@ Every expense record contains:
 
 IDs are immutable, unique across their canonical file, and never reused after deletion. The sole exception is a privacy cleanup required to remove forbidden merchant or location data from an existing ID; update every dependent reference in the same change. Store monetary values with no more than two decimal places and aggregate them as integer cents in code.
 
-Preserve only useful non-identifying optional details with clear field names, for example `description`, `transactionTime`, `originalCurrency`, `originalAmount`, tax, fees, deposits, or a receipt reference that contains no forbidden identity. Use `null` only when "known empty" must be distinguished from "not supplied". Never invent receipt details, times, payment methods, or other evidence.
+For new receipt-derived records, keep only the item or service name or generic purchase type, final amount, purchase date, and standard expense fields Kinance needs for classification and calculations. Store a transaction time or original currency and amount only when necessary to establish when or how much was paid. Do not preserve a receipt transcription, receipt or order number, tax breakdown, payment-card description, unrelated line-item metadata, or other evidence. Never invent details.
 
 ### Finance-record privacy boundary
 
-- Never create fields such as `merchant`, `shop`, `store`, `legalEntity`, `merchantAddress`, `address`, `location`, coordinates, branch identifiers, or ordering-platform/domain names in an expense or income record.
+- Never create fields such as `merchant`, `shop`, `store`, `legalEntity`, `merchantAddress`, `address`, `location`, coordinates, branch identifiers, ordering-platform/domain names, customer names, staff names, or other person identifiers in an expense or income record.
 - Never embed those identities in an `id`, `note`, translation, description, line item, receipt reference, fallback reason, or other free text. This applies even when the frontend would not render the field.
-- Describe a purchase by its useful item or service type, such as `Fast food`, `Iced peach tea`, or `Bus travel`, without naming where it was bought. A product or subscription name explicitly supplied as the thing purchased may remain; seller identity copied from a receipt may not.
-- Retain the financial facts needed by Kinance: amount, purchase date and optional time, category, source, debit or credit status, recurrence, currency, and useful non-identifying tax, fee, deposit, or item details.
+- The actual item or service name is allowed and preferred when it is readable and useful, including a named product or subscription. Otherwise use a generic purchase type such as `Fast food`, `Iced peach tea`, or `Bus travel`. Never append where it was bought, who sold or served it, or who else was involved.
+- The sanitized record should retain only the item or service name or type, how much was paid, when it was paid, and standard Kinance fields required for category, source, debit or credit status, and recurrence.
+- Before persistence, inspect every key and string in the candidate record. If any merchant, location, address, person's name, account identity, or unrelated receipt detail remains, remove or generalize it and repeat the check. Write the record only after it passes.
 - When correcting legacy data, remove forbidden fields and generalize merchant-derived text without changing amounts, dates, categories, payment methods, recurrence, or calculated totals.
 
 ### Fitness root
@@ -165,7 +168,7 @@ A terse message that clearly presents an amount as spending or a purchase means 
 - Use `paymentMethod: "debit"` unless the user explicitly says credit.
 - Do not mark the expense recurring unless the user says it repeats.
 - Add English and Russian note translations.
-- Describe the purchase purpose, never its merchant or location. If the purpose is genuinely unknown, use a neutral name such as `Unspecified expense`.
+- Record the item or service name when supplied, otherwise describe the purchase type. Never include its merchant, location, address, or any person's identity. If the purpose is genuinely unknown, use a neutral name such as `Unspecified expense`.
 
 ### Receipt image
 
@@ -180,9 +183,9 @@ Record the final amount actually paid, not a subtotal, tax amount, discount, out
 - If the date is absent, unreadable, obscured, conflicting, or genuinely uncertain, use the actual current `Europe/Vilnius` calendar day and add the expense to the current salary cycle. Do not guess missing digits or pause merely to ask about an unclear date.
 - If a clear old date falls outside every retained cycle, never misdate it into the current cycle. Create the correct historical cycle only when required salary-cycle data can be preserved without invention; otherwise ask for the missing historical values.
 - Default to debit even when a card receipt is visible. Use credit only when the user explicitly says it was credit.
-- Read merchant and location details only as transient receipt context, then discard them. Never transcribe them into JSON, tests, UI copy, banner prompts, or assets.
-- Name the expense after the purchased item or service, using a generic purpose when the printed wording would disclose the seller. Keep both translations equally sanitized.
-- Preserve only non-identifying receipt details that are useful for accounting. Omit a receipt reference, nested line item, or free-text detail if it contains a merchant, business, address, branch, domain, or location identity.
+- Read all identifying details only as transient receipt context, then discard them. Never transcribe merchants, locations, addresses, customer or staff names, or other people into JSON, tests, UI copy, banner prompts, or assets.
+- Name the expense after the actual item or service when useful. Use a generic purchase type when the printed wording would disclose the seller or another person. Keep both translations equally sanitized.
+- Before writing JSON, reduce the extracted receipt to the item or service name or type, final amount, purchase date, and standard Kinance accounting fields. Do not preserve the raw receipt text or unrelated receipt metadata.
 - Preserve the receipt currency. Convert only when the user requests it or a reliable conversion value is supplied.
 - Use an existing broad category when it fits. Create a new reusable category without separate approval only when no current category accurately represents the purchase.
 - Never create a merchant-specific, product-specific, or one-off category to avoid reasonable classification.

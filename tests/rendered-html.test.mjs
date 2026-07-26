@@ -229,8 +229,12 @@ test("keeps database history and translations aligned", async () => {
   assert.match(manual, /Lancer Cu Chulainn, Shuten-Douji, and Aoko Aozaki for Alcohol & nightlife/);
   assert.match(manual, /stable expense-ID hash/);
   assert.match(manual, /create new concepts from a blank canvas instead of tracing an older icon/);
-  assert.match(manual, /never persist or display a merchant, shop, store, business, legal-entity, address, or purchase-location identity/);
-  assert.match(manual, /Read merchant and location details only as transient receipt context, then discard them/);
+  assert.match(manual, /mandatory pre-write privacy gate to every submitted expense and receipt/);
+  assert.match(manual, /build and inspect a sanitized candidate record before writing JSON/);
+  assert.match(manual, /actual item or service name is allowed and preferred when it is readable and useful/);
+  assert.match(manual, /only the item or service name or type, how much was paid, when it was paid/);
+  assert.match(manual, /Write the record only after it passes/);
+  assert.match(manual, /Read all identifying details only as transient receipt context, then discard them/);
   assert.match(manual, /Never embed those identities in an `id`, `note`, translation, description, line item, receipt reference, fallback reason, or other free text/);
   assert.match(manual, /sits entirely over the lower 168 pixels of the banner artwork/);
   assert.match(manual, /red upper segment is credit/);

@@ -35,6 +35,9 @@ test("server-renders the current finance tracker", async () => {
   assert.match(html, /<option value="kinance" selected="">Kinance<\/option><option value="kinance-moon">Kinance Moon<\/option>/);
   assert.match(html, /NieR:Automata/);
   assert.match(html, /Tohsaka Rin/);
+  const monthPill = html.match(/<div class="month-pill"[^>]*>([\s\S]*?)<\/div>/)?.[1] ?? "";
+  assert.ok(monthPill);
+  assert.doesNotMatch(monthPill, /2026/);
   assert.doesNotMatch(html, /—|&mdash;|&#8212;|&#x2014;/i);
   assert.match(html, /kinance-favicon\.jpg/i);
   assert.match(html, />kinance<\/span>/i);
@@ -817,7 +820,7 @@ test("keeps database history and translations aligned", async () => {
   assert.match(index, /<html lang="ru">/);
   assert.match(index, /styles\.css\?v=43/);
   assert.match(index, /public\/vendor\/apexcharts\.min\.js\?v=21/);
-  assert.match(index, /script\.js\?v=49/);
+  assert.match(index, /script\.js\?v=50/);
   assert.match(index, /data-current-theme="kinance"/);
   assert.match(index, /id="credit-alert"[^>]*hidden/);
   assert.doesNotMatch(index, /id="payment-method"/);
@@ -837,8 +840,8 @@ test("keeps database history and translations aligned", async () => {
   assert.equal((page.match(/theme-banners\/kinance-frame-2\.png\?v=7/g) ?? []).length, 2);
   assert.match(script, /id: "kinance-moon", label: "Kinance Moon"/);
   assert.match(page, /id: "kinance-moon", label: "Kinance Moon"/);
-  assert.match(script, /public\/theme-banners\/nier-automata\.png/);
-  assert.match(script, /public\/theme-banners\/tohsaka-rin\.png/);
+  assert.match(script, /public\/theme-banners\/nier-automata\.png\?v=2/);
+  assert.match(script, /public\/theme-banners\/tohsaka-rin\.png\?v=2/);
   assert.match(script, /public\/category-icons\/food\.png/);
   assert.match(script, /public\/category-icons\/alcohol-nightlife\.png/);
   assert.match(script, /category-icons\/food\.png\?v=5/);

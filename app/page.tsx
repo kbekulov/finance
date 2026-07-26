@@ -22,8 +22,8 @@ const STRENGTH_PUSH_UP_TARGET_REPS = 50;
 const THEMES = [
   { id: "kinance", label: "Kinance", banners: ["/theme-banners/kinance.png?v=7", "/theme-banners/kinance-frame-2.png?v=7"] },
   { id: "kinance-moon", label: "Kinance Moon", banners: ["/theme-banners/kinance.png?v=7", "/theme-banners/kinance-frame-2.png?v=7"] },
-  { id: "nier-automata", label: "NieR:Automata", banners: ["/theme-banners/nier-automata.png"] },
-  { id: "tohsaka-rin", label: "Tohsaka Rin", banners: ["/theme-banners/tohsaka-rin.png"] },
+  { id: "nier-automata", label: "NieR:Automata", banners: ["/theme-banners/nier-automata.png?v=2"] },
+  { id: "tohsaka-rin", label: "Tohsaka Rin", banners: ["/theme-banners/tohsaka-rin.png?v=2"] },
 ] as const;
 type ThemeId = (typeof THEMES)[number]["id"];
 
@@ -751,7 +751,6 @@ export default function Home() {
   });
   const monthLabel = new Intl.DateTimeFormat(locale, {
     month: "long",
-    year: "numeric",
   }).format(new Date(year, month - 1, 1));
   const shortDate = (date: Date) => new Intl.DateTimeFormat(locale, {
     day: "numeric",

@@ -83,8 +83,8 @@ function categoryIconFor(expense) {
 const THEMES = [
   { id: "kinance", label: "Kinance", banners: ["/public/theme-banners/kinance.png?v=7", "/public/theme-banners/kinance-frame-2.png?v=7"] },
   { id: "kinance-moon", label: "Kinance Moon", banners: ["/public/theme-banners/kinance.png?v=7", "/public/theme-banners/kinance-frame-2.png?v=7"] },
-  { id: "nier-automata", label: "NieR:Automata", banners: ["/public/theme-banners/nier-automata.png"] },
-  { id: "tohsaka-rin", label: "Tohsaka Rin", banners: ["/public/theme-banners/tohsaka-rin.png"] },
+  { id: "nier-automata", label: "NieR:Automata", banners: ["/public/theme-banners/nier-automata.png?v=2"] },
+  { id: "tohsaka-rin", label: "Tohsaka Rin", banners: ["/public/theme-banners/tohsaka-rin.png?v=2"] },
 ];
 
 const PREFERENCE_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
@@ -395,6 +395,12 @@ function formatEuro(value, compact = false) {
 function formatMonth(monthKey) {
   const [year, month] = monthKey.split("-").map(Number);
   return new Intl.DateTimeFormat(locale(), { month: "long", year: "numeric" })
+    .format(new Date(year, month - 1, 1));
+}
+
+function formatMonthName(monthKey) {
+  const [year, month] = monthKey.split("-").map(Number);
+  return new Intl.DateTimeFormat(locale(), { month: "long" })
     .format(new Date(year, month - 1, 1));
 }
 
@@ -1082,7 +1088,7 @@ function render() {
   const timeline = renderTimeline();
   const daysLeft = Math.max(timeline.totalDays - timeline.elapsedDays, 1);
 
-  element("month-label").textContent = formatMonth(selectedMonth.month);
+  element("month-label").textContent = formatMonthName(selectedMonth.month);
   element("updated-label").textContent = `${t("updated")} ${new Date(
     `${selectedMonth.updatedAt}T12:00:00`,
   ).toLocaleDateString(locale(), { day: "numeric", month: "long", year: "numeric" })}`;

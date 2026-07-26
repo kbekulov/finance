@@ -85,7 +85,6 @@ const THEMES = [
 const PREFERENCE_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
 const THEME_COOKIE = "kinance_theme";
 const LANGUAGE_COOKIE = "kinance_language";
-const STRENGTH_STORAGE_KEY = "kinance:relative-strength:v1";
 
 function readPreferenceCookie(name) {
   const prefix = `${encodeURIComponent(name)}=`;
@@ -131,7 +130,8 @@ const TRANSLATIONS = {
     strengthPullUps: "Max pull-ups",
     strengthPushUps: "Max push-ups",
     strengthSave: "Save attempt",
-    strengthNote: "Personal training index · best daily score · saved on this device",
+    strengthNote: "Personal training index · best daily score · updated through chat",
+    strengthLatestMetrics: "Latest relative strength attempt metrics",
     strengthWeightUnit: "kg",
     tapToEdit: "Tap the amount to edit",
     savingsRequirement: "SAVINGS REQUIREMENT",
@@ -236,7 +236,8 @@ const TRANSLATIONS = {
     strengthPullUps: "Макс. подтягиваний",
     strengthPushUps: "Макс. отжиманий",
     strengthSave: "Сохранить попытку",
-    strengthNote: "Персональный индекс · лучший результат дня · хранится на этом устройстве",
+    strengthNote: "Персональный индекс · лучший результат дня · обновляется через чат",
+    strengthLatestMetrics: "Показатели последней попытки относительной силы",
     strengthWeightUnit: "кг",
     tapToEdit: "Нажмите на сумму, чтобы изменить её",
     savingsRequirement: "ЦЕЛЬ НАКОПЛЕНИЙ",
@@ -444,19 +445,14 @@ function safeNumber(value) {
   return Number.isFinite(number) ? Math.max(number, 0) : 0;
 }
 
-function financeDataForMonth(month, savedData = null) {
-  const savedSavings = Number(savedData?.savingsGoal);
+function financeDataForMonth(month) {
   return {
     salary: safeNumber(month.salary),
     additionalIncome: structuredClone(
       Array.isArray(month.additionalIncome) ? month.additionalIncome : [],
     ),
-    savingsGoal: Number.isFinite(savedSavings)
-      ? Math.max(savedSavings, 0)
-      : safeNumber(month.savingsGoal),
-    expenses: structuredClone(
-      Array.isArray(savedData?.expenses) ? savedData.expenses : month.expenses,
-    ),
+    savingsGoal: safeNumber(month.savingsGoal),
+    expenses: structuredClone(month.expenses),
   };
 }
 
@@ -474,13 +470,6 @@ function sumExpenses(expenses) {
 
 function roundMoney(value) {
   return Math.round(value * 100) / 100;
-}
-
-function parseExpenseAmount(value) {
-  const normalized = String(value).trim().replace(",", ".");
-  if (!/^(?:\d+|\d*\.\d{1,2})$/.test(normalized)) return null;
-  const amount = Number(normalized);
-  return Number.isFinite(amount) && amount > 0 ? roundMoney(amount) : null;
 }
 
 function calendarDateKey(date) {
@@ -642,10 +631,6 @@ function renderSpendingAlert() {
   element("spending-alert-detail").textContent = `${lead} ${action}`;
 }
 
-function storageKey(month) {
-  return `kinance:${month.month}:${month.updatedAt}:r${month.revision}`;
-}
-
 function renderCreditAlert() {
   const alert = element("credit-alert");
   const outstandingExpenses = history
@@ -666,32 +651,10 @@ function renderCreditAlert() {
   element("credit-alert-total").textContent = formatEuro(outstandingTotal);
 }
 
-function legacyStorageKey(month) {
-  return `euroscope:${month.month}:${month.updatedAt}:r${month.revision}`;
-}
-
 function loadMonth(month) {
   selectedMonth = month;
-  try {
-    const saved =
-      localStorage.getItem(storageKey(month)) ??
-      localStorage.getItem(legacyStorageKey(month));
-    const savedData = JSON.parse(saved);
-    data = financeDataForMonth(month, savedData);
-  } catch {
-    data = financeDataForMonth(month);
-  }
+  data = financeDataForMonth(month);
   render();
-}
-
-function save() {
-  localStorage.setItem(
-    storageKey(selectedMonth),
-    JSON.stringify({
-      savingsGoal: data.savingsGoal,
-      expenses: data.expenses,
-    }),
-  );
 }
 
 function renderHistory() {
@@ -909,7 +872,8 @@ function dailyStrengthPoints(entries, period, asOfDate) {
   const dailyBest = new Map();
   entries.forEach((entry) => {
     if (entry.date < period.start || entry.date > period.end || entry.date > asOfDate) return;
-    dailyBest.set(entry.date, Math.max(dailyBest.get(entry.date) ?? 0, entry.score));
+    const score = relativeStrengthScore(entry.weightKg, entry.pullUps, entry.pushUps);
+    dailyBest.set(entry.date, Math.max(dailyBest.get(entry.date) ?? 0, score));
   });
   return [...dailyBest.entries()]
     .sort(([left], [right]) => left.localeCompare(right))
@@ -931,41 +895,20 @@ function allowanceGuideTops(allFunds, savingsSafe, maximum) {
   return { allFundsTop, savingsSafeTop };
 }
 
-function loadStrengthEntries() {
-  try {
-    const saved = JSON.parse(localStorage.getItem(STRENGTH_STORAGE_KEY) ?? "[]");
-    strengthEntries = Array.isArray(saved)
-      ? saved.filter((entry) =>
-          typeof entry?.id === "string" &&
-          /^\d{4}-\d{2}-\d{2}$/.test(entry?.date) &&
-          typeof entry?.recordedAt === "string" &&
-          Number.isFinite(entry?.weightKg) &&
-          Number.isFinite(entry?.pullUps) &&
-          Number.isFinite(entry?.pushUps) &&
-          Number.isFinite(entry?.score),
-        )
-      : [];
-  } catch {
-    strengthEntries = [];
-  }
-}
-
-function saveStrengthEntries() {
-  try {
-    localStorage.setItem(STRENGTH_STORAGE_KEY, JSON.stringify(strengthEntries));
-  } catch {
-    // The tracker remains usable for the active session.
-  }
-}
-
 function renderStrengthSummary() {
   const latest = [...strengthEntries].sort((left, right) =>
-    right.recordedAt.localeCompare(left.recordedAt),
+    right.date.localeCompare(left.date) || right.id.localeCompare(left.id),
   )[0];
-  element("strength-score").textContent = latest ? latest.score.toFixed(1) : "N/A";
+  const score = latest
+    ? relativeStrengthScore(latest.weightKg, latest.pullUps, latest.pushUps)
+    : null;
+  element("strength-score").textContent = score?.toFixed(1) ?? "N/A";
   element("strength-status").textContent = latest
     ? t("strengthLatest", { date: formatShortDate(dateFromKey(latest.date)) })
     : t("strengthNoAttempts");
+  element("strength-weight-value").textContent = String(latest?.weightKg ?? 0);
+  element("strength-pull-ups-value").textContent = String(latest?.pullUps ?? 0);
+  element("strength-push-ups-value").textContent = String(latest?.pushUps ?? 0);
 }
 
 function renderDailyExpenseChart(allFundsDailyPace, savingsSafeDailyPace) {
@@ -1071,7 +1014,7 @@ function render() {
   element("additional-income-summary").hidden = additionalIncomeTotal <= 0;
   element("additional-income-value").textContent = `+${formatEuro(additionalIncomeTotal)}`;
   element("total-income-value").textContent = formatEuro(totalIncome);
-  element("savings").value = savings;
+  element("savings-value").textContent = formatEuro(savings);
   element("spent-total").textContent = formatEuro(spent);
   element("expense-count").textContent =
     t("recordedExpenses", {
@@ -1143,61 +1086,6 @@ function bindControls() {
       if (data) render();
     });
   });
-  element("savings").addEventListener("change", (event) => {
-    data.savingsGoal = safeNumber(event.target.value);
-    save();
-    render();
-  });
-  element("expense-form").addEventListener("submit", (event) => {
-    event.preventDefault();
-    const amountInput = element("amount");
-    const amount = parseExpenseAmount(amountInput.value);
-    if (amount === null) return;
-    const category = element("category").value;
-    const paymentMethod = element("payment-method").value;
-    const noteInput = element("note");
-    data.expenses.unshift({
-      id: crypto.randomUUID(),
-      amount,
-      note: noteInput.value.trim() || category,
-      date: todayInVilnius(),
-      category,
-      source: "site",
-      paymentMethod,
-      ...(paymentMethod === "credit" ? { creditStatus: "outstanding" } : {}),
-    });
-    amountInput.value = "";
-    noteInput.value = "";
-    element("payment-method").value = "debit";
-    save();
-    render();
-  });
-  element("strength-form").addEventListener("submit", (event) => {
-    event.preventDefault();
-    const weightInput = element("strength-weight");
-    const pullUpsInput = element("strength-pull-ups");
-    const pushUpsInput = element("strength-push-ups");
-    const weightKg = Number(String(weightInput.value).replace(",", "."));
-    const pullUps = Number(pullUpsInput.value);
-    const pushUps = Number(pushUpsInput.value);
-    if (
-      !Number.isFinite(weightKg) || weightKg < 30 || weightKg > 250 ||
-      !Number.isInteger(pullUps) || pullUps < 0 || pullUps > 200 ||
-      !Number.isInteger(pushUps) || pushUps < 0 || pushUps > 300
-    ) return;
-
-    strengthEntries.push({
-      id: crypto.randomUUID(),
-      date: todayInVilnius(),
-      recordedAt: new Date().toISOString(),
-      weightKg,
-      pullUps,
-      pushUps,
-      score: relativeStrengthScore(weightKg, pullUps, pushUps),
-    });
-    saveStrengthEntries();
-    render();
-  });
 }
 
 async function start() {
@@ -1205,13 +1093,28 @@ async function start() {
     renderThemeOptions();
     applyTheme();
     applyTranslations();
-    const response = await fetch("/data/finance-history.json", { cache: "no-store" });
-    if (!response.ok) throw new Error(`History request failed: ${response.status}`);
-    const financeHistory = await response.json();
+    const [financeResponse, strengthResponse] = await Promise.all([
+      fetch("/data/finance-history.json", { cache: "no-store" }),
+      fetch("/data/strength-history.json", { cache: "no-store" }),
+    ]);
+    if (!financeResponse.ok) throw new Error(`History request failed: ${financeResponse.status}`);
+    if (!strengthResponse.ok) throw new Error(`Strength history request failed: ${strengthResponse.status}`);
+    const [financeHistory, strengthHistory] = await Promise.all([
+      financeResponse.json(),
+      strengthResponse.json(),
+    ]);
     salarySchedule = financeHistory.salarySchedule ?? salarySchedule;
     history = financeHistory.months.slice(-12);
+    strengthEntries = Array.isArray(strengthHistory.entries)
+      ? strengthHistory.entries.filter((entry) =>
+          typeof entry?.id === "string" &&
+          /^\d{4}-\d{2}-\d{2}$/.test(entry?.date) &&
+          Number.isFinite(entry?.weightKg) &&
+          Number.isFinite(entry?.pullUps) &&
+          Number.isFinite(entry?.pushUps),
+        )
+      : [];
     if (!history.length) throw new Error("Finance history is empty.");
-    loadStrengthEntries();
     bindControls();
     loadMonth(history.at(-1));
   } catch (error) {

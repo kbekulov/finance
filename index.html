@@ -13,9 +13,9 @@
     <meta property="og:image" content="https://finance.bekulov.com/public/og.png" />
     <title>Kinance</title>
     <link rel="icon" type="image/jpeg" href="/kinance-favicon.jpg" />
-    <link rel="stylesheet" href="/styles.css?v=39" />
+    <link rel="stylesheet" href="/styles.css?v=40" />
     <script src="/public/vendor/apexcharts.min.js?v=21" defer></script>
-    <script src="/script.js?v=44" defer></script>
+    <script src="/script.js?v=45" defer></script>
   </head>
   <body>
     <main>
@@ -107,28 +107,15 @@
             <div class="strength-score"><strong id="strength-score">N/A</strong><small>/ 10</small></div>
             <p id="strength-status" data-i18n="strengthNoAttempts">Log an attempt to establish your baseline</p>
           </div>
-          <form id="strength-form" class="strength-form">
-            <label>
-              <span data-i18n="strengthWeight">Weight</span>
-              <span class="strength-input">
-                <input id="strength-weight" inputmode="decimal" type="number" min="30" max="250" step="0.1" required />
-                <small data-i18n="strengthWeightUnit">kg</small>
-              </span>
-            </label>
-            <label>
-              <span data-i18n="strengthPullUps">Max pull-ups</span>
-              <input id="strength-pull-ups" inputmode="numeric" type="number" min="0" max="200" step="1" required />
-            </label>
-            <label>
-              <span data-i18n="strengthPushUps">Max push-ups</span>
-              <input id="strength-push-ups" inputmode="numeric" type="number" min="0" max="300" step="1" required />
-            </label>
-            <button type="submit" data-i18n="strengthSave">Save attempt</button>
-          </form>
+          <div class="strength-metrics" aria-label="Latest relative strength attempt metrics" data-i18n-aria-label="strengthLatestMetrics">
+            <div><span data-i18n="strengthWeight">Weight</span><strong><span id="strength-weight-value">0</span><small data-i18n="strengthWeightUnit">kg</small></strong></div>
+            <div><span data-i18n="strengthPullUps">Max pull-ups</span><strong id="strength-pull-ups-value">0</strong></div>
+            <div><span data-i18n="strengthPushUps">Max push-ups</span><strong id="strength-push-ups-value">0</strong></div>
+          </div>
           <div class="strength-meta">
             <span><i class="spending-key"></i><span data-i18n="dailyExpenseSeries">Daily spending</span></span>
             <span><i class="strength-key"></i><span data-i18n="relativeStrengthSeries">Relative strength</span></span>
-            <small data-i18n="strengthNote">Personal training index · best daily score · saved on this device</small>
+            <small data-i18n="strengthNote">Personal training index · best daily score · updated through chat</small>
           </div>
         </section>
 
@@ -191,11 +178,7 @@
           <article class="stat-card">
             <span class="stat-icon" aria-hidden="true">◇</span>
             <p data-i18n="savingsRequirement">SAVINGS REQUIREMENT</p>
-            <label class="editable-value">
-              <span class="sr-only" data-i18n="savingsEuroLabel">Monthly savings requirement in euros</span>
-              <span aria-hidden="true">€</span>
-              <input id="savings" inputmode="decimal" value="0" />
-            </label>
+            <strong id="savings-value" class="fixed-stat-value">€0.00</strong>
             <small data-i18n="protectedSpending">Protected from spending</small>
             <div id="savings-comparison" class="stat-comparison neutral" hidden></div>
           </article>
@@ -225,45 +208,6 @@
 
         <section class="workspace">
           <div class="ledger-stack" id="ledger"></div>
-
-          <aside class="add-panel" aria-labelledby="add-title">
-            <p class="eyebrow" data-i18n="quickEntry">QUICK ENTRY</p>
-            <h2 id="add-title" data-i18n="addExpense">Add an expense</h2>
-            <p class="form-intro" data-i18n="formIntro">Log something now, or simply send the amount in our chat.</p>
-            <form id="expense-form">
-              <label for="amount" data-i18n="amount">Amount</label>
-              <div class="amount-field">
-                <span aria-hidden="true">€</span>
-                <input id="amount" inputmode="decimal" placeholder="0.00" required />
-              </div>
-
-              <label for="category" data-i18n="category">Category</label>
-              <select id="category">
-                <option value="Food" data-category-option="Food">Food</option>
-                <option value="Subscriptions & services" data-category-option="Subscriptions & services">Subscriptions &amp; services</option>
-                <option value="Luxury purchases" data-category-option="Luxury purchases">Luxury purchases</option>
-                <option value="Debt & repayments" data-category-option="Debt & repayments">Debt &amp; repayments</option>
-                <option value="Devices & installments" data-category-option="Devices & installments">Devices &amp; installments</option>
-                <option value="Transport & Travel" data-category-option="Transport & Travel">Transport &amp; Travel</option>
-                <option value="Alcohol & nightlife" data-category-option="Alcohol & nightlife">Alcohol &amp; nightlife</option>
-              </select>
-
-              <label for="payment-method" data-i18n="paymentMethod">Payment method</label>
-              <select id="payment-method">
-                <option value="debit" data-i18n="debit">Debit</option>
-                <option value="credit" data-i18n="credit">Credit</option>
-              </select>
-
-              <label for="note" data-i18n="whatFor">What was it for?</label>
-              <input id="note" placeholder="Coffee, Netflix, new shoes…" data-i18n-placeholder="notePlaceholder" />
-
-              <button type="submit"><span aria-hidden="true">＋</span> <span data-i18n="addExpense">Add expense</span></button>
-            </form>
-            <p class="chat-hint">
-              <span aria-hidden="true">✦</span>
-              <span data-i18n="chatHint">In chat, send a number or receipt photo and it will be added and categorised here.</span>
-            </p>
-          </aside>
         </section>
 
         <footer>

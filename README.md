@@ -34,7 +34,7 @@ The complete tracker must be served directly. Never add a redirect to an unrelat
 
 ## Canonical database
 
-`data/finance-history.json` is the only canonical finance database. UI edits saved in browser storage are device-local conveniences and must never be treated as canonical history.
+`data/finance-history.json` is the only canonical finance database. `data/strength-history.json` is the only canonical fitness database. The current GitHub Pages frontend is read-only for finance and fitness records: do not render expense, savings, income, or Relative Strength input controls, and do not use browser storage as a record database. Record changes through chat by updating these repository files, then commit and publish them. Browser storage and cookies may be used only for non-authoritative interface preferences such as theme and language.
 
 Root fields:
 
@@ -84,7 +84,7 @@ Every expense record must preserve all known details:
 - `recurring`: boolean when known
 - `frequency`: `monthly` for monthly recurring expenses
 
-All expense dates and repayment dates use the `Europe/Vilnius` calendar day. Derive today in that timezone for chat, frontend quick entry, recurring carry-forward, and repayment records, regardless of the maintainer, browser, server, or receipt-processing device timezone. Preserve an explicit user-supplied or clearly printed receipt date, interpreting any associated time in Vilnius unless the source explicitly identifies another timezone.
+All expense dates and repayment dates use the `Europe/Vilnius` calendar day. Derive today in that timezone for chat, recurring carry-forward, and repayment records, regardless of the maintainer, browser, server, or receipt-processing device timezone. Preserve an explicit user-supplied or clearly printed receipt date, interpreting any associated time in Vilnius unless the source explicitly identifies another timezone.
 
 When more information is actually available, preserve it with clearly named optional fields rather than discarding it, for example `merchant`, `description`, `originalCurrency`, `originalAmount`, or `receiptReference`. Use `null` only when the distinction between “known empty” and “not supplied” matters. Never invent missing receipt, merchant, time, or payment details.
 
@@ -145,7 +145,7 @@ When creating a new salary cycle, copy the immediately preceding cycle’s salar
 
 Salary is the income base from which that cycle’s savings requirement and expenses are deducted. Treat it as the usable salary amount supplied by the user; do not infer gross pay, net pay, bonuses, taxes, or other payroll components that were not stated.
 
-Salary is backend-owned canonical data and must never be editable from either frontend interface. Render it as a visually distinct locked value for the selected cycle with no input control, mutation handler, or browser-local override. Device-local storage may persist editable savings and expense data, but it must never persist or override salary. Salary changes happen only by editing the targeted cycle in the canonical database through the maintenance workflow.
+Salary, savings, income, expenses, and fitness attempts are repository-owned canonical data and must never be editable from either frontend interface while the site remains a static GitHub Pages product without authenticated server persistence. Render financial plan values as clear fixed values with no input control, mutation handler, or browser-local override. Changes happen only by editing the appropriate canonical data file through the maintenance workflow.
 
 Salary is nominally paid on the 12th of every month. If the 12th is Saturday or Sunday, the effective salary and reset date is the Friday immediately before that weekend. A cycle starts on that effective salary date and ends one calendar day before the next effective salary date. Use `Europe/Vilnius` dates and calculate this rule for each month; never hard-code a permanent day-of-week assumption.
 
@@ -318,16 +318,16 @@ Add two thin horizontal allowance guides because daily allowance is a spending-a
 
 ## Relative Strength tracking
 
-Relative Strength entries are a device-local training log stored under the global `kinance:relative-strength:v1` local-storage key. They are intentionally independent of salary-cycle storage so a cycle revision cannot erase training history. Until authenticated server persistence exists, the UI must explicitly say that entries are saved on the current device. Keep both implementations equivalent.
+Relative Strength entries live in `data/strength-history.json`, independently of salary cycles. The root contains `version`, `timezone`, `updatedAt`, `revision`, and chronological `entries`. Increment `revision` and set the actual Vilnius `updatedAt` whenever an entry changes. Each entry contains a stable ID, the actual Vilnius date, body weight in kilograms, maximum pull-ups, maximum push-ups, and `source: "chat"`. Do not store the derived score. Validate weight from 30 to 250 kg, pull-ups from 0 to 200, and push-ups from 0 to 300.
 
-Each attempt records the actual Vilnius date, ISO timestamp, body weight in kilograms, maximum pull-ups, maximum push-ups, and the calculated score. Accept weight from 30 to 250 kg, pull-ups from 0 to 200, and push-ups from 0 to 300. Show the latest attempt beside the form and the best score per day on the shared activity chart. The score is a personal training index, not a medical assessment or population percentile. Calculate it identically in JavaScript and React:
+The frontend is read-only: show the latest attempt as compact metrics and the best calculated score per day on the shared activity chart, without an input form or a misleading local save action. The score is a personal training index, not a medical assessment or population percentile. Calculate it identically in JavaScript and React:
 
 1. cap pull-up progress at `pullUps / 20` and push-up progress at `pushUps / 50`;
 2. weight those components 60% and 40% respectively;
 3. apply the deliberately mild body-mass factor `(weightKg / 75) ^ 0.12`, clamped from `0.9` to `1.1`;
 4. map the result onto 1 through 10, clamp it, and round to one decimal place.
 
-Never diagnose health, claim that this index is scientifically standardized, or silently change the formula because that would make historical comparisons misleading. If the formula must change, version the storage key or migrate and recompute all saved scores explicitly.
+Never diagnose health, claim that this index is scientifically standardized, or silently change the formula because that would make historical comparisons misleading. If the formula changes, increment the strength database schema version and keep historical comparisons explicit.
 
 The built-in themes are:
 

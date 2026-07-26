@@ -152,6 +152,13 @@ test("server-renders the current finance tracker", async () => {
   assert.match(html, /aria-label="Расходы по дням в виде столбцов, график относительной силы и линии дневных лимитов"/);
   assert.match(html, /class="strength-panel"/);
   assert.match(html, /ОТНОСИТЕЛЬНАЯ СИЛА/);
+  assert.match(html, /<strong>4\.4<\/strong>/);
+  assert.match(html, /<strong>51<small>кг<\/small><\/strong>/);
+  assert.match(html, /Макс\. подтягиваний<\/span><strong>5<\/strong>/);
+  assert.match(html, /Макс\. отжиманий<\/span><strong>30<\/strong>/);
+  assert.doesNotMatch(html, /<form\b/);
+  assert.doesNotMatch(html, /class="add-panel"/);
+  assert.doesNotMatch(html, /class="editable-value"/);
   assert.match(html, /Можно 12.{0,8}€ в день · Накопления используются/);
   assert.match(html, /Можно 0.{0,8}€ в день · Накопления сохранены/);
   assert.match(html, /allowance-guide-all" style="--guide-top:79%"/);
@@ -160,8 +167,9 @@ test("server-renders the current finance tracker", async () => {
 });
 
 test("keeps database history and translations aligned", async () => {
-  const [databaseText, page, script, styles, index, manual] = await Promise.all([
+  const [databaseText, strengthText, page, script, styles, index, manual] = await Promise.all([
     readFile(new URL("../data/finance-history.json", import.meta.url), "utf8"),
+    readFile(new URL("../data/strength-history.json", import.meta.url), "utf8"),
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../script.js", import.meta.url), "utf8"),
     readFile(new URL("../styles.css", import.meta.url), "utf8"),
@@ -169,6 +177,7 @@ test("keeps database history and translations aligned", async () => {
     readFile(new URL("../README.md", import.meta.url), "utf8"),
   ]);
   const database = JSON.parse(databaseText);
+  const strengthDatabase = JSON.parse(strengthText);
   const current = database.months.at(-1);
 
   assert.equal(database.maxMonths, 12);
@@ -204,7 +213,8 @@ test("keeps database history and translations aligned", async () => {
   assert.match(manual, /green short-dashed rule for the savings-safe allowance/);
   assert.match(manual, /visually `line, text, line`/);
   assert.match(manual, /no pill, badge, rectangle, outline, or floating callout/);
-  assert.match(manual, /`kinance:relative-strength:v1`/);
+  assert.match(manual, /`data\/strength-history\.json`/);
+  assert.match(manual, /frontend is read-only/);
   assert.match(manual, /personal training index, not a medical assessment/);
   assert.match(manual, /Keep it separate from `salary` so the fixed salary and salary history remain truthful/);
   assert.match(manual, /Russian is the default language when no preference exists/);
@@ -214,6 +224,20 @@ test("keeps database history and translations aligned", async () => {
   assert.equal(current.revision, 29);
   assert.equal(current.savingsGoal, 200);
   assert.equal(current.expenses.length, 44);
+  assert.deepEqual(strengthDatabase, {
+    version: 1,
+    timezone: "Europe/Vilnius",
+    updatedAt: "2026-07-26",
+    revision: 1,
+    entries: [{
+      id: "2026-07-26-rs-001",
+      date: "2026-07-26",
+      weightKg: 51,
+      pullUps: 5,
+      pushUps: 30,
+      source: "chat",
+    }],
+  });
   const supportedCategories = new Set([
     "Food",
     "Subscriptions & services",
@@ -769,23 +793,26 @@ test("keeps database history and translations aligned", async () => {
     assert.match(source, /timeZone:\s*"Europe\/Vilnius"/);
     assert.match(source, /sumExpenses/);
     assert.match(source, /toCents/);
-    assert.match(source, /parseExpenseAmount/);
+    assert.doesNotMatch(source, /parseExpenseAmount/);
     assert.match(source, /visualSpentPercent/);
     assert.match(source, /noSpendingBudget/);
     assert.match(source, /expenseDay <= elapsed/);
-    assert.match(source, /creditStatus: "outstanding"/);
+    assert.doesNotMatch(source, /localStorage/);
     assert.doesNotMatch(source, /const TODAY\s*=/);
   }
   assert.match(index, /id="theme-select"/);
   assert.match(index, /<html lang="ru">/);
-  assert.match(index, /styles\.css\?v=39/);
+  assert.match(index, /styles\.css\?v=40/);
   assert.match(index, /public\/vendor\/apexcharts\.min\.js\?v=21/);
-  assert.match(index, /script\.js\?v=44/);
+  assert.match(index, /script\.js\?v=45/);
   assert.match(index, /data-current-theme="kinance"/);
   assert.match(index, /id="credit-alert"[^>]*hidden/);
-  assert.match(index, /id="payment-method"/);
-  assert.match(index, /option value="debit"/);
-  assert.match(index, /option value="credit"/);
+  assert.doesNotMatch(index, /id="payment-method"/);
+  assert.doesNotMatch(index, /id="expense-form"/);
+  assert.doesNotMatch(index, /id="strength-form"/);
+  assert.doesNotMatch(index, /class="add-panel"/);
+  assert.doesNotMatch(index, /class="editable-value"/);
+  assert.match(index, /id="savings-value" class="fixed-stat-value"/);
   assert.match(index, /id="theme-banner-image"/);
   assert.doesNotMatch(index, /class="hero-copy"/);
   assert.doesNotMatch(index, /class="hero-intro"/);
@@ -898,7 +925,7 @@ test("keeps database history and translations aligned", async () => {
   for (const source of [script, page]) {
     assert.match(source, /relativeStrengthScore/);
     assert.match(source, /dailyStrengthPoints/);
-    assert.match(source, /kinance:relative-strength:v1/);
+    assert.match(source, /strength-history\.json/);
     assert.match(source, /type:\s*"column"/);
     assert.match(source, /type:\s*"line"/);
     assert.match(source, /min:\s*1,\s*max:\s*10/);
@@ -925,11 +952,11 @@ test("keeps database history and translations aligned", async () => {
   assert.match(page, /financeDataForMonth/);
   assert.match(page, /salary:\s*safeMoney\(month\.salary\)/);
   for (const source of [page, script]) {
-    assert.match(source, /JSON\.stringify\(\{[\s\S]*savingsGoal:[\s\S]*expenses:/);
-    assert.doesNotMatch(source, /JSON\.stringify\(\{[\s\S]{0,240}salary:/);
-    assert.doesNotMatch(source, /JSON\.stringify\(data\)/);
+    assert.doesNotMatch(source, /localStorage/);
+    assert.doesNotMatch(source, /expense-form|strength-form|editable-value/);
   }
-  assert.match(page, /hydratedStorageKey !== selectedStorageKey/);
+  assert.match(page, /import strengthHistoryJson from "@\/data\/strength-history\.json"/);
+  assert.match(script, /fetch\("\/data\/strength-history\.json"/);
   for (const source of [page, script]) {
     assert.match(source, /dailyExpensePoints/);
     assert.match(source, /type:\s*"column"/);

@@ -1,7 +1,8 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import financeHistoryJson from "@/data/finance-history.json";
+import strengthHistoryJson from "@/data/strength-history.json";
 
 type Category =
   | "Food"
@@ -24,7 +25,6 @@ type ThemeId = (typeof THEMES)[number]["id"];
 const PREFERENCE_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
 const THEME_COOKIE = "kinance_theme";
 const LANGUAGE_COOKIE = "kinance_language";
-const STRENGTH_STORAGE_KEY = "kinance:relative-strength:v1";
 
 type Expense = {
   id: string;
@@ -57,16 +57,13 @@ type FinanceData = {
   expenses: Expense[];
 };
 
-type SavedFinanceData = Pick<FinanceData, "savingsGoal" | "expenses">;
-
 type StrengthEntry = {
   id: string;
   date: string;
-  recordedAt: string;
   weightKg: number;
   pullUps: number;
   pushUps: number;
-  score: number;
+  source: "chat";
 };
 
 type MonthRecord = FinanceData & {
@@ -205,8 +202,9 @@ const COPY = {
     strengthWeight: "Weight",
     strengthPullUps: "Max pull-ups",
     strengthPushUps: "Max push-ups",
+    strengthLatestMetrics: "Latest relative strength attempt metrics",
     strengthSave: "Save attempt",
-    strengthNote: "Personal training index · best daily score · saved on this device",
+    strengthNote: "Personal training index · best daily score · updated through chat",
     strengthWeightUnit: "kg",
     edit: "Tap the amount to edit",
     savings: "SAVINGS REQUIREMENT",
@@ -297,8 +295,9 @@ const COPY = {
     strengthWeight: "Вес",
     strengthPullUps: "Макс. подтягиваний",
     strengthPushUps: "Макс. отжиманий",
+    strengthLatestMetrics: "Показатели последней попытки относительной силы",
     strengthSave: "Сохранить попытку",
-    strengthNote: "Персональный индекс · лучший результат дня · хранится на этом устройстве",
+    strengthNote: "Персональный индекс · лучший результат дня · обновляется через чат",
     strengthWeightUnit: "кг",
     edit: "Нажмите на сумму, чтобы изменить её",
     savings: "ЦЕЛЬ НАКОПЛЕНИЙ",
@@ -385,6 +384,7 @@ const CATEGORY_LABELS: Record<Language, Record<Category, string>> = {
 // The JSON file is the source of truth. Only the most recent 12 records are shown.
 const HISTORY = (financeHistoryJson.months as unknown as MonthRecord[]).slice(-12);
 const INITIAL_MONTH = HISTORY[HISTORY.length - 1];
+const STRENGTH_ENTRIES = strengthHistoryJson.entries as StrengthEntry[];
 const SALARY_SCHEDULE = financeHistoryJson.salarySchedule;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -458,22 +458,14 @@ function safeMoney(value: number) {
   return Number.isFinite(value) ? Math.max(value, 0) : 0;
 }
 
-function financeDataForMonth(
-  month: MonthRecord,
-  savedData?: Partial<SavedFinanceData> | null,
-): FinanceData {
-  const savedSavings = Number(savedData?.savingsGoal);
+function financeDataForMonth(month: MonthRecord): FinanceData {
   return {
     salary: safeMoney(month.salary),
     additionalIncome: Array.isArray(month.additionalIncome)
       ? month.additionalIncome
       : [],
-    savingsGoal: Number.isFinite(savedSavings)
-      ? Math.max(savedSavings, 0)
-      : safeMoney(month.savingsGoal),
-    expenses: Array.isArray(savedData?.expenses)
-      ? savedData.expenses
-      : month.expenses,
+    savingsGoal: safeMoney(month.savingsGoal),
+    expenses: month.expenses,
   };
 }
 
@@ -491,13 +483,6 @@ function sumExpenses(expenses: Expense[]) {
 
 function roundMoney(value: number) {
   return Math.round(value * 100) / 100;
-}
-
-function parseExpenseAmount(value: string) {
-  const normalized = value.trim().replace(",", ".");
-  if (!/^(?:\d+|\d*\.\d{1,2})$/.test(normalized)) return null;
-  const amount = Number(normalized);
-  return Number.isFinite(amount) && amount > 0 ? roundMoney(amount) : null;
 }
 
 function calendarDateKey(date: Date) {
@@ -557,7 +542,8 @@ function dailyStrengthPoints(
   const dailyBest = new Map<string, number>();
   for (const entry of entries) {
     if (entry.date < period.start || entry.date > period.end || entry.date > asOfDate) continue;
-    dailyBest.set(entry.date, Math.max(dailyBest.get(entry.date) ?? 0, entry.score));
+    const score = relativeStrengthScore(entry.weightKg, entry.pullUps, entry.pushUps);
+    dailyBest.set(entry.date, Math.max(dailyBest.get(entry.date) ?? 0, score));
   }
   return [...dailyBest.entries()]
     .sort(([left], [right]) => left.localeCompare(right))
@@ -581,28 +567,14 @@ function allowanceGuideTops(allFunds: number, savingsSafe: number, maximum: numb
 
 export default function Home() {
   const [selectedMonth, setSelectedMonth] = useState<MonthRecord>(INITIAL_MONTH);
-  const [data, setData] = useState<FinanceData>(() => financeDataForMonth(INITIAL_MONTH));
-  const [amount, setAmount] = useState("");
-  const [note, setNote] = useState("");
-  const [category, setCategory] = useState<Category>("Food");
-  const [paymentMethod, setPaymentMethod] = useState<"debit" | "credit">("debit");
-  const [hydratedStorageKey, setHydratedStorageKey] = useState("");
+  const data = financeDataForMonth(selectedMonth);
   const [language, setLanguage] = useState<Language>("ru");
   const [theme, setTheme] = useState<ThemeId>("kinance");
   const [recurringExpanded, setRecurringExpanded] = useState(true);
   const [oneTimeExpanded, setOneTimeExpanded] = useState(true);
-  const [strengthEntries, setStrengthEntries] = useState<StrengthEntry[]>([]);
-  const [strengthHydrated, setStrengthHydrated] = useState(false);
-  const [strengthWeight, setStrengthWeight] = useState("");
-  const [strengthPullUps, setStrengthPullUps] = useState("");
-  const [strengthPushUps, setStrengthPushUps] = useState("");
   const dailyChartRef = useRef<HTMLDivElement>(null);
-  const selectedStorageKey =
-    `kinance:${selectedMonth.month}:${selectedMonth.updatedAt}:r${selectedMonth.revision}`;
-  const legacySelectedStorageKey =
-    `euroscope:${selectedMonth.month}:${selectedMonth.updatedAt}:r${selectedMonth.revision}`;
 
-  /* Cookie preferences and device-local entries hydrate only after the client mounts. */
+  /* Cookie preferences hydrate only after the client mounts. */
   /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     const savedLanguage = readPreferenceCookie(LANGUAGE_COOKIE);
@@ -625,65 +597,7 @@ export default function Home() {
     document.documentElement.lang = language;
   }, [language]);
 
-  useEffect(() => {
-    let savedData: Partial<SavedFinanceData> | null = null;
-    try {
-      const saved =
-        localStorage.getItem(selectedStorageKey) ??
-        localStorage.getItem(legacySelectedStorageKey);
-      if (saved) savedData = JSON.parse(saved) as Partial<SavedFinanceData>;
-    } catch {
-      // Source data remains available if browser storage is unavailable.
-    }
-    setData(financeDataForMonth(selectedMonth, savedData));
-    setHydratedStorageKey(selectedStorageKey);
-  }, [legacySelectedStorageKey, selectedMonth, selectedStorageKey]);
   /* eslint-enable react-hooks/set-state-in-effect */
-
-  useEffect(() => {
-    if (hydratedStorageKey !== selectedStorageKey) return;
-    try {
-      localStorage.setItem(
-        selectedStorageKey,
-        JSON.stringify({
-          savingsGoal: data.savingsGoal,
-          expenses: data.expenses,
-        } satisfies SavedFinanceData),
-      );
-    } catch {
-      // The canonical cycle remains usable when browser storage is unavailable.
-    }
-  }, [data.expenses, data.savingsGoal, hydratedStorageKey, selectedStorageKey]);
-
-  useEffect(() => {
-    try {
-      const saved = JSON.parse(localStorage.getItem(STRENGTH_STORAGE_KEY) ?? "[]");
-      if (Array.isArray(saved)) {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setStrengthEntries(saved.filter((entry): entry is StrengthEntry =>
-          typeof entry?.id === "string" &&
-          /^\d{4}-\d{2}-\d{2}$/.test(entry?.date) &&
-          typeof entry?.recordedAt === "string" &&
-          Number.isFinite(entry?.weightKg) &&
-          Number.isFinite(entry?.pullUps) &&
-          Number.isFinite(entry?.pushUps) &&
-          Number.isFinite(entry?.score),
-        ));
-      }
-    } catch {
-      // Strength tracking starts empty if device storage is unavailable.
-    }
-    setStrengthHydrated(true);
-  }, []);
-
-  useEffect(() => {
-    if (!strengthHydrated) return;
-    try {
-      localStorage.setItem(STRENGTH_STORAGE_KEY, JSON.stringify(strengthEntries));
-    } catch {
-      // The tracker remains usable for the active session.
-    }
-  }, [strengthEntries, strengthHydrated]);
 
   const spent = useMemo(
     () => sumExpenses(data.expenses),
@@ -920,9 +834,16 @@ export default function Home() {
     selectedMonth.period,
     todayKey,
   );
-  const latestStrength = [...strengthEntries].sort((left, right) =>
-    right.recordedAt.localeCompare(left.recordedAt),
+  const latestStrength = [...STRENGTH_ENTRIES].sort((left, right) =>
+    right.date.localeCompare(left.date) || right.id.localeCompare(left.id),
   )[0];
+  const latestStrengthScore = latestStrength
+    ? relativeStrengthScore(
+        latestStrength.weightKg,
+        latestStrength.pullUps,
+        latestStrength.pushUps,
+      )
+    : null;
   const chartMaximum = Math.max(
     ...guideSpendingPoints.map(({ y }) => y),
     allFundsDailyPace,
@@ -962,7 +883,7 @@ export default function Home() {
         todayKey,
       );
       const strengthPoints = dailyStrengthPoints(
-        strengthEntries,
+        STRENGTH_ENTRIES,
         selectedMonth.period,
         todayKey,
       );
@@ -1020,59 +941,9 @@ export default function Home() {
     data.expenses,
     savingsSafeDailyPace,
     selectedMonth.period,
-    strengthEntries,
     theme,
     todayKey,
   ]);
-
-  function addStrengthAttempt(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const weightKg = Number(strengthWeight.replace(",", "."));
-    const pullUps = Number(strengthPullUps);
-    const pushUps = Number(strengthPushUps);
-    if (
-      !Number.isFinite(weightKg) || weightKg < 30 || weightKg > 250 ||
-      !Number.isInteger(pullUps) || pullUps < 0 || pullUps > 200 ||
-      !Number.isInteger(pushUps) || pushUps < 0 || pushUps > 300
-    ) return;
-
-    const now = new Date();
-    setStrengthEntries((current) => [...current, {
-      id: crypto.randomUUID(),
-      date: todayInVilnius(),
-      recordedAt: now.toISOString(),
-      weightKg,
-      pullUps,
-      pushUps,
-      score: relativeStrengthScore(weightKg, pullUps, pushUps),
-    }]);
-  }
-
-  function addExpense(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const value = parseExpenseAmount(amount);
-    if (value === null) return;
-
-    setData((current) => ({
-      ...current,
-      expenses: [
-        {
-          id: crypto.randomUUID(),
-          amount: value,
-          note: note.trim() || category,
-          date: todayInVilnius(),
-          category,
-          source: "site",
-          paymentMethod,
-          ...(paymentMethod === "credit" ? { creditStatus: "outstanding" as const } : {}),
-        },
-        ...current.expenses,
-      ],
-    }));
-    setAmount("");
-    setNote("");
-    setPaymentMethod("debit");
-  }
 
   return (
     <main>
@@ -1221,7 +1092,7 @@ export default function Home() {
           <div className="strength-scoreboard">
             <span id="strength-title">{copy.strengthTitle}</span>
             <div className="strength-score">
-              <strong>{latestStrength ? latestStrength.score.toFixed(1) : "N/A"}</strong>
+              <strong>{latestStrengthScore?.toFixed(1) ?? "N/A"}</strong>
               <small>/ 10</small>
             </div>
             <p>
@@ -1230,51 +1101,11 @@ export default function Home() {
                 : copy.strengthNoAttempts}
             </p>
           </div>
-          <form className="strength-form" onSubmit={addStrengthAttempt}>
-            <label>
-              <span>{copy.strengthWeight}</span>
-              <span className="strength-input">
-                <input
-                  type="number"
-                  inputMode="decimal"
-                  min="30"
-                  max="250"
-                  step="0.1"
-                  value={strengthWeight}
-                  onChange={(event) => setStrengthWeight(event.target.value)}
-                  required
-                />
-                <small>{copy.strengthWeightUnit}</small>
-              </span>
-            </label>
-            <label>
-              <span>{copy.strengthPullUps}</span>
-              <input
-                type="number"
-                inputMode="numeric"
-                min="0"
-                max="200"
-                step="1"
-                value={strengthPullUps}
-                onChange={(event) => setStrengthPullUps(event.target.value)}
-                required
-              />
-            </label>
-            <label>
-              <span>{copy.strengthPushUps}</span>
-              <input
-                type="number"
-                inputMode="numeric"
-                min="0"
-                max="300"
-                step="1"
-                value={strengthPushUps}
-                onChange={(event) => setStrengthPushUps(event.target.value)}
-                required
-              />
-            </label>
-            <button type="submit">{copy.strengthSave}</button>
-          </form>
+          <div className="strength-metrics" aria-label={copy.strengthLatestMetrics}>
+            <div><span>{copy.strengthWeight}</span><strong>{latestStrength?.weightKg ?? 0}<small>{copy.strengthWeightUnit}</small></strong></div>
+            <div><span>{copy.strengthPullUps}</span><strong>{latestStrength?.pullUps ?? 0}</strong></div>
+            <div><span>{copy.strengthPushUps}</span><strong>{latestStrength?.pushUps ?? 0}</strong></div>
+          </div>
           <div className="strength-meta">
             <span><i className="spending-key" />{copy.dailyExpenseSeries}</span>
             <span><i className="strength-key" />{copy.relativeStrengthSeries}</span>
@@ -1360,20 +1191,7 @@ export default function Home() {
           <article className="stat-card savings">
             <span className="stat-icon" aria-hidden="true">◇</span>
             <p>{copy.savings}</p>
-            <label className="editable-value">
-              <span className="sr-only">{copy.savingsEuroLabel}</span>
-              <span aria-hidden="true">€</span>
-              <input
-                inputMode="decimal"
-                value={data.savingsGoal}
-                onChange={(event) =>
-                  setData((current) => ({
-                    ...current,
-                    savingsGoal: Math.max(Number(event.target.value) || 0, 0),
-                  }))
-                }
-              />
-            </label>
+            <strong className="fixed-stat-value">{euro.format(savings)}</strong>
             <small>{copy.protected}</small>
             {savingsComparison && (
               <div className={`stat-comparison ${savingsComparison.tone}`}>
@@ -1497,66 +1315,6 @@ export default function Home() {
               </div>
             </details>
           </div>
-
-          <aside className="add-panel" aria-labelledby="add-title">
-            <p className="eyebrow">{copy.quick}</p>
-            <h2 id="add-title">{copy.add}</h2>
-            <p className="form-intro">{copy.formIntro}</p>
-            <form onSubmit={addExpense}>
-              <label htmlFor="amount">{copy.amount}</label>
-              <div className="amount-field">
-                <span aria-hidden="true">€</span>
-                <input
-                  id="amount"
-                  name="amount"
-                  inputMode="decimal"
-                  placeholder="0.00"
-                  value={amount}
-                  onChange={(event) => setAmount(event.target.value)}
-                  required
-                />
-              </div>
-              <label htmlFor="category">{copy.category}</label>
-              <select
-                id="category"
-                name="category"
-                value={category}
-                onChange={(event) => setCategory(event.target.value as Category)}
-              >
-                {CATEGORIES.map((name) => (
-                  <option key={name} value={name}>{categoryLabel(name)}</option>
-                ))}
-              </select>
-              <label htmlFor="payment-method">{copy.paymentMethod}</label>
-              <select
-                id="payment-method"
-                name="paymentMethod"
-                value={paymentMethod}
-                onChange={(event) =>
-                  setPaymentMethod(event.target.value as "debit" | "credit")
-                }
-              >
-                <option value="debit">{copy.debit}</option>
-                <option value="credit">{copy.credit}</option>
-              </select>
-              <label htmlFor="note">{copy.what}</label>
-              <input
-                id="note"
-                name="note"
-                placeholder={copy.placeholder}
-                value={note}
-                onChange={(event) => setNote(event.target.value)}
-              />
-              <button type="submit">
-                <span aria-hidden="true">＋</span>
-                {copy.add}
-              </button>
-            </form>
-            <p className="chat-hint">
-              <span aria-hidden="true">✦</span>
-              {copy.hint}
-            </p>
-          </aside>
         </section>
 
         <footer>

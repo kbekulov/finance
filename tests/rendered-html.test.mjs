@@ -140,7 +140,8 @@ test("server-renders the current finance tracker", async () => {
     new RegExp(`${renderedSavingsSafePace}.{0,12}€(?:<!-- --> <!-- -->)?в день`),
   );
   assert.match(html, /Красное вино/);
-  assert.match(html, /McDonald&#x27;s/);
+  assert.match(html, /Фастфуд/);
+  assert.doesNotMatch(html, /data-merchant|merchant-name|merchant-address/i);
   assert.match(html, /Пиво/);
   assert.match(html, /Мороженое/);
   assert.match(html, /class="stat-card salary salary-locked"/);
@@ -192,7 +193,7 @@ test("keeps database history and translations aligned", async () => {
   const current = database.months.at(-1);
 
   assert.equal(database.maxMonths, 12);
-  assert.equal(database.version, 6);
+  assert.equal(database.version, 7);
   assert.deepEqual(database.salarySchedule, {
     dayOfMonth: 12,
     weekendRule: "previousFriday",
@@ -228,6 +229,9 @@ test("keeps database history and translations aligned", async () => {
   assert.match(manual, /Lancer Cu Chulainn, Shuten-Douji, and Aoko Aozaki for Alcohol & nightlife/);
   assert.match(manual, /stable expense-ID hash/);
   assert.match(manual, /create new concepts from a blank canvas instead of tracing an older icon/);
+  assert.match(manual, /never persist or display a merchant, shop, store, business, legal-entity, address, or purchase-location identity/);
+  assert.match(manual, /Read merchant and location details only as transient receipt context, then discard them/);
+  assert.match(manual, /Never embed those identities in an `id`, `note`, translation, description, line item, receipt reference, fallback reason, or other free text/);
   assert.match(manual, /sits entirely over the lower 168 pixels of the banner artwork/);
   assert.match(manual, /red upper segment is credit/);
   assert.match(manual, /whether its `creditStatus` is `outstanding` or `repaid`/);
@@ -248,7 +252,7 @@ test("keeps database history and translations aligned", async () => {
   assert.match(manual, /`kinance_language` cookie/);
   assert.match(manual, /`kinance_theme` cookie/);
   assert.equal(current.updatedAt, "2026-07-26");
-  assert.equal(current.revision, 29);
+  assert.equal(current.revision, 30);
   assert.equal(current.savingsGoal, 200);
   assert.equal(current.expenses.length, 44);
   assert.deepEqual(strengthDatabase, {
@@ -277,6 +281,41 @@ test("keeps database history and translations aligned", async () => {
   const monthKeys = new Set();
   const expenseIds = new Set();
   const incomeIds = new Set();
+  const forbiddenFinanceKeys = new Set([
+    "merchant",
+    "shop",
+    "store",
+    "business",
+    "legalentity",
+    "merchantaddress",
+    "address",
+    "location",
+    "coordinates",
+    "latitude",
+    "longitude",
+    "orderingplatform",
+    "branch",
+  ]);
+  const receiptIdentityPattern = /\bUAB\b|\.menu\b|(?:^|[\s,])(?:g\.|gatvė)\s*\d+|\bVilnius\b/i;
+  const assertPrivateFinanceRecord = (value, path) => {
+    if (Array.isArray(value)) {
+      value.forEach((entry, index) => assertPrivateFinanceRecord(entry, `${path}[${index}]`));
+      return;
+    }
+    if (!value || typeof value !== "object") {
+      if (typeof value === "string") {
+        assert.doesNotMatch(value, receiptIdentityPattern, `${path} contains merchant or location identity`);
+      }
+      return;
+    }
+    for (const [key, nestedValue] of Object.entries(value)) {
+      assert.ok(
+        !forbiddenFinanceKeys.has(key.toLowerCase()),
+        `${path}.${key} is a forbidden merchant or location field`,
+      );
+      assertPrivateFinanceRecord(nestedValue, `${path}.${key}`);
+    }
+  };
   for (const [monthIndex, monthRecord] of database.months.entries()) {
     assert.match(monthRecord.month, /^\d{4}-\d{2}$/);
     assert.ok(!monthKeys.has(monthRecord.month));
@@ -293,6 +332,7 @@ test("keeps database history and translations aligned", async () => {
     }
     assert.ok(Array.isArray(monthRecord.additionalIncome));
     for (const income of monthRecord.additionalIncome) {
+      assertPrivateFinanceRecord(income, `months[${monthIndex}].additionalIncome`);
       assert.ok(!incomeIds.has(income.id));
       incomeIds.add(income.id);
       assert.ok(Number.isFinite(income.amount) && income.amount > 0);
@@ -307,6 +347,7 @@ test("keeps database history and translations aligned", async () => {
       assert.equal(typeof income.noteTranslations?.ru, "string");
     }
     for (const expense of monthRecord.expenses) {
+      assertPrivateFinanceRecord(expense, `months[${monthIndex}].expenses`);
       assert.ok(!expenseIds.has(expense.id));
       expenseIds.add(expense.id);
       assert.ok(Number.isFinite(expense.amount) && expense.amount > 0);
@@ -467,9 +508,9 @@ test("keeps database history and translations aligned", async () => {
     undefined,
   );
   assert.deepEqual(
-    current.expenses.find((expense) => expense.id === "2026-07-istorijos-001"),
+    current.expenses.find((expense) => expense.id === "2026-07-receipt-food-002"),
     {
-      id: "2026-07-istorijos-001",
+      id: "2026-07-receipt-food-002",
       amount: 6,
       note: "Keturi vėjai 0.4 l",
       noteTranslations: {
@@ -479,9 +520,6 @@ test("keeps database history and translations aligned", async () => {
       date: "2026-07-25",
       category: "Food",
       source: "receipt",
-      merchant: "Istorijos",
-      legalEntity: "MB Skania",
-      merchantAddress: "M. K. Čiurlionio g. 100, Vilnius",
       description: "Keturi vėjai 0.4 l",
       originalCurrency: "EUR",
       originalAmount: 6,
@@ -496,10 +534,10 @@ test("keeps database history and translations aligned", async () => {
   );
   assert.deepEqual(
     current.expenses.find(
-      (expense) => expense.id === "2026-07-maxima-cider-001",
+      (expense) => expense.id === "2026-07-receipt-alcohol-003",
     ),
     {
-      id: "2026-07-maxima-cider-001",
+      id: "2026-07-receipt-alcohol-003",
       amount: 1.99,
       note: "Shelton's pear cider",
       noteTranslations: {
@@ -509,9 +547,6 @@ test("keeps database history and translations aligned", async () => {
       date: "2026-07-25",
       category: "Alcohol & nightlife",
       source: "receipt",
-      merchant: "Maxima",
-      legalEntity: "MAXIMA LT, UAB",
-      merchantAddress: "Medeinos g. 39, Vilnius",
       description: "Shelton's pear cider with refundable can deposit",
       originalCurrency: "EUR",
       originalAmount: 1.99,
@@ -576,7 +611,7 @@ test("keeps database history and translations aligned", async () => {
     current.expenses.filter((expense) => [
       "2026-07-beer-debit-002",
       "2026-07-red-wine-001",
-      "2026-07-mcdonalds-001",
+      "2026-07-fast-food-001",
     ].includes(expense.id)),
     [
       {
@@ -600,10 +635,10 @@ test("keeps database history and translations aligned", async () => {
         paymentMethod: "debit",
       },
       {
-        id: "2026-07-mcdonalds-001",
+        id: "2026-07-fast-food-001",
         amount: 5.8,
-        note: "McDonald's",
-        noteTranslations: { en: "McDonald's", ru: "McDonald's" },
+        note: "Fast food",
+        noteTranslations: { en: "Fast food", ru: "Фастфуд" },
         date: "2026-07-26",
         category: "Food",
         source: "chat",
@@ -613,10 +648,10 @@ test("keeps database history and translations aligned", async () => {
   );
   assert.deepEqual(
     current.expenses.find(
-      (expense) => expense.id === "2026-07-caffeine-iced-peach-tea-001",
+      (expense) => expense.id === "2026-07-receipt-food-001",
     ),
     {
-      id: "2026-07-caffeine-iced-peach-tea-001",
+      id: "2026-07-receipt-food-001",
       amount: 3.4,
       note: "Iced peach tea",
       noteTranslations: {
@@ -626,9 +661,6 @@ test("keeps database history and translations aligned", async () => {
       date: "2026-07-26",
       category: "Food",
       source: "receipt",
-      merchant: "Caffeine",
-      legalEntity: "UAB Retail Convenience Lithuania",
-      merchantAddress: "Vinco Kudirkos g. 1, Vilnius",
       description: "Iced peach tea with packaging fee",
       originalCurrency: "EUR",
       originalAmount: 3.4,
@@ -647,10 +679,10 @@ test("keeps database history and translations aligned", async () => {
   );
   assert.deepEqual(
     current.expenses.find(
-      (expense) => expense.id === "2026-07-greet-bocmano-usai-ipa-001",
+      (expense) => expense.id === "2026-07-receipt-alcohol-001",
     ),
     {
-      id: "2026-07-greet-bocmano-usai-ipa-001",
+      id: "2026-07-receipt-alcohol-001",
       amount: 6.12,
       note: "Bočmano Ūsai IPA 0.4 l",
       noteTranslations: {
@@ -665,7 +697,6 @@ test("keeps database history and translations aligned", async () => {
       originalAmount: 6.12,
       receiptReference: "Order #8",
       paymentMethod: "debit",
-      orderingPlatform: "app.greet.menu",
       dateFallbackReason: "No transaction date visible in order confirmation screenshot",
       lineItems: [
         { description: "Bočmano Ūsai IPA 0.4 l", amount: 6 },
@@ -675,9 +706,9 @@ test("keeps database history and translations aligned", async () => {
     },
   );
   assert.deepEqual(
-    current.expenses.find((expense) => expense.id === "2026-07-rimi-alita-spritz-001"),
+    current.expenses.find((expense) => expense.id === "2026-07-receipt-alcohol-002"),
     {
-      id: "2026-07-rimi-alita-spritz-001",
+      id: "2026-07-receipt-alcohol-002",
       amount: 1.69,
       note: "Alita Spritz Limon",
       noteTranslations: {
@@ -687,9 +718,6 @@ test("keeps database history and translations aligned", async () => {
       date: "2026-07-26",
       category: "Alcohol & nightlife",
       source: "receipt",
-      merchant: "Rimi",
-      legalEntity: "UAB RIMI LIETUVA",
-      merchantAddress: "Rygos g. 8, Vilnius",
       description: "Alita Spritz Limon 8% 0.2 l with refundable metal packaging deposit",
       originalCurrency: "EUR",
       originalAmount: 1.69,

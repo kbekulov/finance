@@ -21,6 +21,7 @@ The user's latest explicit instruction always takes precedence over an older pre
 11. Publish the exact pushed commit to the connected Site when Sites tools are available. Preserve `CNAME` and the complete tracker at the custom GitHub Pages domain.
 12. Finish with a clean worktree and confirm local `HEAD` equals `origin/dev`.
 13. Change source files, canonical data, and final project assets only. Do not commit generated build output, temporary image-generation sources, local logs, credentials, or unrelated workspace files.
+14. Apply strict receipt privacy: never persist or display a merchant, shop, store, business, legal-entity, address, or purchase-location identity. A receipt may be inspected transiently, but those details must not enter canonical data, tests, UI copy, asset prompts, or generated assets.
 
 Never force-push, discard unrelated changes, overwrite a newer remote commit, or redirect the tracker to an unrelated host.
 
@@ -98,9 +99,17 @@ Every expense record contains:
 - `recurring`: boolean when known
 - `frequency`: `monthly` for monthly recurring expenses
 
-IDs are immutable, unique across their canonical file, and never reused after deletion. Store monetary values with no more than two decimal places and aggregate them as integer cents in code.
+IDs are immutable, unique across their canonical file, and never reused after deletion. The sole exception is a privacy cleanup required to remove forbidden merchant or location data from an existing ID; update every dependent reference in the same change. Store monetary values with no more than two decimal places and aggregate them as integer cents in code.
 
-Preserve known optional details with clear field names, for example `merchant`, `description`, `transactionTime`, `originalCurrency`, `originalAmount`, or `receiptReference`. Use `null` only when "known empty" must be distinguished from "not supplied". Never invent merchants, receipt details, times, payment methods, or other evidence.
+Preserve only useful non-identifying optional details with clear field names, for example `description`, `transactionTime`, `originalCurrency`, `originalAmount`, tax, fees, deposits, or a receipt reference that contains no forbidden identity. Use `null` only when "known empty" must be distinguished from "not supplied". Never invent receipt details, times, payment methods, or other evidence.
+
+### Finance-record privacy boundary
+
+- Never create fields such as `merchant`, `shop`, `store`, `legalEntity`, `merchantAddress`, `address`, `location`, coordinates, branch identifiers, or ordering-platform/domain names in an expense or income record.
+- Never embed those identities in an `id`, `note`, translation, description, line item, receipt reference, fallback reason, or other free text. This applies even when the frontend would not render the field.
+- Describe a purchase by its useful item or service type, such as `Fast food`, `Iced peach tea`, or `Bus travel`, without naming where it was bought. A product or subscription name explicitly supplied as the thing purchased may remain; seller identity copied from a receipt may not.
+- Retain the financial facts needed by Kinance: amount, purchase date and optional time, category, source, debit or credit status, recurrence, currency, and useful non-identifying tax, fee, deposit, or item details.
+- When correcting legacy data, remove forbidden fields and generalize merchant-derived text without changing amounts, dates, categories, payment methods, recurrence, or calculated totals.
 
 ### Fitness root
 
@@ -156,7 +165,7 @@ A terse message that clearly presents an amount as spending or a purchase means 
 - Use `paymentMethod: "debit"` unless the user explicitly says credit.
 - Do not mark the expense recurring unless the user says it repeats.
 - Add English and Russian note translations.
-- If the purpose is genuinely unknown, use a neutral name such as `Unspecified expense`; do not invent a merchant.
+- Describe the purchase purpose, never its merchant or location. If the purpose is genuinely unknown, use a neutral name such as `Unspecified expense`.
 
 ### Receipt image
 
@@ -171,7 +180,9 @@ Record the final amount actually paid, not a subtotal, tax amount, discount, out
 - If the date is absent, unreadable, obscured, conflicting, or genuinely uncertain, use the actual current `Europe/Vilnius` calendar day and add the expense to the current salary cycle. Do not guess missing digits or pause merely to ask about an unclear date.
 - If a clear old date falls outside every retained cycle, never misdate it into the current cycle. Create the correct historical cycle only when required salary-cycle data can be preserved without invention; otherwise ask for the missing historical values.
 - Default to debit even when a card receipt is visible. Use credit only when the user explicitly says it was credit.
-- Preserve visible merchant and receipt details.
+- Read merchant and location details only as transient receipt context, then discard them. Never transcribe them into JSON, tests, UI copy, banner prompts, or assets.
+- Name the expense after the purchased item or service, using a generic purpose when the printed wording would disclose the seller. Keep both translations equally sanitized.
+- Preserve only non-identifying receipt details that are useful for accounting. Omit a receipt reference, nested line item, or free-text detail if it contains a merchant, business, address, branch, domain, or location identity.
 - Preserve the receipt currency. Convert only when the user requests it or a reliable conversion value is supplied.
 - Use an existing broad category when it fits. Create a new reusable category without separate approval only when no current category accurately represents the purchase.
 - Never create a merchant-specific, product-specific, or one-off category to avoid reasonable classification.
@@ -179,7 +190,7 @@ Record the final amount actually paid, not a subtotal, tax amount, discount, out
 
 ### Correct, rename, or remove an expense
 
-Edit or remove the existing record instead of adding a duplicate. Preserve every field the user did not change. A rename must update both note translations. A rename-only change must not alter monetary totals.
+Edit or remove the existing record instead of adding a duplicate. Preserve every field the user did not change except forbidden privacy data, which must always be removed. A rename must update both note translations. A rename-only change must not alter monetary totals.
 
 ### Synthetic balance backfill
 

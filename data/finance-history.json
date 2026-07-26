@@ -1,5 +1,5 @@
 {
-  "version": 6,
+  "version": 7,
   "maxMonths": 12,
   "currency": "EUR",
   "timezone": "Europe/Vilnius",
@@ -18,7 +18,7 @@
       "currency": "EUR",
       "timezone": "Europe/Vilnius",
       "updatedAt": "2026-07-26",
-      "revision": 29,
+      "revision": 30,
       "salary": 2150,
       "savingsGoal": 200,
       "additionalIncome": [
@@ -62,12 +62,12 @@
           "paymentMethod": "debit"
         },
         {
-          "id": "2026-07-mcdonalds-001",
+          "id": "2026-07-fast-food-001",
           "amount": 5.8,
-          "note": "McDonald's",
+          "note": "Fast food",
           "noteTranslations": {
-            "en": "McDonald's",
-            "ru": "McDonald's"
+            "en": "Fast food",
+            "ru": "Фастфуд"
           },
           "date": "2026-07-26",
           "category": "Food",
@@ -75,7 +75,7 @@
           "paymentMethod": "debit"
         },
         {
-          "id": "2026-07-caffeine-iced-peach-tea-001",
+          "id": "2026-07-receipt-food-001",
           "amount": 3.4,
           "note": "Iced peach tea",
           "noteTranslations": {
@@ -85,9 +85,6 @@
           "date": "2026-07-26",
           "category": "Food",
           "source": "receipt",
-          "merchant": "Caffeine",
-          "legalEntity": "UAB Retail Convenience Lithuania",
-          "merchantAddress": "Vinco Kudirkos g. 1, Vilnius",
           "description": "Iced peach tea with packaging fee",
           "originalCurrency": "EUR",
           "originalAmount": 3.4,
@@ -320,7 +317,7 @@
           "paymentMethod": "debit"
         },
         {
-          "id": "2026-07-greet-bocmano-usai-ipa-001",
+          "id": "2026-07-receipt-alcohol-001",
           "amount": 6.12,
           "note": "Bočmano Ūsai IPA 0.4 l",
           "noteTranslations": {
@@ -335,7 +332,6 @@
           "originalAmount": 6.12,
           "receiptReference": "Order #8",
           "paymentMethod": "debit",
-          "orderingPlatform": "app.greet.menu",
           "dateFallbackReason": "No transaction date visible in order confirmation screenshot",
           "lineItems": [
             {
@@ -350,7 +346,7 @@
           "receiptPaymentDescription": "Apple Pay"
         },
         {
-          "id": "2026-07-rimi-alita-spritz-001",
+          "id": "2026-07-receipt-alcohol-002",
           "amount": 1.69,
           "note": "Alita Spritz Limon",
           "noteTranslations": {
@@ -360,9 +356,6 @@
           "date": "2026-07-26",
           "category": "Alcohol & nightlife",
           "source": "receipt",
-          "merchant": "Rimi",
-          "legalEntity": "UAB RIMI LIETUVA",
-          "merchantAddress": "Rygos g. 8, Vilnius",
           "description": "Alita Spritz Limon 8% 0.2 l with refundable metal packaging deposit",
           "originalCurrency": "EUR",
           "originalAmount": 1.69,
@@ -385,7 +378,7 @@
           "receiptPaymentDescription": "Contactless debit Mastercard"
         },
         {
-          "id": "2026-07-istorijos-001",
+          "id": "2026-07-receipt-food-002",
           "amount": 6,
           "note": "Keturi vėjai 0.4 l",
           "noteTranslations": {
@@ -395,9 +388,6 @@
           "date": "2026-07-25",
           "category": "Food",
           "source": "receipt",
-          "merchant": "Istorijos",
-          "legalEntity": "MB Skania",
-          "merchantAddress": "M. K. Čiurlionio g. 100, Vilnius",
           "description": "Keturi vėjai 0.4 l",
           "originalCurrency": "EUR",
           "originalAmount": 6,
@@ -410,7 +400,7 @@
           "receiptPaymentDescription": "Credit card"
         },
         {
-          "id": "2026-07-maxima-cider-001",
+          "id": "2026-07-receipt-alcohol-003",
           "amount": 1.99,
           "note": "Shelton's pear cider",
           "noteTranslations": {
@@ -420,9 +410,6 @@
           "date": "2026-07-25",
           "category": "Alcohol & nightlife",
           "source": "receipt",
-          "merchant": "Maxima",
-          "legalEntity": "MAXIMA LT, UAB",
-          "merchantAddress": "Medeinos g. 39, Vilnius",
           "description": "Shelton's pear cider with refundable can deposit",
           "originalCurrency": "EUR",
           "originalAmount": 1.99,

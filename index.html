@@ -13,9 +13,9 @@
     <meta property="og:image" content="https://finance.bekulov.com/public/og.png" />
     <title>Kinance</title>
     <link rel="icon" type="image/jpeg" href="/kinance-favicon.jpg" />
-    <link rel="stylesheet" href="/styles.css?v=42" />
+    <link rel="stylesheet" href="/styles.css?v=43" />
     <script src="/public/vendor/apexcharts.min.js?v=21" defer></script>
-    <script src="/script.js?v=48" defer></script>
+    <script src="/script.js?v=49" defer></script>
   </head>
   <body>
     <main>
@@ -29,21 +29,28 @@
           <strong class="credit-alert-total" id="credit-alert-total">€0.00</strong>
         </section>
 
-        <section class="spending-alert" role="status" aria-live="polite">
-          <span class="spending-alert-icon" aria-hidden="true">!</span>
-          <div>
-            <strong id="spending-alert-title">Spending alert</strong>
-            <p id="spending-alert-detail">Reviewing this salary cycle’s spending…</p>
-          </div>
-        </section>
-
         <header class="topbar">
           <a class="brand" href="#top" aria-label="Kinance home" data-i18n-aria-label="kinanceHome">
             <span class="brand-mark" aria-hidden="true">€</span>
             <span>kinance</span>
           </a>
+          <div class="spending-insight" id="spending-insight">
+            <button
+              type="button"
+              class="spending-insight-trigger"
+              id="spending-insight-trigger"
+              aria-expanded="false"
+              aria-controls="spending-insight-tooltip"
+            >
+              <span class="spending-insight-icon" aria-hidden="true">i</span>
+              <span data-i18n="spendingInsight">Spending insight</span>
+            </button>
+            <div class="spending-insight-tooltip" id="spending-insight-tooltip" role="tooltip" hidden>
+              <strong id="spending-insight-title">Spending insight</strong>
+              <p id="spending-insight-detail">Reviewing this salary cycle’s spending…</p>
+            </div>
+          </div>
           <div class="header-meta">
-            <span class="updated-label" id="updated-label">Loading history…</span>
             <label class="theme-switcher" data-current-theme="kinance">
               <span class="sr-only" data-i18n="themeLabel">Theme</span>
               <select id="theme-select" aria-label="Theme" data-i18n-aria-label="themeLabel"></select>
@@ -56,6 +63,7 @@
               <span class="month-dot" aria-hidden="true"></span>
               <span id="month-label">Current salary cycle</span>
             </div>
+            <span class="updated-label" id="updated-label">Loading history…</span>
           </div>
         </header>
 
@@ -113,10 +121,8 @@
             <div><span data-i18n="strengthPushUps">Best push-up set</span><strong id="strength-push-ups-value">0</strong></div>
           </div>
           <div class="strength-meta">
-            <span><i class="spending-key"></i><span data-i18n="dailyExpenseSeries">Debit spending</span></span>
-            <span><i class="credit-key"></i><span data-i18n="creditExpenseSeries">Credit spending</span></span>
             <span><i class="strength-key"></i><span data-i18n="relativeStrengthSeries">Relative strength</span></span>
-            <small data-i18n="strengthNote">Best single set per exercise · sets are not added together</small>
+            <small data-i18n="strengthNote">Best single sets · never summed · body-mass adjusted personal index</small>
           </div>
         </section>
 
@@ -136,6 +142,7 @@
                 </span>
               </div>
               <div class="progress-ring" id="progress-ring">
+                <i class="progress-threshold" aria-hidden="true"></i>
                 <span id="ring-percent">0%</span>
               </div>
             </div>

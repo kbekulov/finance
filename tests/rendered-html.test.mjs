@@ -39,12 +39,14 @@ test("server-renders the current finance tracker", async () => {
   assert.match(html, /kinance-favicon\.jpg/i);
   assert.match(html, />kinance<\/span>/i);
   assert.doesNotMatch(html, />euroscope<\/span>/i);
-  assert.match(html, /class="spending-alert"/);
+  assert.match(html, /class="spending-insight-trigger"/);
+  assert.match(html, /id="spending-insight-tooltip"[^>]*role="tooltip"[^>]*hidden/);
+  assert.doesNotMatch(html, /class="spending-alert"/);
   assert.doesNotMatch(html, /class="credit-alert"/);
   assert.match(html, /class="payment-badge debit"/);
   assert.match(html, /class="payment-badge credit-repaid"/);
   assert.doesNotMatch(html, /class="payment-badge credit-outstanding"/);
-  assert.match(html, /Контроль расходов/);
+  assert.match(html, /Анализ расходов/);
   assert.match(html, /Самая крупная статья расходов: Еда, 560,64/);
   assert.match(html, /Устройства Apple/);
   assert.match(html, /iPad/);
@@ -222,7 +224,11 @@ test("keeps database history and translations aligned", async () => {
   assert.match(manual, /edge-faded canvas mask/);
   assert.match(manual, /`data\/strength-history\.json`/);
   assert.match(manual, /frontend is read-only/);
-  assert.match(manual, /personal training index, not a medical assessment/);
+  assert.match(manual, /personal bodyweight strength-endurance index/);
+  assert.match(manual, /Formula version 3/);
+  assert.match(manual, /Spending insight` disclosure between the Kinance brand and the theme selector/);
+  assert.match(manual, /clicking anywhere outside it or pressing Escape closes it/);
+  assert.match(manual, /Do not place debit, credit, or other finance-series legends inside the Relative Strength card/);
   assert.match(manual, /Keep it separate from `salary` so the fixed salary and salary history remain truthful/);
   assert.match(manual, /Russian is the default language when no preference exists/);
   assert.match(manual, /`kinance_language` cookie/);
@@ -232,10 +238,10 @@ test("keeps database history and translations aligned", async () => {
   assert.equal(current.savingsGoal, 200);
   assert.equal(current.expenses.length, 44);
   assert.deepEqual(strengthDatabase, {
-    version: 2,
+    version: 3,
     timezone: "Europe/Vilnius",
     updatedAt: "2026-07-26",
-    revision: 2,
+    revision: 3,
     entries: [{
       id: "2026-07-26-rs-001",
       date: "2026-07-26",
@@ -764,8 +770,8 @@ test("keeps database history and translations aligned", async () => {
 
   for (const source of [page, script]) {
     assert.match(source, /noteTranslations/);
-    assert.match(source, /Spending alert/);
-    assert.match(source, /Контроль расходов/);
+    assert.match(source, /Spending insight/);
+    assert.match(source, /Анализ расходов/);
     assert.match(source, /Transport & Travel/);
     assert.match(source, /Транспорт и путешествия/);
     assert.match(source, /Alcohol & nightlife/);
@@ -809,9 +815,9 @@ test("keeps database history and translations aligned", async () => {
   }
   assert.match(index, /id="theme-select"/);
   assert.match(index, /<html lang="ru">/);
-  assert.match(index, /styles\.css\?v=42/);
+  assert.match(index, /styles\.css\?v=43/);
   assert.match(index, /public\/vendor\/apexcharts\.min\.js\?v=21/);
-  assert.match(index, /script\.js\?v=48/);
+  assert.match(index, /script\.js\?v=49/);
   assert.match(index, /data-current-theme="kinance"/);
   assert.match(index, /id="credit-alert"[^>]*hidden/);
   assert.doesNotMatch(index, /id="payment-method"/);
@@ -912,8 +918,19 @@ test("keeps database history and translations aligned", async () => {
   assert.match(styles, /\.daily-expense-chart\s*\{[^}]*margin:\s*-168px 0 18px/s);
   assert.match(styles, /@media \(max-width:\s*640px\)[\s\S]*\.daily-expense-chart\s*\{[^}]*margin-top:\s*-168px/s);
   assert.match(styles, /\.daily-expense-chart\s*\{[^}]*transform:\s*translateX\(-50%\)/s);
-  assert.match(styles, /\.progress-ring\s*\{[^}]*--spent-end:\s*0deg[^}]*--savings-start:\s*360deg/s);
-  assert.match(styles, /var\(--red\) var\(--savings-start\) 360deg/);
+  assert.match(styles, /\.progress-ring\s*\{[^}]*--safe-spent-end:\s*0deg[^}]*--spent-end:\s*0deg[^}]*--savings-start:\s*360deg/s);
+  assert.match(styles, /var\(--green\) 0 var\(--safe-spent-end\)/);
+  assert.match(styles, /var\(--red\) var\(--safe-spent-end\) var\(--spent-end\)/);
+  assert.match(styles, /rgba\(118, 118, 128, 0\.28\) var\(--spent-end\) 360deg/);
+  assert.match(styles, /\.progress-threshold\s*\{[^}]*transform:\s*rotate\(var\(--savings-start\)\)/s);
+  assert.match(styles, /\.balance-safe-caption b\.is-negative\s*\{[^}]*color:\s*var\(--red\)/s);
+  assert.match(index, /class="progress-threshold"/);
+  for (const source of [script, page]) {
+    assert.match(source, /safeSpendingLimitPercent/);
+    assert.match(source, /safeSpentEndDegrees/);
+    assert.match(source, /savingsUsed/);
+    assert.match(source, /savingsViolated|savings-violated/);
+  }
   assert.match(styles, /\.pace-limit-all strong\s*\{[^}]*color:\s*var\(--red\)/s);
   assert.match(styles, /\.pace-limit-safe strong\s*\{[^}]*color:\s*var\(--green\)/s);
   assert.match(styles, /\.expense-category-icon\s*\{[^}]*width:\s*48px[^}]*height:\s*48px/s);
@@ -940,10 +957,13 @@ test("keeps database history and translations aligned", async () => {
     assert.match(source, /type:\s*"line"/);
     assert.match(source, /min:\s*1,\s*max:\s*10/);
     assert.match(source, /allowanceGuide/);
-    assert.match(source, /maxPullUpsSingleSet[\s\S]{0,90}\/ 20/);
-    assert.match(source, /maxPushUpsSingleSet[\s\S]{0,90}\/ 50/);
-    assert.match(source, /pullComponent \* 0\.6 \+ pushComponent \* 0\.4/);
-    assert.match(source, /\(weightKg \/ 75\) \*\* 0\.12/);
+    assert.match(source, /STRENGTH_ALLOMETRIC_EXPONENT = 1 \/ 3/);
+    assert.match(source, /STRENGTH_PULL_UP_TARGET_REPS = 20/);
+    assert.match(source, /STRENGTH_PUSH_UP_TARGET_REPS = 50/);
+    assert.match(source, /safePullUps \* massAdjustment/);
+    assert.match(source, /safePushUps \* massAdjustment/);
+    assert.match(source, /\(pullComponent \+ pushComponent\) \/ 2/);
+    assert.doesNotMatch(source, /\* 0\.6 \+ pushComponent \* 0\.4|\*\* 0\.12/);
     assert.match(source, /savingsSafeTop - allFundsTop < 12/);
   }
   assert.match(styles, /\.allowance-guide\s*\{/);
@@ -985,8 +1005,13 @@ test("keeps database history and translations aligned", async () => {
     assert.match(source, /seriesName:[\s\S]{0,120}min:\s*0,[\s\S]{0,80}max:\s*(?:drawChartMaximum|chartMaximum)/);
     assert.match(source, /creditStatus !== "repaid"/);
   }
-  assert.match(index, /class="credit-key"/);
-  assert.match(styles, /\.credit-key\s*\{[^}]*background:\s*var\(--red\)/s);
+  assert.doesNotMatch(index, /class="(?:spending|credit)-key"/);
+  assert.doesNotMatch(styles, /\.(?:spending|credit)-key\s*\{/);
+  for (const source of [script, page]) {
+    assert.match(source, /spendingInsight/);
+    assert.match(source, /pointerdown/);
+    assert.match(source, /event\.key === "Escape"/);
+  }
   assert.doesNotMatch(styles, /--chart-glow|drop-shadow\(0 0|text-shadow:\s*0 0/);
   assert.match(script, /window\.setInterval[\s\S]{0,180}1000/);
   assert.match(page, /window\.setInterval[\s\S]{0,180}1000/);

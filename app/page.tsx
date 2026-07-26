@@ -14,6 +14,11 @@ type Category =
   | "Alcohol & nightlife";
 type Language = "en" | "ru";
 
+const STRENGTH_REFERENCE_BODY_MASS_KG = 75;
+const STRENGTH_ALLOMETRIC_EXPONENT = 1 / 3;
+const STRENGTH_PULL_UP_TARGET_REPS = 20;
+const STRENGTH_PUSH_UP_TARGET_REPS = 50;
+
 const THEMES = [
   { id: "kinance", label: "Kinance", banners: ["/theme-banners/kinance.png?v=7", "/theme-banners/kinance-frame-2.png?v=7"] },
   { id: "kinance-moon", label: "Kinance Moon", banners: ["/theme-banners/kinance.png?v=7", "/theme-banners/kinance-frame-2.png?v=7"] },
@@ -205,7 +210,7 @@ const COPY = {
     strengthPushUps: "Best push-up set",
     strengthLatestMetrics: "Latest relative strength attempt metrics",
     strengthSave: "Save attempt",
-    strengthNote: "Best single set per exercise · sets are not added together",
+    strengthNote: "Best single sets · never summed · body-mass adjusted personal index",
     strengthWeightUnit: "kg",
     edit: "Tap the amount to edit",
     savings: "SAVINGS REQUIREMENT",
@@ -249,7 +254,7 @@ const COPY = {
     monthEnd: "Cycle end",
     updated: "Updated",
     monthsSaved: "{count} / 12 cycles saved",
-    spendingAlert: "Spending alert",
+    spendingInsight: "Spending insight",
     spendingClear: "No spending pressure yet. Keep logging expenses to receive current guidance.",
     spendingLargest: "{category} is your largest cost at {amount} ({percent}% of spending).",
     spendingCut: "For flexible cuts, focus on {category} next ({amount}).",
@@ -262,7 +267,7 @@ const COPY = {
     monthlyPlanLabel: "Salary cycle plan balance",
     monthlyTotalsLabel: "Salary cycle totals",
     budgetUsed: "{percent}% of spending budget used",
-    salaryAllocation: "{spent}% of total income spent; {savings}% reserved for savings",
+    salaryAllocation: "{spent}% of total income spent. Savings threshold: {safeLimit}%. Amount beyond threshold: {savingsUsed}.",
     noSpendingBudget: "NO SPENDING BUDGET",
     savingsEuroLabel: "Monthly savings requirement in euros",
   },
@@ -299,7 +304,7 @@ const COPY = {
     strengthPushUps: "Лучший подход: отжимания",
     strengthLatestMetrics: "Показатели последней попытки относительной силы",
     strengthSave: "Сохранить попытку",
-    strengthNote: "Лучший подход в каждом упражнении · подходы не суммируются",
+    strengthNote: "Лучшие одиночные подходы · подходы не суммируются · персональный индекс с поправкой на массу тела",
     strengthWeightUnit: "кг",
     edit: "Нажмите на сумму, чтобы изменить её",
     savings: "ЦЕЛЬ НАКОПЛЕНИЙ",
@@ -343,7 +348,7 @@ const COPY = {
     monthEnd: "Конец цикла",
     updated: "Обновлено",
     monthsSaved: "Сохранено циклов: {count} из 12",
-    spendingAlert: "Контроль расходов",
+    spendingInsight: "Анализ расходов",
     spendingClear: "Пока признаков перерасхода нет. Продолжайте учитывать расходы, чтобы рекомендации оставались актуальными.",
     spendingLargest: "Самая крупная статья расходов: {category}, {amount} ({percent}% всех расходов).",
     spendingCut: "Если нужно сократить необязательные траты, начните с категории «{category}» ({amount}).",
@@ -356,7 +361,7 @@ const COPY = {
     monthlyPlanLabel: "Баланс зарплатного цикла",
     monthlyTotalsLabel: "Итоги зарплатного цикла",
     budgetUsed: "Использовано {percent}% доступного бюджета",
-    salaryAllocation: "Потрачено {spent}% общего дохода; {savings}% отведено на накопления",
+    salaryAllocation: "Потрачено {spent}% общего дохода. Порог накоплений: {safeLimit}%. Сверх порога потрачено: {savingsUsed}.",
     noSpendingBudget: "НЕТ БЮДЖЕТА НА РАСХОДЫ",
     savingsEuroLabel: "Цель ежемесячных накоплений в евро",
   },
@@ -535,10 +540,24 @@ function relativeStrengthScore(
   maxPullUpsSingleSet: number,
   maxPushUpsSingleSet: number,
 ) {
-  const pullComponent = Math.min(Math.max(maxPullUpsSingleSet, 0) / 20, 1);
-  const pushComponent = Math.min(Math.max(maxPushUpsSingleSet, 0) / 50, 1);
-  const massFactor = Math.min(Math.max((weightKg / 75) ** 0.12, 0.9), 1.1);
-  const score = 1 + 9 * (pullComponent * 0.6 + pushComponent * 0.4) * massFactor;
+  const safeWeightKg = Number.isFinite(weightKg) ? Math.max(weightKg, 0) : 0;
+  const safePullUps = Number.isFinite(maxPullUpsSingleSet)
+    ? Math.max(maxPullUpsSingleSet, 0)
+    : 0;
+  const safePushUps = Number.isFinite(maxPushUpsSingleSet)
+    ? Math.max(maxPushUpsSingleSet, 0)
+    : 0;
+  const massAdjustment =
+    (safeWeightKg / STRENGTH_REFERENCE_BODY_MASS_KG) ** STRENGTH_ALLOMETRIC_EXPONENT;
+  const pullComponent = Math.min(
+    (safePullUps * massAdjustment) / STRENGTH_PULL_UP_TARGET_REPS,
+    1,
+  );
+  const pushComponent = Math.min(
+    (safePushUps * massAdjustment) / STRENGTH_PUSH_UP_TARGET_REPS,
+    1,
+  );
+  const score = 1 + 9 * ((pullComponent + pushComponent) / 2);
   return Math.round(Math.min(Math.max(score, 1), 10) * 10) / 10;
 }
 
@@ -583,9 +602,11 @@ export default function Home() {
   const [language, setLanguage] = useState<Language>("ru");
   const [theme, setTheme] = useState<ThemeId>("kinance");
   const [bannerFrame, setBannerFrame] = useState(0);
+  const [spendingInsightOpen, setSpendingInsightOpen] = useState(false);
   const [recurringExpanded, setRecurringExpanded] = useState(true);
   const [oneTimeExpanded, setOneTimeExpanded] = useState(true);
   const dailyChartRef = useRef<HTMLDivElement>(null);
+  const spendingInsightRef = useRef<HTMLDivElement>(null);
 
   /* Cookie preferences hydrate only after the client mounts. */
   /* eslint-disable react-hooks/set-state-in-effect */
@@ -609,6 +630,24 @@ export default function Home() {
   useEffect(() => {
     document.documentElement.lang = language;
   }, [language]);
+
+  useEffect(() => {
+    if (!spendingInsightOpen) return;
+    const closeOnOutsidePress = (event: PointerEvent) => {
+      if (!spendingInsightRef.current?.contains(event.target as Node)) {
+        setSpendingInsightOpen(false);
+      }
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setSpendingInsightOpen(false);
+    };
+    document.addEventListener("pointerdown", closeOnOutsidePress);
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.removeEventListener("pointerdown", closeOnOutsidePress);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [spendingInsightOpen]);
 
   /* eslint-enable react-hooks/set-state-in-effect */
 
@@ -647,9 +686,13 @@ export default function Home() {
   const safeRemaining = roundMoney(cashRemaining - savings);
   const spentPercent = totalIncome > 0 ? (spent / totalIncome) * 100 : spent > 0 ? null : 0;
   const visualSpentPercent = spentPercent === null ? 100 : Math.min(spentPercent, 100);
-  const savingsPercent = totalIncome > 0 ? Math.min((savings / totalIncome) * 100, 100) : savings > 0 ? 100 : 0;
-  const savingsStartDegrees = (100 - savingsPercent) * 3.6;
-  const spentEndDegrees = Math.min(visualSpentPercent * 3.6, savingsStartDegrees);
+  const safeSpendingLimitPercent = totalIncome > 0
+    ? Math.min(Math.max(((totalIncome - savings) / totalIncome) * 100, 0), 100)
+    : 0;
+  const savingsStartDegrees = safeSpendingLimitPercent * 3.6;
+  const spentEndDegrees = visualSpentPercent * 3.6;
+  const safeSpentEndDegrees = Math.min(spentEndDegrees, savingsStartDegrees);
+  const savingsUsed = Math.max(-safeRemaining, 0);
   const [year, month] = selectedMonth.month.split("-").map(Number);
   const { start: cycleStart, end: cycleEnd } = salaryCycleDates(selectedMonth.month);
   const todayKey = todayInVilnius();
@@ -848,7 +891,7 @@ export default function Home() {
         item.name !== largestCategory?.name &&
         flexibleCategories.has(item.name),
     ) ?? largestCategory;
-  const spendingAlertDetail = largestCategory
+  const spendingInsightDetail = largestCategory
     ? `${fillTemplate(copy.spendingLargest, {
         category: categoryLabel(largestCategory.name),
         amount: euro.format(largestCategory.amount),
@@ -1009,21 +1052,33 @@ export default function Home() {
           </section>
         )}
 
-        <section className="spending-alert" role="status" aria-live="polite">
-          <span className="spending-alert-icon" aria-hidden="true">!</span>
-          <div>
-            <strong>{copy.spendingAlert}</strong>
-            <p>{spendingAlertDetail}</p>
-          </div>
-        </section>
-
         <header className="topbar">
           <a className="brand" href="#top" aria-label={copy.kinanceHome}>
             <span className="brand-mark" aria-hidden="true">€</span>
             <span>kinance</span>
           </a>
+          <div className="spending-insight" ref={spendingInsightRef}>
+            <button
+              type="button"
+              className="spending-insight-trigger"
+              aria-expanded={spendingInsightOpen}
+              aria-controls="spending-insight-tooltip"
+              onClick={() => setSpendingInsightOpen((open) => !open)}
+            >
+              <span className="spending-insight-icon" aria-hidden="true">i</span>
+              <span>{copy.spendingInsight}</span>
+            </button>
+            <div
+              id="spending-insight-tooltip"
+              className="spending-insight-tooltip"
+              role="tooltip"
+              hidden={!spendingInsightOpen}
+            >
+              <strong>{copy.spendingInsight}</strong>
+              <p>{spendingInsightDetail}</p>
+            </div>
+          </div>
           <div className="header-meta">
-            <span className="updated-label">{updatedLabel}</span>
             <label className="theme-switcher" data-current-theme={theme}>
               <span className="sr-only">{copy.themeLabel}</span>
               <select
@@ -1063,6 +1118,7 @@ export default function Home() {
               <span className="month-dot" aria-hidden="true" />
               {monthLabel}
             </div>
+            <span className="updated-label">{updatedLabel}</span>
           </div>
         </header>
 
@@ -1155,8 +1211,6 @@ export default function Home() {
             <div><span>{copy.strengthPushUps}</span><strong>{latestStrength?.maxPushUpsSingleSet ?? 0}</strong></div>
           </div>
           <div className="strength-meta">
-            <span><i className="spending-key" />{copy.dailyExpenseSeries}</span>
-            <span><i className="credit-key" />{copy.creditExpenseSeries}</span>
             <span><i className="strength-key" />{copy.relativeStrengthSeries}</span>
             <small>{copy.strengthNote}</small>
           </div>
@@ -1177,24 +1231,30 @@ export default function Home() {
                 <strong>{euro.format(cashRemaining)}</strong>
                 <span className="balance-caption">{copy.left}</span>
                 <span className="balance-safe-caption">
-                  <b>{euro.format(safeRemaining)}</b> {copy.afterSavings}
+                  <b className={safeRemaining < 0 ? "is-negative" : undefined}>
+                    {euro.format(safeRemaining)}
+                  </b>{" "}{copy.afterSavings}
                 </span>
               </div>
               <div
                 className="progress-ring"
                 style={{
+                  "--safe-spent-end": `${safeSpentEndDegrees}deg`,
                   "--spent-end": `${spentEndDegrees}deg`,
                   "--savings-start": `${savingsStartDegrees}deg`,
                 } as React.CSSProperties}
+                data-savings-violated={savingsUsed > 0 ? "true" : "false"}
                 aria-label={
                   spentPercent === null
                     ? copy.noSpendingBudget
                     : fillTemplate(copy.salaryAllocation, {
                         spent: Math.round(spentPercent),
-                        savings: Math.round(savingsPercent),
+                        safeLimit: Math.round(safeSpendingLimitPercent),
+                        savingsUsed: euro.format(savingsUsed),
                       })
                 }
               >
+                <i className="progress-threshold" aria-hidden="true" />
                 <span>{spentPercent === null ? "!" : `${Math.round(spentPercent)}%`}</span>
               </div>
             </div>

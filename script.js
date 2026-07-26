@@ -8,6 +8,11 @@ const CATEGORIES = [
   "Alcohol & nightlife",
 ];
 
+const STRENGTH_REFERENCE_BODY_MASS_KG = 75;
+const STRENGTH_ALLOMETRIC_EXPONENT = 1 / 3;
+const STRENGTH_PULL_UP_TARGET_REPS = 20;
+const STRENGTH_PUSH_UP_TARGET_REPS = 50;
+
 const KINANCE_CATEGORY_ICONS = {
   Food: "/public/category-icons/food-rpg.png?v=1",
   "Subscriptions & services": "/public/category-icons/services-rpg.png?v=1",
@@ -131,7 +136,7 @@ const TRANSLATIONS = {
     strengthPullUps: "Best pull-up set",
     strengthPushUps: "Best push-up set",
     strengthSave: "Save attempt",
-    strengthNote: "Best single set per exercise · sets are not added together",
+    strengthNote: "Best single sets · never summed · body-mass adjusted personal index",
     strengthLatestMetrics: "Latest relative strength attempt metrics",
     strengthWeightUnit: "kg",
     tapToEdit: "Tap the amount to edit",
@@ -180,7 +185,7 @@ const TRANSLATIONS = {
     perDay: "/ day",
     monthsSaved: "{count} / 12 cycles saved",
     noExpenses: "No expenses recorded",
-    spendingAlert: "Spending alert",
+    spendingInsight: "Spending insight",
     spendingClear: "No spending pressure yet. Keep logging expenses to receive current guidance.",
     spendingLargest: "{category} is your largest cost at {amount} ({percent}% of spending).",
     spendingCut: "For flexible cuts, focus on {category} next ({amount}).",
@@ -194,7 +199,7 @@ const TRANSLATIONS = {
     monthlyPlanLabel: "Salary cycle plan balance",
     monthlyTotalsLabel: "Salary cycle totals",
     budgetUsed: "{percent}% of spending budget used",
-    salaryAllocation: "{spent}% of total income spent; {savings}% reserved for savings",
+    salaryAllocation: "{spent}% of total income spent. Savings threshold: {safeLimit}%. Amount beyond threshold: {savingsUsed}.",
     noSpendingBudget: "NO SPENDING BUDGET",
     historyUnavailable: "History unavailable",
     refresh: "Please refresh the page in a moment.",
@@ -238,7 +243,7 @@ const TRANSLATIONS = {
     strengthPullUps: "Лучший подход: подтягивания",
     strengthPushUps: "Лучший подход: отжимания",
     strengthSave: "Сохранить попытку",
-    strengthNote: "Лучший подход в каждом упражнении · подходы не суммируются",
+    strengthNote: "Лучшие одиночные подходы · подходы не суммируются · персональный индекс с поправкой на массу тела",
     strengthLatestMetrics: "Показатели последней попытки относительной силы",
     strengthWeightUnit: "кг",
     tapToEdit: "Нажмите на сумму, чтобы изменить её",
@@ -287,7 +292,7 @@ const TRANSLATIONS = {
     perDay: "в день",
     monthsSaved: "Сохранено циклов: {count} из 12",
     noExpenses: "Расходов нет",
-    spendingAlert: "Контроль расходов",
+    spendingInsight: "Анализ расходов",
     spendingClear: "Пока признаков перерасхода нет. Продолжайте учитывать расходы, чтобы рекомендации оставались актуальными.",
     spendingLargest: "Самая крупная статья расходов: {category}, {amount} ({percent}% всех расходов).",
     spendingCut: "Если нужно сократить необязательные траты, начните с категории «{category}» ({amount}).",
@@ -301,7 +306,7 @@ const TRANSLATIONS = {
     monthlyPlanLabel: "Баланс зарплатного цикла",
     monthlyTotalsLabel: "Итоги зарплатного цикла",
     budgetUsed: "Использовано {percent}% доступного бюджета",
-    salaryAllocation: "Потрачено {spent}% общего дохода; {savings}% отведено на накопления",
+    salaryAllocation: "Потрачено {spent}% общего дохода. Порог накоплений: {safeLimit}%. Сверх порога потрачено: {savingsUsed}.",
     noSpendingBudget: "НЕТ БЮДЖЕТА НА РАСХОДЫ",
     historyUnavailable: "История недоступна",
     refresh: "Обновите страницу через несколько секунд.",
@@ -622,15 +627,15 @@ function categoryTotals() {
   }));
 }
 
-function renderSpendingAlert() {
+function renderSpendingInsight() {
   const ranked = categoryTotals()
     .filter((item) => item.amount > 0)
     .sort((a, b) => b.amount - a.amount);
   const total = ranked.reduce((sum, item) => sum + item.amount, 0);
-  element("spending-alert-title").textContent = t("spendingAlert");
+  element("spending-insight-title").textContent = t("spendingInsight");
 
   if (!ranked.length || total <= 0) {
-    element("spending-alert-detail").textContent = t("spendingClear");
+    element("spending-insight-detail").textContent = t("spendingClear");
     return;
   }
 
@@ -662,7 +667,7 @@ function renderSpendingAlert() {
           amount: formatEuro(cutTarget.amount),
         });
 
-  element("spending-alert-detail").textContent = `${lead} ${action}`;
+  element("spending-insight-detail").textContent = `${lead} ${action}`;
 }
 
 function renderCreditAlert() {
@@ -896,10 +901,24 @@ function dailyExpensePoints(expenses, period, asOfDate, paymentMethod) {
 }
 
 function relativeStrengthScore(weightKg, maxPullUpsSingleSet, maxPushUpsSingleSet) {
-  const pullComponent = Math.min(Math.max(maxPullUpsSingleSet, 0) / 20, 1);
-  const pushComponent = Math.min(Math.max(maxPushUpsSingleSet, 0) / 50, 1);
-  const massFactor = Math.min(Math.max((weightKg / 75) ** 0.12, 0.9), 1.1);
-  const score = 1 + 9 * (pullComponent * 0.6 + pushComponent * 0.4) * massFactor;
+  const safeWeightKg = Number.isFinite(weightKg) ? Math.max(weightKg, 0) : 0;
+  const safePullUps = Number.isFinite(maxPullUpsSingleSet)
+    ? Math.max(maxPullUpsSingleSet, 0)
+    : 0;
+  const safePushUps = Number.isFinite(maxPushUpsSingleSet)
+    ? Math.max(maxPushUpsSingleSet, 0)
+    : 0;
+  const massAdjustment =
+    (safeWeightKg / STRENGTH_REFERENCE_BODY_MASS_KG) ** STRENGTH_ALLOMETRIC_EXPONENT;
+  const pullComponent = Math.min(
+    (safePullUps * massAdjustment) / STRENGTH_PULL_UP_TARGET_REPS,
+    1,
+  );
+  const pushComponent = Math.min(
+    (safePushUps * massAdjustment) / STRENGTH_PUSH_UP_TARGET_REPS,
+    1,
+  );
+  const score = 1 + 9 * ((pullComponent + pushComponent) / 2);
   return Math.round(Math.min(Math.max(score, 1), 10) * 10) / 10;
 }
 
@@ -1053,9 +1072,13 @@ function render() {
   const safeRemaining = roundMoney(cashRemaining - savings);
   const spentPercent = totalIncome > 0 ? (spent / totalIncome) * 100 : spent > 0 ? null : 0;
   const visualSpentPercent = spentPercent === null ? 100 : Math.min(spentPercent, 100);
-  const savingsPercent = totalIncome > 0 ? Math.min((savings / totalIncome) * 100, 100) : savings > 0 ? 100 : 0;
-  const savingsStartDegrees = (100 - savingsPercent) * 3.6;
-  const spentEndDegrees = Math.min(visualSpentPercent * 3.6, savingsStartDegrees);
+  const safeSpendingLimitPercent = totalIncome > 0
+    ? Math.min(Math.max(((totalIncome - savings) / totalIncome) * 100, 0), 100)
+    : 0;
+  const savingsStartDegrees = safeSpendingLimitPercent * 3.6;
+  const spentEndDegrees = visualSpentPercent * 3.6;
+  const safeSpentEndDegrees = Math.min(spentEndDegrees, savingsStartDegrees);
+  const savingsUsed = Math.max(-safeRemaining, 0);
   const timeline = renderTimeline();
   const daysLeft = Math.max(timeline.totalDays - timeline.elapsedDays, 1);
 
@@ -1086,20 +1109,25 @@ function render() {
   spendingComparisonElement.className = `stat-comparison ${spendingComparison?.tone ?? "neutral"}`;
   element("remaining").textContent = formatEuro(cashRemaining);
   element("safe-remaining").textContent = formatEuro(safeRemaining);
+  element("safe-remaining").classList.toggle("is-negative", safeRemaining < 0);
   const usedLabel = spentPercent === null
     ? t("noSpendingBudget")
     : `${Math.round(spentPercent)}% ${t("spent")}`;
   element("spent-percent").textContent = usedLabel;
   element("ring-percent").textContent = spentPercent === null ? "!" : `${Math.round(spentPercent)}%`;
-  element("progress-ring").style.setProperty("--spent-end", `${spentEndDegrees}deg`);
-  element("progress-ring").style.setProperty("--savings-start", `${savingsStartDegrees}deg`);
-  element("progress-ring").setAttribute(
+  const progressRing = element("progress-ring");
+  progressRing.style.setProperty("--safe-spent-end", `${safeSpentEndDegrees}deg`);
+  progressRing.style.setProperty("--spent-end", `${spentEndDegrees}deg`);
+  progressRing.style.setProperty("--savings-start", `${savingsStartDegrees}deg`);
+  progressRing.dataset.savingsViolated = String(savingsUsed > 0);
+  progressRing.setAttribute(
     "aria-label",
     spentPercent === null
       ? t("noSpendingBudget")
-      : t("salaryAllocation", {
+        : t("salaryAllocation", {
           spent: Math.round(spentPercent),
-          savings: Math.round(savingsPercent),
+          safeLimit: Math.round(safeSpendingLimitPercent),
+          savingsUsed: formatEuro(savingsUsed),
         }),
   );
   element("daily-pace-all").textContent = `${formatEuro(Math.max(cashRemaining, 0) / daysLeft, true)} ${t("perDay")}`;
@@ -1112,13 +1140,29 @@ function render() {
     Math.max(safeRemaining, 0) / daysLeft,
   );
   renderCreditAlert();
-  renderSpendingAlert();
+  renderSpendingInsight();
   renderHistory();
   renderBreakdown();
   renderLedger();
 }
 
 function bindControls() {
+  const spendingInsight = element("spending-insight");
+  const spendingInsightTrigger = element("spending-insight-trigger");
+  const spendingInsightTooltip = element("spending-insight-tooltip");
+  const setSpendingInsightOpen = (open) => {
+    spendingInsightTooltip.hidden = !open;
+    spendingInsightTrigger.setAttribute("aria-expanded", String(open));
+  };
+  spendingInsightTrigger.addEventListener("click", () => {
+    setSpendingInsightOpen(spendingInsightTooltip.hidden);
+  });
+  document.addEventListener("pointerdown", (event) => {
+    if (!spendingInsight.contains(event.target)) setSpendingInsightOpen(false);
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") setSpendingInsightOpen(false);
+  });
   element("theme-banner-image").addEventListener("error", (event) => {
     event.currentTarget.hidden = true;
   });

@@ -302,6 +302,10 @@ Preserve the dark iOS-inspired system:
 - one proportional colored spending bar with a text legend as the single category breakdown; do not repeat the same category amounts in a separate card strip;
 - visible keyboard focus, semantic structure, sufficient contrast, and reduced-motion support.
 
+The calculated spending guidance belongs in a compact `Spending insight` disclosure between the Kinance brand and the theme selector, not in a persistent page-top panel. Keep the insight data-driven from the selected salary cycle. Clicking the button opens a restrained tooltip containing the localized insight; clicking anywhere outside it or pressing Escape closes it. Keep `aria-expanded`, `aria-controls`, the tooltip role, keyboard focus, and mobile viewport containment correct. Do not place debit, credit, or other finance-series legends inside the Relative Strength card. That card may identify only its own Relative Strength line and methodology note; the activity chart's localized accessible label carries the debit and credit series explanation.
+
+The expenditure ring is a progress gauge, not an allocation pie. Its untouched track is dark. Actual spending fills it clockwise in green only up to the safe-spending threshold of `total income - savings goal`; a distinct radial marker shows that threshold. Only actual spending beyond the marker is red, and the remaining unspent track stays dark. Never color the entire savings allocation red before it has been spent. Derive all stops and the threshold from the selected cycle's income, savings goal, and recorded expenses. A negative balance after protecting savings is a savings breach and must be red; zero or a positive protected balance remains green.
+
 Do not introduce heavy libraries for behavior that plain TypeScript/JavaScript/CSS already handles.
 
 ## Theme system
@@ -326,14 +330,19 @@ Avoid glow effects throughout every theme. Do not add luminous text shadows, col
 
 Relative Strength entries live in `data/strength-history.json`, independently of salary cycles. The root contains `version`, `timezone`, `updatedAt`, `revision`, and chronological `entries`. Increment `revision` and set the actual Vilnius `updatedAt` whenever an entry changes. Each entry contains a stable ID, the actual Vilnius date, body weight in kilograms, `maxPullUpsSingleSet`, `maxPushUpsSingleSet`, and `source: "chat"`. These two repetition values always mean the highest number completed in one uninterrupted set on that date. Never add together separate sets, rounds, or an evening's total volume. If the user performs five sets, record only the highest pull-up set and highest push-up set; they do not have to come from the same round. Do not track the number of sets unless the user explicitly asks for a separate training-volume feature. Do not store the derived score. Validate weight from 30 to 250 kg, pull-ups from 0 to 200, and push-ups from 0 to 300.
 
-The frontend is read-only: show the latest attempt as compact metrics and the best calculated score per day on the shared activity chart, without an input form or a misleading local save action. The score is a personal training index, not a medical assessment or population percentile. Keep the Relative Strength card compact and immediately scannable on mobile: the score and latest date form the first hierarchy, all three metric values use equal visual emphasis, long metric labels wrap instead of truncating, and the chart legend plus single-set explanation remain readable secondary information. Format the score with the selected locale's decimal separator. Calculate it identically in JavaScript and React:
+The frontend is read-only: show the latest attempt as compact metrics and the best calculated score per day on the shared activity chart, without an input form or a misleading local save action. The displayed number is a personal bodyweight strength-endurance index, not a direct measurement of maximal force, a medical assessment, or a population percentile. Pull-up and push-up repetitions depend on technique, range of motion, cadence, and proximity to failure, so compare attempts only when the user uses consistent strict form. Keep the Relative Strength card compact and immediately scannable on mobile: the score and latest date form the first hierarchy, all three metric values use equal visual emphasis, long metric labels wrap instead of truncating, and the Relative Strength line key plus methodology note remain readable secondary information. Format the score with the selected locale's decimal separator.
 
-1. cap pull-up progress at `maxPullUpsSingleSet / 20` and push-up progress at `maxPushUpsSingleSet / 50`;
-2. weight those components 60% and 40% respectively;
-3. apply the deliberately mild body-mass factor `(weightKg / 75) ^ 0.12`, clamped from `0.9` to `1.1`;
-4. map the result onto 1 through 10, clamp it, and round to one decimal place.
+Formula version 3 must be calculated identically in JavaScript and React:
 
-Never diagnose health, claim that this index is scientifically standardized, or silently change the formula because that would make historical comparisons misleading. If the formula changes, increment the strength database schema version and keep historical comparisons explicit.
+1. calculate the allometric body-mass adjustment `(weightKg / 75) ^ (1 / 3)`; the one-third exponent corrects the known size advantage in tests that support body weight without pretending that repetition tests are direct 1RM measurements;
+2. multiply both single-set repetition counts by that adjustment;
+3. divide adjusted pull-ups by the 20-repetition scale anchor and adjusted push-ups by the 50-repetition scale anchor, clamping each component from 0 to 1;
+4. average the two components equally so neither movement silently dominates the index;
+5. map that average onto 1 through 10, clamp it, and round to one decimal place.
+
+The 20- and 50-repetition anchors calibrate this personal 1-to-10 display and are not population norms. Store raw attempts only and recompute every displayed historical score with the current formula so the chart stays internally comparable. Never diagnose health or claim that this index is scientifically standardized. If the formula changes, increment the strength database schema version, document the new formula version, and update regression fixtures. Strength database version 3 introduced the allometric, equally weighted formula above; version 2 used the discontinued `0.12` clamped mass factor and 60/40 weighting.
+
+Scientific rationale: research on bodyweight-supported performance found an approximately negative one-third body-mass scaling exponent for tests such as chin-ups, which corresponds to multiplying repetition performance by body mass to the positive one-third power when comparing sizes ([PubMed](https://pubmed.ncbi.nlm.nih.gov/15024662/)). Push-up biomechanics also show that the upper extremities support a consistent fraction of body mass rather than an external fixed load ([PubMed](https://pubmed.ncbi.nlm.nih.gov/20179649/), [full-text study](https://pmc.ncbi.nlm.nih.gov/articles/PMC7386139/)). Repetition capacity still varies substantially between people at a given percentage of 1RM, so this index must not be presented as a 1RM estimate or universal norm ([PubMed](https://pubmed.ncbi.nlm.nih.gov/37792272/)).
 
 The built-in themes are:
 

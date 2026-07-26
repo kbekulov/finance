@@ -154,8 +154,9 @@ test("server-renders the current finance tracker", async () => {
   assert.match(html, /ОТНОСИТЕЛЬНАЯ СИЛА/);
   assert.match(html, /<strong>4\.4<\/strong>/);
   assert.match(html, /<strong>51<small>кг<\/small><\/strong>/);
-  assert.match(html, /Макс\. подтягиваний<\/span><strong>5<\/strong>/);
-  assert.match(html, /Макс\. отжиманий<\/span><strong>30<\/strong>/);
+  assert.match(html, /Лучший подход: подтягивания<\/span><strong>5<\/strong>/);
+  assert.match(html, /Лучший подход: отжимания<\/span><strong>30<\/strong>/);
+  assert.match(html, /подходы не суммируются/);
   assert.doesNotMatch(html, /<form\b/);
   assert.doesNotMatch(html, /class="add-panel"/);
   assert.doesNotMatch(html, /class="editable-value"/);
@@ -225,16 +226,16 @@ test("keeps database history and translations aligned", async () => {
   assert.equal(current.savingsGoal, 200);
   assert.equal(current.expenses.length, 44);
   assert.deepEqual(strengthDatabase, {
-    version: 1,
+    version: 2,
     timezone: "Europe/Vilnius",
     updatedAt: "2026-07-26",
-    revision: 1,
+    revision: 2,
     entries: [{
       id: "2026-07-26-rs-001",
       date: "2026-07-26",
       weightKg: 51,
-      pullUps: 5,
-      pushUps: 30,
+      maxPullUpsSingleSet: 5,
+      maxPushUpsSingleSet: 30,
       source: "chat",
     }],
   });
@@ -804,7 +805,7 @@ test("keeps database history and translations aligned", async () => {
   assert.match(index, /<html lang="ru">/);
   assert.match(index, /styles\.css\?v=40/);
   assert.match(index, /public\/vendor\/apexcharts\.min\.js\?v=21/);
-  assert.match(index, /script\.js\?v=45/);
+  assert.match(index, /script\.js\?v=46/);
   assert.match(index, /data-current-theme="kinance"/);
   assert.match(index, /id="credit-alert"[^>]*hidden/);
   assert.doesNotMatch(index, /id="payment-method"/);
@@ -930,8 +931,8 @@ test("keeps database history and translations aligned", async () => {
     assert.match(source, /type:\s*"line"/);
     assert.match(source, /min:\s*1,\s*max:\s*10/);
     assert.match(source, /allowanceGuide/);
-    assert.match(source, /pullUps[\s\S]{0,90}\/ 20/);
-    assert.match(source, /pushUps[\s\S]{0,90}\/ 50/);
+    assert.match(source, /maxPullUpsSingleSet[\s\S]{0,90}\/ 20/);
+    assert.match(source, /maxPushUpsSingleSet[\s\S]{0,90}\/ 50/);
     assert.match(source, /pullComponent \* 0\.6 \+ pushComponent \* 0\.4/);
     assert.match(source, /\(weightKg \/ 75\) \*\* 0\.12/);
     assert.match(source, /savingsSafeTop - allFundsTop < 12/);

@@ -61,8 +61,8 @@ type StrengthEntry = {
   id: string;
   date: string;
   weightKg: number;
-  pullUps: number;
-  pushUps: number;
+  maxPullUpsSingleSet: number;
+  maxPushUpsSingleSet: number;
   source: "chat";
 };
 
@@ -200,11 +200,11 @@ const COPY = {
     strengthNoAttempts: "Log an attempt to establish your baseline",
     strengthLatest: "Latest attempt · {date}",
     strengthWeight: "Weight",
-    strengthPullUps: "Max pull-ups",
-    strengthPushUps: "Max push-ups",
+    strengthPullUps: "Best pull-up set",
+    strengthPushUps: "Best push-up set",
     strengthLatestMetrics: "Latest relative strength attempt metrics",
     strengthSave: "Save attempt",
-    strengthNote: "Personal training index · best daily score · updated through chat",
+    strengthNote: "Best uninterrupted set per exercise · never summed across sets",
     strengthWeightUnit: "kg",
     edit: "Tap the amount to edit",
     savings: "SAVINGS REQUIREMENT",
@@ -293,11 +293,11 @@ const COPY = {
     strengthNoAttempts: "Добавьте попытку, чтобы определить исходный уровень",
     strengthLatest: "Последняя попытка · {date}",
     strengthWeight: "Вес",
-    strengthPullUps: "Макс. подтягиваний",
-    strengthPushUps: "Макс. отжиманий",
+    strengthPullUps: "Лучший подход: подтягивания",
+    strengthPushUps: "Лучший подход: отжимания",
     strengthLatestMetrics: "Показатели последней попытки относительной силы",
     strengthSave: "Сохранить попытку",
-    strengthNote: "Персональный индекс · лучший результат дня · обновляется через чат",
+    strengthNote: "Лучший непрерывный подход в каждом упражнении · подходы не суммируются",
     strengthWeightUnit: "кг",
     edit: "Нажмите на сумму, чтобы изменить её",
     savings: "ЦЕЛЬ НАКОПЛЕНИЙ",
@@ -526,9 +526,13 @@ function dailyExpensePoints(
   return points;
 }
 
-function relativeStrengthScore(weightKg: number, pullUps: number, pushUps: number) {
-  const pullComponent = Math.min(Math.max(pullUps, 0) / 20, 1);
-  const pushComponent = Math.min(Math.max(pushUps, 0) / 50, 1);
+function relativeStrengthScore(
+  weightKg: number,
+  maxPullUpsSingleSet: number,
+  maxPushUpsSingleSet: number,
+) {
+  const pullComponent = Math.min(Math.max(maxPullUpsSingleSet, 0) / 20, 1);
+  const pushComponent = Math.min(Math.max(maxPushUpsSingleSet, 0) / 50, 1);
   const massFactor = Math.min(Math.max((weightKg / 75) ** 0.12, 0.9), 1.1);
   const score = 1 + 9 * (pullComponent * 0.6 + pushComponent * 0.4) * massFactor;
   return Math.round(Math.min(Math.max(score, 1), 10) * 10) / 10;
@@ -542,7 +546,11 @@ function dailyStrengthPoints(
   const dailyBest = new Map<string, number>();
   for (const entry of entries) {
     if (entry.date < period.start || entry.date > period.end || entry.date > asOfDate) continue;
-    const score = relativeStrengthScore(entry.weightKg, entry.pullUps, entry.pushUps);
+    const score = relativeStrengthScore(
+      entry.weightKg,
+      entry.maxPullUpsSingleSet,
+      entry.maxPushUpsSingleSet,
+    );
     dailyBest.set(entry.date, Math.max(dailyBest.get(entry.date) ?? 0, score));
   }
   return [...dailyBest.entries()]
@@ -840,8 +848,8 @@ export default function Home() {
   const latestStrengthScore = latestStrength
     ? relativeStrengthScore(
         latestStrength.weightKg,
-        latestStrength.pullUps,
-        latestStrength.pushUps,
+        latestStrength.maxPullUpsSingleSet,
+        latestStrength.maxPushUpsSingleSet,
       )
     : null;
   const chartMaximum = Math.max(
@@ -1103,8 +1111,8 @@ export default function Home() {
           </div>
           <div className="strength-metrics" aria-label={copy.strengthLatestMetrics}>
             <div><span>{copy.strengthWeight}</span><strong>{latestStrength?.weightKg ?? 0}<small>{copy.strengthWeightUnit}</small></strong></div>
-            <div><span>{copy.strengthPullUps}</span><strong>{latestStrength?.pullUps ?? 0}</strong></div>
-            <div><span>{copy.strengthPushUps}</span><strong>{latestStrength?.pushUps ?? 0}</strong></div>
+            <div><span>{copy.strengthPullUps}</span><strong>{latestStrength?.maxPullUpsSingleSet ?? 0}</strong></div>
+            <div><span>{copy.strengthPushUps}</span><strong>{latestStrength?.maxPushUpsSingleSet ?? 0}</strong></div>
           </div>
           <div className="strength-meta">
             <span><i className="spending-key" />{copy.dailyExpenseSeries}</span>

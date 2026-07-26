@@ -127,10 +127,10 @@ const TRANSLATIONS = {
     strengthNoAttempts: "Log an attempt to establish your baseline",
     strengthLatest: "Latest attempt · {date}",
     strengthWeight: "Weight",
-    strengthPullUps: "Max pull-ups",
-    strengthPushUps: "Max push-ups",
+    strengthPullUps: "Best pull-up set",
+    strengthPushUps: "Best push-up set",
     strengthSave: "Save attempt",
-    strengthNote: "Personal training index · best daily score · updated through chat",
+    strengthNote: "Best uninterrupted set per exercise · never summed across sets",
     strengthLatestMetrics: "Latest relative strength attempt metrics",
     strengthWeightUnit: "kg",
     tapToEdit: "Tap the amount to edit",
@@ -233,10 +233,10 @@ const TRANSLATIONS = {
     strengthNoAttempts: "Добавьте попытку, чтобы определить исходный уровень",
     strengthLatest: "Последняя попытка · {date}",
     strengthWeight: "Вес",
-    strengthPullUps: "Макс. подтягиваний",
-    strengthPushUps: "Макс. отжиманий",
+    strengthPullUps: "Лучший подход: подтягивания",
+    strengthPushUps: "Лучший подход: отжимания",
     strengthSave: "Сохранить попытку",
-    strengthNote: "Персональный индекс · лучший результат дня · обновляется через чат",
+    strengthNote: "Лучший непрерывный подход в каждом упражнении · подходы не суммируются",
     strengthLatestMetrics: "Показатели последней попытки относительной силы",
     strengthWeightUnit: "кг",
     tapToEdit: "Нажмите на сумму, чтобы изменить её",
@@ -860,9 +860,9 @@ function dailyExpensePoints(expenses, period, asOfDate) {
   return points;
 }
 
-function relativeStrengthScore(weightKg, pullUps, pushUps) {
-  const pullComponent = Math.min(Math.max(pullUps, 0) / 20, 1);
-  const pushComponent = Math.min(Math.max(pushUps, 0) / 50, 1);
+function relativeStrengthScore(weightKg, maxPullUpsSingleSet, maxPushUpsSingleSet) {
+  const pullComponent = Math.min(Math.max(maxPullUpsSingleSet, 0) / 20, 1);
+  const pushComponent = Math.min(Math.max(maxPushUpsSingleSet, 0) / 50, 1);
   const massFactor = Math.min(Math.max((weightKg / 75) ** 0.12, 0.9), 1.1);
   const score = 1 + 9 * (pullComponent * 0.6 + pushComponent * 0.4) * massFactor;
   return Math.round(Math.min(Math.max(score, 1), 10) * 10) / 10;
@@ -872,7 +872,11 @@ function dailyStrengthPoints(entries, period, asOfDate) {
   const dailyBest = new Map();
   entries.forEach((entry) => {
     if (entry.date < period.start || entry.date > period.end || entry.date > asOfDate) return;
-    const score = relativeStrengthScore(entry.weightKg, entry.pullUps, entry.pushUps);
+    const score = relativeStrengthScore(
+      entry.weightKg,
+      entry.maxPullUpsSingleSet,
+      entry.maxPushUpsSingleSet,
+    );
     dailyBest.set(entry.date, Math.max(dailyBest.get(entry.date) ?? 0, score));
   });
   return [...dailyBest.entries()]
@@ -900,15 +904,15 @@ function renderStrengthSummary() {
     right.date.localeCompare(left.date) || right.id.localeCompare(left.id),
   )[0];
   const score = latest
-    ? relativeStrengthScore(latest.weightKg, latest.pullUps, latest.pushUps)
+    ? relativeStrengthScore(latest.weightKg, latest.maxPullUpsSingleSet, latest.maxPushUpsSingleSet)
     : null;
   element("strength-score").textContent = score?.toFixed(1) ?? "N/A";
   element("strength-status").textContent = latest
     ? t("strengthLatest", { date: formatShortDate(dateFromKey(latest.date)) })
     : t("strengthNoAttempts");
   element("strength-weight-value").textContent = String(latest?.weightKg ?? 0);
-  element("strength-pull-ups-value").textContent = String(latest?.pullUps ?? 0);
-  element("strength-push-ups-value").textContent = String(latest?.pushUps ?? 0);
+  element("strength-pull-ups-value").textContent = String(latest?.maxPullUpsSingleSet ?? 0);
+  element("strength-push-ups-value").textContent = String(latest?.maxPushUpsSingleSet ?? 0);
 }
 
 function renderDailyExpenseChart(allFundsDailyPace, savingsSafeDailyPace) {
@@ -1110,8 +1114,8 @@ async function start() {
           typeof entry?.id === "string" &&
           /^\d{4}-\d{2}-\d{2}$/.test(entry?.date) &&
           Number.isFinite(entry?.weightKg) &&
-          Number.isFinite(entry?.pullUps) &&
-          Number.isFinite(entry?.pushUps),
+          Number.isFinite(entry?.maxPullUpsSingleSet) &&
+          Number.isFinite(entry?.maxPushUpsSingleSet),
         )
       : [];
     if (!history.length) throw new Error("Finance history is empty.");

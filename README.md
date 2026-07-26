@@ -318,11 +318,11 @@ Add two thin horizontal allowance guides because daily allowance is a spending-a
 
 ## Relative Strength tracking
 
-Relative Strength entries live in `data/strength-history.json`, independently of salary cycles. The root contains `version`, `timezone`, `updatedAt`, `revision`, and chronological `entries`. Increment `revision` and set the actual Vilnius `updatedAt` whenever an entry changes. Each entry contains a stable ID, the actual Vilnius date, body weight in kilograms, maximum pull-ups, maximum push-ups, and `source: "chat"`. Do not store the derived score. Validate weight from 30 to 250 kg, pull-ups from 0 to 200, and push-ups from 0 to 300.
+Relative Strength entries live in `data/strength-history.json`, independently of salary cycles. The root contains `version`, `timezone`, `updatedAt`, `revision`, and chronological `entries`. Increment `revision` and set the actual Vilnius `updatedAt` whenever an entry changes. Each entry contains a stable ID, the actual Vilnius date, body weight in kilograms, `maxPullUpsSingleSet`, `maxPushUpsSingleSet`, and `source: "chat"`. These two repetition values always mean the highest number completed in one uninterrupted set on that date. Never add together separate sets, rounds, or an evening's total volume. If the user performs five sets, record only the highest pull-up set and highest push-up set; they do not have to come from the same round. Do not track the number of sets unless the user explicitly asks for a separate training-volume feature. Do not store the derived score. Validate weight from 30 to 250 kg, pull-ups from 0 to 200, and push-ups from 0 to 300.
 
 The frontend is read-only: show the latest attempt as compact metrics and the best calculated score per day on the shared activity chart, without an input form or a misleading local save action. The score is a personal training index, not a medical assessment or population percentile. Calculate it identically in JavaScript and React:
 
-1. cap pull-up progress at `pullUps / 20` and push-up progress at `pushUps / 50`;
+1. cap pull-up progress at `maxPullUpsSingleSet / 20` and push-up progress at `maxPushUpsSingleSet / 50`;
 2. weight those components 60% and 40% respectively;
 3. apply the deliberately mild body-mass factor `(weightKg / 75) ^ 0.12`, clamped from `0.9` to `1.1`;
 4. map the result onto 1 through 10, clamp it, and round to one decimal place.

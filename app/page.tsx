@@ -182,7 +182,7 @@ const COPY = {
     savingsSafe: "Savings safe",
     savingsPreserved: "Savings protected",
     savingsViolated: "Savings used",
-    allowanceGuide: "Allowed {amount}/day · {label}",
+    allowanceGuide: "{amount}/day · {label}",
     day: "/ day",
     salary: "SALARY THIS CYCLE",
     salaryLocked: "Locked to this salary cycle",
@@ -204,7 +204,7 @@ const COPY = {
     strengthPushUps: "Best push-up set",
     strengthLatestMetrics: "Latest relative strength attempt metrics",
     strengthSave: "Save attempt",
-    strengthNote: "Best uninterrupted set per exercise · never summed across sets",
+    strengthNote: "Best single set per exercise · sets are not added together",
     strengthWeightUnit: "kg",
     edit: "Tap the amount to edit",
     savings: "SAVINGS REQUIREMENT",
@@ -275,7 +275,7 @@ const COPY = {
     savingsSafe: "С сохранением накоплений",
     savingsPreserved: "Накопления сохранены",
     savingsViolated: "Накопления используются",
-    allowanceGuide: "Можно {amount} в день · {label}",
+    allowanceGuide: "{amount}/день · {label}",
     day: "в день",
     salary: "ЗАРПЛАТА ЗА ЭТОТ ЦИКЛ",
     salaryLocked: "Зафиксирована для этого зарплатного цикла",
@@ -297,7 +297,7 @@ const COPY = {
     strengthPushUps: "Лучший подход: отжимания",
     strengthLatestMetrics: "Показатели последней попытки относительной силы",
     strengthSave: "Сохранить попытку",
-    strengthNote: "Лучший непрерывный подход в каждом упражнении · подходы не суммируются",
+    strengthNote: "Лучший подход в каждом упражнении · подходы не суммируются",
     strengthWeightUnit: "кг",
     edit: "Нажмите на сумму, чтобы изменить её",
     savings: "ЦЕЛЬ НАКОПЛЕНИЙ",
@@ -674,6 +674,10 @@ export default function Home() {
       currency: "EUR",
       maximumFractionDigits: 0,
     }),
+    [locale],
+  );
+  const scoreFormatter = useMemo(
+    () => new Intl.NumberFormat(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 }),
     [locale],
   );
   const copy = COPY[language];
@@ -1100,7 +1104,7 @@ export default function Home() {
           <div className="strength-scoreboard">
             <span id="strength-title">{copy.strengthTitle}</span>
             <div className="strength-score">
-              <strong>{latestStrengthScore?.toFixed(1) ?? "N/A"}</strong>
+              <strong>{latestStrengthScore === null ? "N/A" : scoreFormatter.format(latestStrengthScore)}</strong>
               <small>/ 10</small>
             </div>
             <p>

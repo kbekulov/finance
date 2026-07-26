@@ -939,7 +939,7 @@ main::before {
   left: 6px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   color: var(--red);
   pointer-events: none;
   transform: translateY(-50%);
@@ -951,10 +951,10 @@ main::before {
 
 .allowance-guide i {
   flex: 1 1 auto;
-  height: 2px;
+  height: 1px;
   min-width: 14px;
-  background: repeating-linear-gradient(90deg, currentColor 0 8px, transparent 8px 13px);
-  opacity: 0.82;
+  background: repeating-linear-gradient(90deg, currentColor 0 7px, transparent 7px 12px);
+  opacity: 0.9;
 }
 
 .allowance-guide-safe i {
@@ -964,17 +964,21 @@ main::before {
 .allowance-guide span {
   flex: 0 1 auto;
   overflow: hidden;
+  max-width: min(76vw, 430px);
+  padding: 2px 9px;
+  background: linear-gradient(90deg, transparent, var(--canvas) 16%, var(--canvas) 84%, transparent);
   color: currentColor;
-  font-size: 10px;
-  font-weight: 780;
-  letter-spacing: 0.035em;
+  font-size: 9.5px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 760;
+  letter-spacing: 0.018em;
   line-height: 1.2;
   text-align: center;
   text-overflow: ellipsis;
   text-shadow:
     0 1px 2px var(--canvas),
-    1px 0 2px var(--canvas),
-    -1px 0 2px var(--canvas);
+    1px 0 3px var(--canvas),
+    -1px 0 3px var(--canvas);
   white-space: nowrap;
 }
 
@@ -1059,14 +1063,13 @@ main::before {
   padding: 9px 12px;
 }
 
-.strength-metrics span {
+.strength-metrics > div > span {
   overflow: hidden;
   color: var(--secondary);
   font-size: 9px;
   font-weight: 700;
   letter-spacing: 0.045em;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  line-height: 1.25;
 }
 
 .strength-metrics strong {
@@ -1105,8 +1108,10 @@ main::before {
 
 .strength-meta > small {
   margin-left: auto;
-  color: var(--tertiary);
+  color: var(--secondary);
   font-size: 9px;
+  line-height: 1.35;
+  opacity: 0.78;
   text-align: right;
 }
 
@@ -2362,26 +2367,28 @@ footer p {
     height: 168px;
     min-height: 168px;
     margin-top: -168px;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
   }
 
   .allowance-guide {
     right: 3px;
     left: 3px;
-    gap: 5px;
+    gap: 3px;
   }
 
   .allowance-guide span {
-    font-size: 8.5px;
-    letter-spacing: 0.01em;
+    max-width: 78vw;
+    padding-inline: 6px;
+    font-size: 9px;
+    letter-spacing: 0.005em;
   }
 
   .strength-panel {
     grid-template-columns: 1fr;
-    gap: 12px;
-    margin-bottom: 12px;
+    gap: 10px;
+    margin-bottom: 0;
     border-radius: 16px;
-    padding: 13px;
+    padding: 14px 15px 12px;
   }
 
   .strength-scoreboard {
@@ -2393,16 +2400,18 @@ footer p {
   }
 
   .strength-metrics > div {
-    padding: 8px 9px;
+    gap: 5px;
+    padding: 9px 10px;
   }
 
   .strength-metrics strong {
-    font-size: 18px;
+    font-size: 20px;
   }
 
   .strength-meta {
     flex-wrap: wrap;
-    gap: 8px 12px;
+    gap: 7px 12px;
+    padding-top: 9px;
   }
 
   .strength-meta > small {
@@ -2426,7 +2435,7 @@ footer p {
   }
 
   .hero {
-    padding: 14px 0 24px;
+    padding: 10px 0 24px;
   }
 
   .balance-card {

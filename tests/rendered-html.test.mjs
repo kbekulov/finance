@@ -152,7 +152,7 @@ test("server-renders the current finance tracker", async () => {
   assert.match(html, /aria-label="Расходы по дням в виде столбцов, график относительной силы и линии дневных лимитов"/);
   assert.match(html, /class="strength-panel"/);
   assert.match(html, /ОТНОСИТЕЛЬНАЯ СИЛА/);
-  assert.match(html, /<strong>4\.4<\/strong>/);
+  assert.match(html, /<strong>4,4<\/strong>/);
   assert.match(html, /<strong>51<small>кг<\/small><\/strong>/);
   assert.match(html, /Лучший подход: подтягивания<\/span><strong>5<\/strong>/);
   assert.match(html, /Лучший подход: отжимания<\/span><strong>30<\/strong>/);
@@ -160,8 +160,8 @@ test("server-renders the current finance tracker", async () => {
   assert.doesNotMatch(html, /<form\b/);
   assert.doesNotMatch(html, /class="add-panel"/);
   assert.doesNotMatch(html, /class="editable-value"/);
-  assert.match(html, /Можно 12.{0,8}€ в день · Накопления используются/);
-  assert.match(html, /Можно 0.{0,8}€ в день · Накопления сохранены/);
+  assert.match(html, /12.{0,8}€\/день · Накопления используются/);
+  assert.match(html, /0.{0,8}€\/день · Накопления сохранены/);
   assert.match(html, /allowance-guide-all" style="--guide-top:79%"/);
   assert.match(html, /allowance-guide-safe" style="--guide-top:91%"/);
   assert.doesNotMatch(html, /Your site is taking shape|Building your site/);
@@ -213,7 +213,8 @@ test("keeps database history and translations aligned", async () => {
   assert.match(manual, /red long-dashed rule for the all-funds allowance/);
   assert.match(manual, /green short-dashed rule for the savings-safe allowance/);
   assert.match(manual, /visually `line, text, line`/);
-  assert.match(manual, /no pill, badge, rectangle, outline, or floating callout/);
+  assert.match(manual, /no pill, badge, outline, or floating callout/);
+  assert.match(manual, /edge-faded canvas mask/);
   assert.match(manual, /`data\/strength-history\.json`/);
   assert.match(manual, /frontend is read-only/);
   assert.match(manual, /personal training index, not a medical assessment/);
@@ -803,9 +804,9 @@ test("keeps database history and translations aligned", async () => {
   }
   assert.match(index, /id="theme-select"/);
   assert.match(index, /<html lang="ru">/);
-  assert.match(index, /styles\.css\?v=40/);
+  assert.match(index, /styles\.css\?v=41/);
   assert.match(index, /public\/vendor\/apexcharts\.min\.js\?v=21/);
-  assert.match(index, /script\.js\?v=46/);
+  assert.match(index, /script\.js\?v=47/);
   assert.match(index, /data-current-theme="kinance"/);
   assert.match(index, /id="credit-alert"[^>]*hidden/);
   assert.doesNotMatch(index, /id="payment-method"/);

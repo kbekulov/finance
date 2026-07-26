@@ -110,7 +110,7 @@ const TRANSLATIONS = {
     savingsSafe: "Savings safe",
     savingsPreserved: "Savings protected",
     savingsViolated: "Savings used",
-    allowanceGuide: "Allowed {amount}/day · {label}",
+    allowanceGuide: "{amount}/day · {label}",
     monthlySalary: "SALARY THIS CYCLE",
     salaryLocked: "Locked to this salary cycle",
     additionalIncome: "SIDE INCOME",
@@ -130,7 +130,7 @@ const TRANSLATIONS = {
     strengthPullUps: "Best pull-up set",
     strengthPushUps: "Best push-up set",
     strengthSave: "Save attempt",
-    strengthNote: "Best uninterrupted set per exercise · never summed across sets",
+    strengthNote: "Best single set per exercise · sets are not added together",
     strengthLatestMetrics: "Latest relative strength attempt metrics",
     strengthWeightUnit: "kg",
     tapToEdit: "Tap the amount to edit",
@@ -216,7 +216,7 @@ const TRANSLATIONS = {
     savingsSafe: "С сохранением накоплений",
     savingsPreserved: "Накопления сохранены",
     savingsViolated: "Накопления используются",
-    allowanceGuide: "Можно {amount} в день · {label}",
+    allowanceGuide: "{amount}/день · {label}",
     monthlySalary: "ЗАРПЛАТА ЗА ЭТОТ ЦИКЛ",
     salaryLocked: "Зафиксирована для этого зарплатного цикла",
     additionalIncome: "ДОПОЛНИТЕЛЬНЫЕ ДОХОДЫ",
@@ -236,7 +236,7 @@ const TRANSLATIONS = {
     strengthPullUps: "Лучший подход: подтягивания",
     strengthPushUps: "Лучший подход: отжимания",
     strengthSave: "Сохранить попытку",
-    strengthNote: "Лучший непрерывный подход в каждом упражнении · подходы не суммируются",
+    strengthNote: "Лучший подход в каждом упражнении · подходы не суммируются",
     strengthLatestMetrics: "Показатели последней попытки относительной силы",
     strengthWeightUnit: "кг",
     tapToEdit: "Нажмите на сумму, чтобы изменить её",
@@ -414,6 +414,13 @@ function applyTranslations() {
 
 function element(id) {
   return document.getElementById(id);
+}
+
+function formatScore(value) {
+  return new Intl.NumberFormat(locale(), {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  }).format(value);
 }
 
 function renderThemeOptions() {
@@ -906,7 +913,7 @@ function renderStrengthSummary() {
   const score = latest
     ? relativeStrengthScore(latest.weightKg, latest.maxPullUpsSingleSet, latest.maxPushUpsSingleSet)
     : null;
-  element("strength-score").textContent = score?.toFixed(1) ?? "N/A";
+  element("strength-score").textContent = score === null ? "N/A" : formatScore(score);
   element("strength-status").textContent = latest
     ? t("strengthLatest", { date: formatShortDate(dateFromKey(latest.date)) })
     : t("strengthNoAttempts");

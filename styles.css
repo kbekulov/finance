@@ -1179,11 +1179,13 @@ main::before {
 }
 
 .strength-rank {
-  display: grid;
+  display: flex;
   appearance: none;
-  align-content: center;
-  justify-items: center;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   gap: 1px;
+  width: 100%;
   min-width: 0;
   margin: 0;
   border: 0;
@@ -1199,6 +1201,7 @@ main::before {
 
 .strength-rank-icon {
   display: block;
+  flex: 0 0 auto;
   width: 76px;
   height: 76px;
   background-repeat: no-repeat;
@@ -1210,9 +1213,12 @@ main::before {
 .strength-rank > small {
   position: relative;
   z-index: 1;
+  display: block;
+  align-self: stretch;
   overflow: hidden;
-  max-width: 100%;
+  width: 100%;
   margin-top: -14px;
+  padding: 0;
   color: var(--secondary);
   font-size: 9px;
   font-weight: 760;

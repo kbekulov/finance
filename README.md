@@ -527,7 +527,7 @@ The card must remain compact and scannable:
 - score and latest date form the first hierarchy;
 - pull-ups and push-ups receive equal emphasis, while the simpler Weight column is 30% narrower; center each label, value, unit, and target within its column and use the compact visible labels `Weight`, `Pull-ups`, and `Push-ups` with equivalent Russian labels;
 - pull-up and push-up metrics show `current / target`, where the target is the minimum whole-number repetition count required for a 10.0 score at the recorded body weight;
-- a large frameless military rank control appears beside the three-column metric table, never as a fourth table column or a bordered card, using the derived score and a visible abbreviated rank name raised slightly over the insignia's lower edge;
+- a large frameless military rank control appears beside the three-column metric table, never as a fourth table column or a bordered card, using the derived score and a visible abbreviated rank name raised slightly over the insignia's lower edge; the insignia and its HTML abbreviation must share the exact horizontal center axis at every viewport and for every insignia set;
 - long labels wrap instead of truncating;
 - the Relative Strength line key and methodology remain secondary but readable;
 - locale controls the decimal separator.

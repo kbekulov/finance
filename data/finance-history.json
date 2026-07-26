@@ -18,7 +18,7 @@
       "currency": "EUR",
       "timezone": "Europe/Vilnius",
       "updatedAt": "2026-07-26",
-      "revision": 27,
+      "revision": 28,
       "salary": 2150,
       "savingsGoal": 200,
       "additionalIncome": [
@@ -35,6 +35,41 @@
         }
       ],
       "expenses": [
+        {
+          "id": "2026-07-caffeine-iced-peach-tea-001",
+          "amount": 3.4,
+          "note": "Iced peach tea",
+          "noteTranslations": {
+            "en": "Iced peach tea",
+            "ru": "Холодный персиковый чай"
+          },
+          "date": "2026-07-26",
+          "category": "Food",
+          "source": "receipt",
+          "merchant": "Caffeine",
+          "legalEntity": "UAB Retail Convenience Lithuania",
+          "merchantAddress": "Vinco Kudirkos g. 1, Vilnius",
+          "description": "Iced peach tea with packaging fee",
+          "originalCurrency": "EUR",
+          "originalAmount": 3.4,
+          "receiptReference": "47/567/135894",
+          "paymentMethod": "debit",
+          "transactionTime": "13:13:10",
+          "vatRate": 21,
+          "vatAmount": 0.59,
+          "packagingFee": 0.1,
+          "lineItems": [
+            {
+              "description": "Iced peach tea",
+              "amount": 3.3
+            },
+            {
+              "description": "Packaging fee",
+              "amount": 0.1
+            }
+          ],
+          "receiptPaymentDescription": "Contactless debit Mastercard"
+        },
         {
           "id": "2026-07-university-debt",
           "amount": 189,

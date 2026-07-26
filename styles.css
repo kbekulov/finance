@@ -921,6 +921,19 @@ main::before {
   filter: drop-shadow(0 4px 8px var(--chart-glow));
 }
 
+.daily-expense-chart .allowance-guide-label {
+  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.38));
+  letter-spacing: 0.045em;
+  paint-order: stroke;
+  stroke: rgba(0, 0, 0, 0.16);
+  stroke-width: 0.55px;
+}
+
+.daily-expense-chart .apexcharts-yaxis-annotations rect {
+  rx: 7px;
+  ry: 7px;
+}
+
 /* Hero */
 
 .hero {
@@ -1235,6 +1248,49 @@ p {
 
 .locked-status > span:first-child {
   font-size: 8px;
+}
+
+.additional-income-summary {
+  display: grid;
+  gap: 7px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--separator);
+}
+
+.additional-income-summary[hidden] {
+  display: none;
+}
+
+.additional-income-summary > div {
+  display: flex;
+  gap: 14px;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.additional-income-summary span {
+  color: var(--tertiary);
+  font-size: 9px;
+  font-weight: 750;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.additional-income-summary strong {
+  color: var(--green);
+  font-size: 14px;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+
+.additional-income-summary .income-total-row {
+  padding-top: 7px;
+  border-top: 1px solid color-mix(in srgb, var(--separator) 65%, transparent);
+}
+
+.additional-income-summary .income-total-row strong {
+  color: var(--label);
 }
 
 .expense-category-icon {

@@ -57,7 +57,17 @@ Every month record must contain:
 - `revision`: positive integer incremented whenever canonical values for that month change
 - `salary`: non-negative numeric salary actually assigned to that specific salary cycle; this is historical source data, not a global setting
 - `savingsGoal`: non-negative numeric amount protected from spending
+- `additionalIncome`: ordered array of non-salary income records for that salary cycle, or an empty array when none exists
 - `expenses`: ordered array of expense records
+
+Every additional-income record must contain:
+
+- `id`: stable, unique, month-prefixed identifier such as `2026-07-side-income-001`
+- `amount`: positive numeric euro amount, never a formatted string
+- `note`: concise canonical English name
+- `noteTranslations.en` and `noteTranslations.ru`: required display names
+- `date`: actual income date in `YYYY-MM-DD`, using `Europe/Vilnius`
+- `source`: `chat` or `site`
 
 Every expense record must preserve all known details:
 
@@ -78,7 +88,7 @@ All expense dates and repayment dates use the `Europe/Vilnius` calendar day. Der
 
 When more information is actually available, preserve it with clearly named optional fields rather than discarding it, for example `merchant`, `description`, `originalCurrency`, `originalAmount`, or `receiptReference`. Use `null` only when the distinction between “known empty” and “not supplied” matters. Never invent missing receipt, merchant, time, or payment details.
 
-Do not store derived totals in JSON. Total spent, remaining balance, category totals, percentages, daily pace, and warning guidance must be recalculated from canonical salary, savings, expenses, and calendar dates so they cannot drift.
+Do not store derived totals in JSON. Total income, total spent, remaining balance, category totals, percentages, daily pace, and warning guidance must be recalculated from canonical salary, additional income, savings, expenses, and calendar dates so they cannot drift.
 
 ## Exact interpretation of chat updates
 
@@ -100,7 +110,7 @@ A message whose financial intent is simply a number means: add that amount in eu
 Synthetic expense history is exceptional and may be added only when the user explicitly requests a one-time balance reconciliation or demo-data bootstrap. It must never be inferred from a stated card balance or created as part of routine expense entry.
 
 - Reconcile in integer cents so the resulting calculated balance matches the user-supplied target exactly.
-- When the user states an actual debit-card or cash balance, reconcile it to `cashRemaining = salary - spent`. Never subtract `savingsGoal` before matching a real account balance. The savings requirement is an allocation inside that cash balance, not money held outside the account unless the user explicitly says it has already been transferred elsewhere.
+- When the user states an actual debit-card or cash balance, reconcile it to `cashRemaining = salary + additionalIncomeTotal - spent`. Never subtract `savingsGoal` before matching a real account balance. The savings requirement is an allocation inside that cash balance, not money held outside the account unless the user explicitly says it has already been transferred elsewhere.
 - Keep every synthetic record inside the date range and salary cycle explicitly requested by the user, using `Europe/Vilnius` calendar dates.
 - Use generic, plausible expense names and existing broad categories without inventing merchants, receipts, transaction times, or other evidence.
 - Set `source: "chat"` and use the normal debit or credit rule.
@@ -138,6 +148,12 @@ Salary is the income base from which that cycle’s savings requirement and expe
 Salary is backend-owned canonical data and must never be editable from either frontend interface. Render it as a visually distinct locked value for the selected cycle with no input control, mutation handler, or browser-local override. Device-local storage may persist editable savings and expense data, but it must never persist or override salary. Salary changes happen only by editing the targeted cycle in the canonical database through the maintenance workflow.
 
 Salary is nominally paid on the 12th of every month. If the 12th is Saturday or Sunday, the effective salary and reset date is the Friday immediately before that weekend. A cycle starts on that effective salary date and ends one calendar day before the next effective salary date. Use `Europe/Vilnius` dates and calculate this rule for each month; never hard-code a permanent day-of-week assumption.
+
+### Additional income
+
+Record proceeds from item sales, hobby services, gifts, refunds treated as income, or any other non-salary inflow in the selected cycle's `additionalIncome` array. Keep it separate from `salary` so the fixed salary and salary history remain truthful. Use a generic note such as `Side income` when the user supplies no more specific source, and never invent whether the money came from a sale or a service.
+
+Additional income increases the usable budget only in the salary cycle that contains its actual Vilnius receipt date. It is non-recurring by default and must not be carried into a future cycle unless the user explicitly describes it as recurring. Update that cycle's `updatedAt` and increment its `revision`. The frontend must show base salary, additional income, and total income as distinct values whenever additional income exists. Additional income is canonical backend data and must not be merged into the locked salary amount or stored as a negative expense.
 
 ### Savings requirement
 
@@ -199,7 +215,7 @@ At the first update on or after a new effective salary date:
 3. set `updatedAt` to the current date and `revision` to `1`;
 4. carry forward salary, savings requirement, and active recurring expenses;
 5. assign new cycle-specific expense IDs and dates;
-6. do not copy one-time expenses;
+6. do not copy one-time expenses or non-recurring additional income;
 7. keep records ordered oldest to newest;
 8. if the array exceeds 12 records, remove only the oldest record;
 9. verify navigation, totals, timeline, and warnings for both current and historical cycles.
@@ -245,6 +261,8 @@ For every change, inspect:
 
 Canonical `note` and category keys remain English, while every canonical expense also stores `noteTranslations.en` and `noteTranslations.ru`. Render expense names from those database fields. Russian is the default language when no preference exists. Persist language selection in the one-year, site-wide `kinance_language` cookie with `SameSite=Lax` and `Secure` on HTTPS. Never ship a new visible English string without its Russian equivalent.
 
+Russian copy must read as idiomatic native UI language, not as a word-for-word English translation. Review agreement, government, register, terminology, and singular/few/many count behavior. Prefer `зарплатный цикл` over the literal `цикл зарплаты`, use concise accounting terms consistently, and rewrite count-dependent sentences so placeholders cannot create incorrect declensions.
+
 Never use em dashes in user-facing site copy, metadata, or titles. The document title, Open Graph title, and X/Twitter title must be exactly `Kinance` unless the user explicitly renames the product.
 
 ## Calculation invariants
@@ -253,10 +271,12 @@ After each finance-data update, verify:
 
 - `spent = sum(expense.amount)` using integer cents for aggregation
 - every displayed cycle reads `salary` from that exact month record, allowing salaries to differ across history without cross-cycle leakage
-- `cashRemaining = salary - spent`; this is the real debit balance when canonical expenses have been reconciled to the user's stated account balance
+- `additionalIncomeTotal = sum(additionalIncome.amount)` using integer cents for aggregation
+- `totalIncome = salary + additionalIncomeTotal`; never overwrite the fixed salary with this derived total
+- `cashRemaining = totalIncome - spent`; this is the real debit balance when canonical expenses and income have been reconciled to the user's stated account balance
 - `safeRemaining = cashRemaining - savingsGoal`; this is what may still be spent without touching protected savings
-- spent percentage is based on `spent / salary`; show the real percentage above 100% while capping only the ring graphic at 100%
-- the ring uses one salary-wide scale: green shows spent salary, red permanently marks the `savingsGoal / salary` zone, and the neutral gap between them is `safeRemaining`
+- spent percentage is based on `spent / totalIncome`; show the real percentage above 100% while capping only the ring graphic at 100%
+- the ring uses one total-income-wide scale: green shows spent income, red permanently marks the `savingsGoal / totalIncome` zone, and the neutral gap between them is `safeRemaining`
 - when salary is zero and spending is positive, show a no-spending-budget state instead of a false `0%`
 - category totals sum exactly to `spent`
 - breakdown segment widths are proportional to category totals
@@ -290,9 +310,9 @@ Theme selection is a device preference stored in the one-year, site-wide `kinanc
 
 Every expense-recording request that adds at least one new canonical expense must also refresh the shared Kinance and Kinance Moon banner in the same committed update. Generate one fresh banner per request, even when the request adds several expenses. Use the built-in image-generation workflow to create a substantially new Fate/stay night composition with no text, logos, financial figures, merchant details, or receipt-derived personal information. The newly recorded category may inspire a playful visual motif, but keep important characters in the central crop-safe area and preserve the existing dark Kinance mood, full-viewport treatment, and chart legibility. Replace `public/theme-banners/kinance.png`, inspect the result, and increment the shared banner query version for both `kinance` and `kinance-moon` in `index.html`, `script.js`, and `app/page.tsx` so browsers load it immediately. Do not refresh the banner for corrections, deletions, or credit repayments that add no expense. Finance accuracy takes priority: if image generation is temporarily unavailable or produces no usable result after one focused retry, record and publish the expense normally, retain the current banner, and report that the optional visual refresh could not be completed.
 
-Every expense row uses a category-relevant transparent chibi PNG from `public/category-icons/` instead of a letter monogram. The default `kinance` theme uses one bold, item-only chibi icon per category with no people or characters. `kinance-moon`, `nier-automata`, and `tohsaka-rin` use the existing Type-Moon character pools. Keep both the item map and every character pool complete and identical in JavaScript and React whenever categories change. Select Type-Moon variants with the shared stable expense-ID hash so different rows gain variety without flickering or changing during rerenders. Treat every image as decorative because the localized category name remains visible in text, preserve the square aspect ratio, and use a borderless cutout with a restrained shadow rather than another badge or card. Design for the actual 48-pixel UI size, use bold dark contours and crisp cel shading, and make the category metaphor dominate the silhouette. Judge every replacement on both light and dark backgrounds at 48 pixels. Avoid tiny symbolism that only reads at full resolution, and create new concepts from a blank canvas instead of tracing an older icon. The current item set is curry rice for Food, renewal app tiles for Subscriptions & services, a ruby jewelry box for Luxury purchases, a payment envelope and coins for Debt & repayments, a laptop-phone-tablet group for Devices & installments, a bus and suitcase for Transport & Travel, and a citrus spritz glass for Alcohol & nightlife. The current three-character pools are Taiga Fujimura, Kohaku, and Soujuurou Shizuki for Food; Caster Medea, BB, and Sion Eltnam Atlasia for Subscriptions & services; Luviagelita Edelfelt, Nero Claudius, and Alice Kuonji for Luxury purchases; Kirei Kotomine, Mash Kyrielight, and Shiki Ryougi for Debt & repayments; Archer EMIYA, Ciel, and Touko Aozaki for Devices & installments; Rider Medusa, Arcueid Brunestud, and Shiki Tohno for Transport & Travel; and Lancer Cu Chulainn, Shuten-Douji, and Aoko Aozaki for Alcohol & nightlife.
+Every expense row uses a category-relevant transparent chibi PNG from `public/category-icons/` instead of a letter monogram. The default `kinance` theme uses one bold, item-only chibi icon per category with no people or characters. `kinance-moon`, `nier-automata`, and `tohsaka-rin` use the existing Type-Moon character pools. Keep both the item map and every character pool complete and identical in JavaScript and React whenever categories change. Select Type-Moon variants with the shared stable expense-ID hash so different rows gain variety without flickering or changing during rerenders. Treat every image as decorative because the localized category name remains visible in text, preserve the square aspect ratio, and use a borderless cutout with a restrained shadow rather than another badge or card. Design for the actual 48-pixel UI size, use bold dark contours and crisp cel shading, and make the category metaphor dominate the silhouette. Give every item category its own clearly different primary hue so the set has color variety comparable to the character pools; do not let one accent color dominate the entire set. Judge every replacement on both light and dark backgrounds at 48 pixels. Avoid tiny symbolism that only reads at full resolution, and create new concepts from a blank canvas instead of tracing an older icon. The current item set is curry rice for Food, a calendar inside a renewal loop for Subscriptions & services, a ruby-stoppered perfume bottle for Luxury purchases, a checked repayment ledger with coins for Debt & repayments, a compact charging dock for Devices & installments, a rolling suitcase on a transit line for Transport & Travel, and a moonlit frosty pint for Alcohol & nightlife. The current three-character pools are Taiga Fujimura, Kohaku, and Soujuurou Shizuki for Food; Caster Medea, BB, and Sion Eltnam Atlasia for Subscriptions & services; Luviagelita Edelfelt, Nero Claudius, and Alice Kuonji for Luxury purchases; Kirei Kotomine, Mash Kyrielight, and Shiki Ryougi for Debt & repayments; Archer EMIYA, Ciel, and Touko Aozaki for Devices & installments; Rider Medusa, Arcueid Brunestud, and Shiki Tohno for Transport & Travel; and Lancer Cu Chulainn, Shuten-Douji, and Aoko Aozaki for Alcohol & nightlife.
 
-The daily-expense area chart sits entirely over the lower 168 pixels of the character artwork on desktop and mobile, without obscuring the banner's primary character composition. It uses ApexCharts in both implementations. Aggregate non-recurring expenses by their actual `date`; do not plot recurring expected expenses on the day they happened to be recorded because that would falsely imply they were paid that day. Include zero-value points from the selected salary cycle start only through the actual Vilnius date for a current cycle, or through `period.end` for a historical cycle. Keep the x-axis as a datetime axis and recalculate on cycle, theme, expense, savings target, or remaining-day changes. Render it as a 168-pixel-tall, viewport-width borderless sparkline with a smooth 2.25-pixel stroke and no visible title, totals, axes, labels, grid, legend, markers, or tooltip. Add two thin, unlabeled horizontal allowance guides because daily allowance is a y-axis value: a red long-dashed rule for all available funds and a green short-dashed rule for the savings-safe allowance. Scale the y-axis to keep both guides in range. Its primary visual content remains a high-contrast movement stroke with a clearly visible translucent gradient area and restrained glow. Define the theme-aware chart accent and glow through `--chart-accent` and `--chart-glow`, and use each theme's existing `--red` and `--green` for the allowance guides. Disable chart animation when reduced motion is requested, while preserving a localized accessible label for screen readers.
+The daily-expense area chart sits entirely over the lower 168 pixels of the character artwork on desktop and mobile, without obscuring the banner's primary character composition. It uses ApexCharts in both implementations. Aggregate non-recurring expenses by their actual `date`; do not plot recurring expected expenses on the day they happened to be recorded because that would falsely imply they were paid that day. Include zero-value points from the selected salary cycle start only through the actual Vilnius date for a current cycle, or through `period.end` for a historical cycle. Keep the x-axis as a datetime axis and recalculate on cycle, theme, expense, savings target, or remaining-day changes. Render it as a 168-pixel-tall, viewport-width borderless sparkline with a smooth 2.25-pixel stroke and no visible title, totals, numeric axes, grid, legend, markers, or tooltip. Add two thin horizontal allowance guides because daily allowance is a y-axis value: a red long-dashed rule labeled `Savings violated` for all available funds and a green short-dashed rule labeled `Savings preserved` for the savings-safe allowance. Localize both compact labels, anchor them on opposite sides, and style them as small theme-colored tags so they identify the guides without recreating chart chrome. Scale the y-axis to keep both guides in range. Its primary visual content remains a high-contrast movement stroke with a clearly visible translucent gradient area and restrained glow. Define the theme-aware chart accent and glow through `--chart-accent` and `--chart-glow`, and use each theme's existing `--red` and `--green` for the allowance guides. Disable chart animation when reduced motion is requested, while preserving a localized accessible label for screen readers.
 
 The built-in themes are:
 

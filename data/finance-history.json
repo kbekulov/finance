@@ -1,5 +1,5 @@
 {
-  "version": 5,
+  "version": 6,
   "maxMonths": 12,
   "currency": "EUR",
   "timezone": "Europe/Vilnius",
@@ -18,9 +18,22 @@
       "currency": "EUR",
       "timezone": "Europe/Vilnius",
       "updatedAt": "2026-07-26",
-      "revision": 26,
+      "revision": 27,
       "salary": 2150,
       "savingsGoal": 200,
+      "additionalIncome": [
+        {
+          "id": "2026-07-side-income-001",
+          "amount": 10,
+          "note": "Side income",
+          "noteTranslations": {
+            "en": "Side income",
+            "ru": "Дополнительный доход"
+          },
+          "date": "2026-07-26",
+          "source": "chat"
+        }
+      ],
       "expenses": [
         {
           "id": "2026-07-university-debt",
@@ -28,7 +41,7 @@
           "note": "University debt",
           "noteTranslations": {
             "en": "University debt",
-            "ru": "Долг за университет"
+            "ru": "Долг за обучение"
           },
           "date": "2026-07-25",
           "category": "Debt & repayments",
@@ -118,7 +131,7 @@
           "note": "Revolut debt",
           "noteTranslations": {
             "en": "Revolut debt",
-            "ru": "Долг Revolut"
+            "ru": "Долг в Revolut"
           },
           "date": "2026-07-25",
           "category": "Debt & repayments",
@@ -223,7 +236,7 @@
           "note": "Buses",
           "noteTranslations": {
             "en": "Buses",
-            "ru": "Автобусы"
+            "ru": "Проезд на автобусе"
           },
           "date": "2026-07-25",
           "category": "Transport & Travel",
@@ -543,7 +556,7 @@
           "note": "Night out",
           "noteTranslations": {
             "en": "Night out",
-            "ru": "\u0412\u0435\u0447\u0435\u0440\u043d\u0438\u0439 \u043e\u0442\u0434\u044b\u0445"
+            "ru": "\u0412\u0435\u0447\u0435\u0440 \u0432\u043d\u0435 \u0434\u043e\u043c\u0430"
           },
           "date": "2026-07-18",
           "category": "Alcohol & nightlife",

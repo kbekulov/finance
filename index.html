@@ -15,7 +15,7 @@
     <link rel="icon" type="image/jpeg" href="/kinance-favicon.jpg" />
     <link rel="stylesheet" href="/styles.css?v=37" />
     <script src="/public/vendor/apexcharts.min.js?v=21" defer></script>
-    <script src="/script.js?v=40" defer></script>
+    <script src="/script.js?v=41" defer></script>
   </head>
   <body>
     <main>
@@ -137,6 +137,16 @@
               <span aria-hidden="true">●</span>
               <span data-i18n="salaryLocked">Locked to this salary cycle</span>
             </small>
+            <div id="additional-income-summary" class="additional-income-summary" hidden>
+              <div>
+                <span data-i18n="additionalIncome">SIDE INCOME</span>
+                <strong id="additional-income-value">+€0.00</strong>
+              </div>
+              <div class="income-total-row">
+                <span data-i18n="totalIncome">TOTAL INCOME</span>
+                <strong id="total-income-value">€0.00</strong>
+              </div>
+            </div>
           </article>
 
           <article class="stat-card">

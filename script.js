@@ -10,12 +10,12 @@ const CATEGORIES = [
 
 const KINANCE_CATEGORY_ICONS = {
   Food: "/public/category-icons/food-item.png?v=1",
-  "Subscriptions & services": "/public/category-icons/subscriptions-item.png?v=1",
-  "Luxury purchases": "/public/category-icons/luxury-item.png?v=1",
-  "Debt & repayments": "/public/category-icons/debt-item.png?v=1",
-  "Devices & installments": "/public/category-icons/devices-item.png?v=1",
-  "Transport & Travel": "/public/category-icons/transport-item.png?v=1",
-  "Alcohol & nightlife": "/public/category-icons/alcohol-item.png?v=1",
+  "Subscriptions & services": "/public/category-icons/subscriptions-item.png?v=2",
+  "Luxury purchases": "/public/category-icons/luxury-item.png?v=2",
+  "Debt & repayments": "/public/category-icons/debt-item.png?v=2",
+  "Devices & installments": "/public/category-icons/devices-item.png?v=2",
+  "Transport & Travel": "/public/category-icons/transport-item.png?v=2",
+  "Alcohol & nightlife": "/public/category-icons/alcohol-item.png?v=2",
 };
 
 const CHARACTER_CATEGORY_ICON_POOLS = {
@@ -108,8 +108,12 @@ const TRANSLATIONS = {
     dailyPace: "DAILY LIMITS",
     allFunds: "All funds",
     savingsSafe: "Savings safe",
+    savingsPreserved: "Savings preserved",
+    savingsViolated: "Savings violated",
     monthlySalary: "SALARY THIS CYCLE",
     salaryLocked: "Locked to this salary cycle",
+    additionalIncome: "SIDE INCOME",
+    totalIncome: "TOTAL INCOME",
     dailySpendingEyebrow: "DAILY RHYTHM",
     dailySpending: "Daily expenses",
     dailySpendingIntro: "What left your account each day this salary cycle",
@@ -176,7 +180,7 @@ const TRANSLATIONS = {
     monthlyPlanLabel: "Salary cycle plan balance",
     monthlyTotalsLabel: "Salary cycle totals",
     budgetUsed: "{percent}% of spending budget used",
-    salaryAllocation: "{spent}% of salary spent; {savings}% reserved for savings",
+    salaryAllocation: "{spent}% of total income spent; {savings}% reserved for savings",
     noSpendingBudget: "NO SPENDING BUDGET",
     historyUnavailable: "History unavailable",
     refresh: "Please refresh the page in a moment.",
@@ -193,48 +197,52 @@ const TRANSLATIONS = {
   ru: {
     availableAfterPlan: "БАЛАНС ДЕБЕТОВОЙ КАРТЫ",
     leftForMonth: "на карте до следующей зарплаты",
-    afterSavings: "после защиты накоплений",
-    dailyPace: "ДНЕВНЫЕ ЛИМИТЫ",
-    allFunds: "Все средства",
-    savingsSafe: "Сохранить накопления",
-    monthlySalary: "ДОХОД В ЭТОМ ЦИКЛЕ",
-    salaryLocked: "Зафиксировано для этого цикла зарплаты",
+    afterSavings: "после резерва на накопления",
+    dailyPace: "ЛИМИТЫ НА ДЕНЬ",
+    allFunds: "Без сохранения накоплений",
+    savingsSafe: "С сохранением накоплений",
+    savingsPreserved: "Накопления сохранены",
+    savingsViolated: "Накопления затронуты",
+    monthlySalary: "ЗАРПЛАТА ЗА ЭТОТ ЦИКЛ",
+    salaryLocked: "Зафиксирована для этого зарплатного цикла",
+    additionalIncome: "ДОПОЛНИТЕЛЬНЫЕ ДОХОДЫ",
+    totalIncome: "ОБЩИЙ ДОХОД",
     dailySpendingEyebrow: "ДНЕВНОЙ РИТМ",
     dailySpending: "Расходы по дням",
-    dailySpendingIntro: "Сколько уходило со счёта каждый день этого цикла зарплаты",
-    thisCycleTotal: "За цикл",
+    dailySpendingIntro: "Сколько списывалось со счёта каждый день текущего зарплатного цикла",
+    thisCycleTotal: "За текущий цикл",
     dailyExpenseSeries: "Расходы за день",
-    dailySpendingChartLabel: "Динамика разовых расходов с ориентирами дневных лимитов",
-    tapToEdit: "Нажмите на сумму, чтобы изменить",
+    dailySpendingChartLabel: "График разовых расходов по дням с линиями дневных лимитов",
+    tapToEdit: "Нажмите на сумму, чтобы изменить её",
     savingsRequirement: "ЦЕЛЬ НАКОПЛЕНИЙ",
-    protectedSpending: "Защищено от расходов",
-    spentThisMonth: "ПОТРАЧЕНО В ЭТОМ ЦИКЛЕ",
-    savingsMore: "План накоплений на {difference} выше среднего за {count} прошлых цикла: {average}",
-    savingsLess: "План накоплений на {difference} ниже среднего за {count} прошлых цикла: {average}",
-    savingsSame: "План накоплений совпадает со средним за {count} прошлых цикла: {average}",
-    spendingMore: "Потрачено на {difference} больше среднего за {count} прошлых цикла: {average}",
-    spendingLess: "Потрачено на {difference} меньше среднего за {count} прошлых цикла: {average}",
-    spendingSame: "На уровне средних расходов за {count} прошлых цикла: {average}",
+    protectedSpending: "Зарезервировано и не тратится",
+    spentThisMonth: "ПОТРАЧЕНО ЗА ЭТОТ ЦИКЛ",
+    savingsMore: "План накоплений на {difference} выше среднего по истории ({count} цикл.): {average}",
+    savingsLess: "План накоплений на {difference} ниже среднего по истории ({count} цикл.): {average}",
+    savingsSame: "План накоплений совпадает со средним по истории ({count} цикл.): {average}",
+    spendingMore: "Потрачено на {difference} больше среднего по истории ({count} цикл.): {average}",
+    spendingLess: "Потрачено на {difference} меньше среднего по истории ({count} цикл.): {average}",
+    spendingSame: "Расходы совпадают со средним по истории ({count} цикл.): {average}",
     spendingMix: "СТРУКТУРА РАСХОДОВ",
     whereMoneyGoes: "Куда уходят деньги",
     recentExpenses: "Последние расходы",
-    expectedMonthly: "Ожидаемые ежемесячные расходы",
+    expectedMonthly: "Плановые ежемесячные расходы",
     oneTimeExpenses: "Разовые расходы",
     quickEntry: "БЫСТРОЕ ДОБАВЛЕНИЕ",
     addExpense: "Добавить расход",
-    formIntro: "Добавьте расход здесь или просто отправьте сумму в чате.",
+    formIntro: "Добавьте расход здесь или просто отправьте сумму в чат.",
     amount: "Сумма",
     category: "Категория",
     paymentMethod: "Способ оплаты",
     debit: "Дебетовая карта",
     credit: "Кредитная карта",
-    creditRepaid: "Кредит погашен",
-    outstandingCredit: "Непогашенный кредит",
-    outstandingCreditDetail: "Расходы по кредитной карте ожидают погашения.",
+    creditRepaid: "Задолженность погашена",
+    outstandingCredit: "Непогашенная задолженность",
+    outstandingCreditDetail: "Расходы по кредитной карте ещё не погашены.",
     whatFor: "На что потрачено?",
     notePlaceholder: "Кофе, Netflix, новая обувь…",
     chatHint: "Отправьте в чат сумму или фото чека: расход будет добавлен и распределён по категории.",
-    footer: "Приватность по замыслу. Ясность по умолчанию.",
+    footer: "Конфиденциальность заложена в основу. Всё понятно по умолчанию.",
     today: "Сегодня",
     monthEnd: "Конец цикла",
     updated: "Обновлено",
@@ -248,24 +256,24 @@ const TRANSLATIONS = {
     here: "Добавлено здесь",
     savingsEuroLabel: "Цель ежемесячных накоплений в евро",
     recordedExpenses: "Записано расходов: {count}",
-    perDay: "/ день",
+    perDay: "в день",
     monthsSaved: "Сохранено циклов: {count} из 12",
     noExpenses: "Расходов нет",
     spendingAlert: "Контроль расходов",
-    spendingClear: "Пока нет признаков перерасхода. Продолжайте добавлять расходы для актуальных рекомендаций.",
-    spendingLargest: "Самая крупная статья: {category}, {amount} ({percent}% всех расходов).",
-    spendingCut: "Для гибкого сокращения расходов обратите внимание на {category} ({amount}).",
-    spendingSame: "Не добавляйте новые траты в этой категории, пока баланс не улучшится.",
+    spendingClear: "Пока признаков перерасхода нет. Продолжайте учитывать расходы, чтобы рекомендации оставались актуальными.",
+    spendingLargest: "Самая крупная статья расходов: {category}, {amount} ({percent}% всех расходов).",
+    spendingCut: "Если нужно сократить необязательные траты, начните с категории «{category}» ({amount}).",
+    spendingSame: "Воздержитесь от новых трат в этой категории, пока баланс не улучшится.",
     kinanceHome: "Главная Kinance",
     languageLabel: "Язык",
     themeLabel: "Тема",
     themeBannerLabel: "Оформление темы {theme}",
-    financeHistoryLabel: "История циклов зарплаты",
-    monthlyTimelineLabel: "Шкала цикла зарплаты",
-    monthlyPlanLabel: "Баланс цикла зарплаты",
-    monthlyTotalsLabel: "Итоги цикла зарплаты",
-    budgetUsed: "Использовано {percent}% бюджета на расходы",
-    salaryAllocation: "Потрачено {spent}% зарплаты; {savings}% отведено на накопления",
+    financeHistoryLabel: "История зарплатных циклов",
+    monthlyTimelineLabel: "Шкала зарплатного цикла",
+    monthlyPlanLabel: "Баланс зарплатного цикла",
+    monthlyTotalsLabel: "Итоги зарплатного цикла",
+    budgetUsed: "Использовано {percent}% доступного бюджета",
+    salaryAllocation: "Потрачено {spent}% общего дохода; {savings}% отведено на накопления",
     noSpendingBudget: "НЕТ БЮДЖЕТА НА РАСХОДЫ",
     historyUnavailable: "История недоступна",
     refresh: "Обновите страницу через несколько секунд.",
@@ -414,6 +422,9 @@ function financeDataForMonth(month, savedData = null) {
   const savedSavings = Number(savedData?.savingsGoal);
   return {
     salary: safeNumber(month.salary),
+    additionalIncome: structuredClone(
+      Array.isArray(month.additionalIncome) ? month.additionalIncome : [],
+    ),
     savingsGoal: Number.isFinite(savedSavings)
       ? Math.max(savedSavings, 0)
       : safeNumber(month.savingsGoal),
@@ -427,8 +438,12 @@ function toCents(value) {
   return Math.round(safeNumber(value) * 100);
 }
 
+function sumAmounts(records) {
+  return records.reduce((sum, record) => sum + toCents(record.amount), 0) / 100;
+}
+
 function sumExpenses(expenses) {
-  return expenses.reduce((sum, expense) => sum + toCents(expense.amount), 0) / 100;
+  return sumAmounts(expenses);
 }
 
 function roundMoney(value) {
@@ -908,7 +923,21 @@ function renderDailyExpenseChart(allFundsDailyPace, savingsSafeDailyPace) {
           borderWidth: 1.4,
           strokeDashArray: 5,
           opacity: 0.82,
-          label: { show: false },
+          label: {
+            borderColor: allFundsColor,
+            position: "right",
+            offsetX: -8,
+            offsetY: -2,
+            text: t("savingsViolated"),
+            style: {
+              background: allFundsColor,
+              color: "#fff",
+              cssClass: "allowance-guide-label allowance-guide-label-danger",
+              fontSize: "9px",
+              fontWeight: 750,
+              padding: { left: 7, right: 7, top: 3, bottom: 3 },
+            },
+          },
         },
         {
           y: savingsSafeDailyPace,
@@ -916,7 +945,21 @@ function renderDailyExpenseChart(allFundsDailyPace, savingsSafeDailyPace) {
           borderWidth: 1.4,
           strokeDashArray: 3,
           opacity: 0.9,
-          label: { show: false },
+          label: {
+            borderColor: savingsSafeColor,
+            position: "left",
+            offsetX: 8,
+            offsetY: -8,
+            text: t("savingsPreserved"),
+            style: {
+              background: savingsSafeColor,
+              color: "#fff",
+              cssClass: "allowance-guide-label allowance-guide-label-safe",
+              fontSize: "9px",
+              fontWeight: 750,
+              padding: { left: 7, right: 7, top: 3, bottom: 3 },
+            },
+          },
         },
       ],
     },
@@ -944,12 +987,14 @@ function renderDailyExpenseChart(allFundsDailyPace, savingsSafeDailyPace) {
 function render() {
   const spent = sumExpenses(data.expenses);
   const salary = safeNumber(data.salary);
+  const additionalIncomeTotal = sumAmounts(data.additionalIncome);
+  const totalIncome = roundMoney(salary + additionalIncomeTotal);
   const savings = safeNumber(data.savingsGoal);
-  const cashRemaining = roundMoney(salary - spent);
+  const cashRemaining = roundMoney(totalIncome - spent);
   const safeRemaining = roundMoney(cashRemaining - savings);
-  const spentPercent = salary > 0 ? (spent / salary) * 100 : spent > 0 ? null : 0;
+  const spentPercent = totalIncome > 0 ? (spent / totalIncome) * 100 : spent > 0 ? null : 0;
   const visualSpentPercent = spentPercent === null ? 100 : Math.min(spentPercent, 100);
-  const savingsPercent = salary > 0 ? Math.min((savings / salary) * 100, 100) : savings > 0 ? 100 : 0;
+  const savingsPercent = totalIncome > 0 ? Math.min((savings / totalIncome) * 100, 100) : savings > 0 ? 100 : 0;
   const savingsStartDegrees = (100 - savingsPercent) * 3.6;
   const spentEndDegrees = Math.min(visualSpentPercent * 3.6, savingsStartDegrees);
   const timeline = renderTimeline();
@@ -960,6 +1005,9 @@ function render() {
     `${selectedMonth.updatedAt}T12:00:00`,
   ).toLocaleDateString(locale(), { day: "numeric", month: "long", year: "numeric" })}`;
   element("salary-value").textContent = formatEuro(salary);
+  element("additional-income-summary").hidden = additionalIncomeTotal <= 0;
+  element("additional-income-value").textContent = `+${formatEuro(additionalIncomeTotal)}`;
+  element("total-income-value").textContent = formatEuro(totalIncome);
   element("savings").value = savings;
   element("spent-total").textContent = formatEuro(spent);
   element("expense-count").textContent =

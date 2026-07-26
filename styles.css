@@ -1,5 +1,6 @@
 :root {
   color-scheme: dark;
+  --app-viewport-width: min(100vw, 430px);
   --canvas: #050506;
   --surface: rgba(28, 28, 30, 0.86);
   --surface-solid: #1c1c1e;
@@ -198,7 +199,9 @@ select:focus-visible {
 
 main {
   position: relative;
+  width: var(--app-viewport-width);
   min-height: 100vh;
+  margin-inline: auto;
   overflow: hidden;
   background:
     radial-gradient(circle at 82% -4%, rgba(10, 132, 255, 0.2), transparent 30rem),
@@ -935,7 +938,7 @@ main::before {
   position: relative;
   isolation: isolate;
   left: 50%;
-  width: 100vw;
+  width: var(--app-viewport-width);
   height: clamp(340px, 34vw, 520px);
   min-height: 0;
   overflow: hidden;
@@ -984,7 +987,7 @@ main::before {
   position: relative;
   z-index: 3;
   left: 50%;
-  width: 100vw;
+  width: var(--app-viewport-width);
   height: 168px;
   min-height: 168px;
   margin: -168px 0 18px;
@@ -1111,9 +1114,17 @@ main::before {
   line-height: 1.35;
 }
 
+.strength-metrics-row {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  align-items: stretch;
+  gap: 8px;
+  min-width: 0;
+}
+
 .strength-metrics {
   display: grid;
-  grid-template-columns: 68px repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   align-items: stretch;
   gap: 1px;
   overflow: hidden;
@@ -1162,11 +1173,37 @@ main::before {
   letter-spacing: -0.01em;
 }
 
-.strength-metrics > .strength-rank {
+.strength-rank {
+  position: relative;
+  display: grid;
+  appearance: none;
   align-content: center;
   justify-items: center;
   gap: 3px;
+  min-width: 0;
+  margin: 0;
+  border: 1px solid var(--separator);
+  border-radius: 12px;
+  background: var(--surface-inset);
   padding: 6px;
+  color: inherit;
+  cursor: pointer;
+}
+
+.strength-rank::after {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 4px;
+  height: 4px;
+  border-top: 1px solid var(--tertiary);
+  border-right: 1px solid var(--tertiary);
+  content: "";
+  opacity: 0.75;
+}
+
+.strength-rank:active {
+  transform: translateY(1px);
 }
 
 .strength-rank-icon {
@@ -2386,7 +2423,7 @@ footer p {
   }
 }
 
-@media (max-width: 960px) {
+@media (min-width: 0px) {
   .updated-label {
     display: none;
   }
@@ -2412,7 +2449,7 @@ footer p {
   }
 }
 
-@media (max-width: 640px) {
+@media (min-width: 0px) {
   .credit-alert {
     grid-template-columns: auto minmax(0, 1fr);
     padding: 12px 13px;
@@ -2529,7 +2566,7 @@ footer p {
 
   .theme-banner {
     left: 50%;
-    width: 100vw;
+    width: var(--app-viewport-width);
     height: clamp(250px, 72vw, 330px);
     margin-top: 10px;
     margin-bottom: 0;
@@ -2582,7 +2619,12 @@ footer p {
   }
 
   .strength-metrics {
-    grid-template-columns: 58px repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .strength-metrics-row {
+    grid-template-columns: 56px minmax(0, 1fr);
+    gap: 7px;
   }
 
   .strength-rank-icon {

@@ -158,12 +158,13 @@ test("server-renders the current finance tracker", async () => {
   assert.match(html, /class="strength-panel"/);
   assert.match(html, /ОТНОСИТЕЛЬНАЯ СИЛА/);
   assert.match(html, /<strong>4,6<\/strong>/);
-  assert.match(html, /aria-label="Мастер-сержант, ранг силы 8 из 20"/);
+  assert.match(html, /aria-label="Мастер-сержант, ранг силы 8 из 20\.[^"]*Имперский стиль[^"]*"/);
   assert.match(html, /class="strength-rank-icon"[^>]*background-position:50% 33\.333333333333336%/);
   assert.match(html, /<small>MSgt\.<\/small>/);
   assert.match(html, /<strong>51<small>кг<\/small><\/strong>/);
-  assert.match(html, /Лучший подход: подтягивания<\/span><strong>8<small class="strength-target"[^>]*>.*?23<\/small><\/strong>/);
-  assert.match(html, /Лучший подход: отжимания<\/span><strong>25<small class="strength-target"[^>]*>.*?57<\/small><\/strong>/);
+  assert.match(html, /Подтягивания<\/span><strong>8<small class="strength-target"[^>]*>.*?23<\/small><\/strong>/);
+  assert.match(html, /Отжимания<\/span><strong>25<small class="strength-target"[^>]*>.*?57<\/small><\/strong>/);
+  assert.doesNotMatch(html, /Лучший подход|Best (?:pull-up|push-up) set/);
   assert.match(html, /подходы не суммируются/);
   assert.doesNotMatch(html, /<form\b/);
   assert.doesNotMatch(html, /class="add-panel"/);
@@ -821,12 +822,14 @@ test("keeps database history and translations aligned", async () => {
   }
   assert.match(index, /id="theme-select"/);
   assert.match(index, /<html lang="ru">/);
-  assert.match(index, /styles\.css\?v=45/);
+  assert.match(index, /styles\.css\?v=46/);
   assert.match(index, /public\/vendor\/apexcharts\.min\.js\?v=21/);
-  assert.match(index, /script\.js\?v=51/);
+  assert.match(index, /script\.js\?v=52/);
   assert.match(index, /id="strength-pull-ups-target"/);
   assert.match(index, /id="strength-push-ups-target"/);
   assert.match(index, /rank-icons\/rank-insignia-atlas\.png\?v=1/);
+  assert.match(index, /class="strength-metrics-row"/);
+  assert.match(index, /<button class="strength-rank" id="strength-rank" type="button">/);
   assert.match(index, /data-current-theme="kinance"/);
   assert.match(index, /id="credit-alert"[^>]*hidden/);
   assert.doesNotMatch(index, /id="payment-method"/);
@@ -913,23 +916,36 @@ test("keeps database history and translations aligned", async () => {
     );
     assert.equal(icon.subarray(1, 4).toString("ascii"), "PNG");
   }
-  const rankAtlas = await readFile(
-    new URL("../public/rank-icons/rank-insignia-atlas.png", import.meta.url),
-  );
-  assert.equal(rankAtlas.subarray(1, 4).toString("ascii"), "PNG");
+  for (const filename of [
+    "rank-insignia-atlas.png",
+    "rank-insignia-modern-russia.png",
+    "rank-insignia-france.png",
+    "rank-insignia-britain.png",
+    "rank-insignia-china.png",
+    "rank-insignia-japan.png",
+    "rank-insignia-germany.png",
+    "rank-insignia-italy.png",
+    "rank-insignia-poland.png",
+    "rank-insignia-south-korea.png",
+  ]) {
+    const rankAtlas = await readFile(
+      new URL(`../public/rank-icons/${filename}`, import.meta.url),
+    );
+    assert.equal(rankAtlas.subarray(1, 4).toString("ascii"), "PNG");
+  }
   assert.match(styles, /\.theme-banner\s*\{/);
   assert.match(styles, /@keyframes credit-alert-pulse/);
   assert.match(styles, /\.payment-badge\.credit-outstanding/);
   assert.match(styles, /prefers-reduced-motion[\s\S]*\.credit-alert[\s\S]*animation:\s*none/);
   assert.match(styles, /\.theme-banner img\s*\{[^}]*object-fit:\s*cover/s);
   assert.match(styles, /\.theme-banner\s*\{[^}]*background:\s*transparent/s);
-  assert.match(styles, /\.theme-banner\s*\{[^}]*left:\s*50%[^}]*width:\s*100vw/s);
+  assert.match(styles, /\.theme-banner\s*\{[^}]*left:\s*50%[^}]*width:\s*var\(--app-viewport-width\)/s);
   assert.match(styles, /\.theme-banner\s*\{[^}]*transform:\s*translateX\(-50%\)/s);
   assert.doesNotMatch(styles, /\.daily-chart-panel\s*\{/);
-  assert.match(styles, /\.daily-expense-chart\s*\{[^}]*left:\s*50%[^}]*width:\s*100vw/s);
+  assert.match(styles, /\.daily-expense-chart\s*\{[^}]*left:\s*50%[^}]*width:\s*var\(--app-viewport-width\)/s);
   assert.match(styles, /\.daily-expense-chart\s*\{[^}]*height:\s*168px[^}]*min-height:\s*168px/s);
   assert.match(styles, /\.daily-expense-chart\s*\{[^}]*margin:\s*-168px 0 18px/s);
-  assert.match(styles, /@media \(max-width:\s*640px\)[\s\S]*\.daily-expense-chart\s*\{[^}]*margin-top:\s*-168px/s);
+  assert.match(styles, /@media \(min-width:\s*0px\)[\s\S]*\.daily-expense-chart\s*\{[^}]*margin-top:\s*-168px/s);
   assert.match(styles, /\.daily-expense-chart\s*\{[^}]*transform:\s*translateX\(-50%\)/s);
   assert.match(styles, /\.progress-ring\s*\{[^}]*--safe-spent-end:\s*0deg[^}]*--spent-end:\s*0deg[^}]*--savings-start:\s*360deg/s);
   assert.match(styles, /var\(--green\) 0 var\(--safe-spent-end\)/);
@@ -966,7 +982,7 @@ test("keeps database history and translations aligned", async () => {
   assert.match(styles, /\.expense-table-summary:focus-visible\s*\{[^}]*var\(--focus-ring\)/s);
   assert.match(styles, /data-theme="nier-automata"\]\s+\.stat-card:hover\s*\{[^}]*background-color:\s*rgba\(255, 255, 255, 0\.94\)/s);
   assert.match(styles, /data-theme="tohsaka-rin"\]\s+\.balance-card\s*\{[^}]*rgba\(229, 42, 85, 0\.2\)/s);
-  assert.match(styles, /@media \(max-width:\s*640px\)[\s\S]*\.balance-main\s*\{[^}]*gap:\s*12px/s);
+  assert.match(styles, /@media \(min-width:\s*0px\)[\s\S]*\.balance-main\s*\{[^}]*gap:\s*12px/s);
   assert.match(styles, /\.balance-main > div:first-child\s*\{[^}]*min-width:\s*0/s);
   assert.doesNotMatch(styles, /text-shadow:/);
   assert.doesNotMatch(styles, /var\(--accent\)/);
@@ -1007,8 +1023,18 @@ test("keeps database history and translations aligned", async () => {
   assert.match(styles, /\.allowance-guide i:first-child\s*\{[^}]*flex:\s*0 0 24px/s);
   assert.match(styles, /\.allowance-guide span\s*\{[^}]*text-align:\s*left/s);
   assert.match(styles, /\.strength-panel\s*\{/);
-  assert.match(styles, /\.strength-metrics\s*\{[^}]*grid-template-columns:\s*68px repeat\(3, minmax\(0, 1fr\)\)/s);
+  assert.match(styles, /--app-viewport-width:\s*min\(100vw, 430px\)/);
+  assert.match(styles, /main\s*\{[^}]*width:\s*var\(--app-viewport-width\)[^}]*margin-inline:\s*auto/s);
+  assert.match(styles, /\.strength-metrics-row\s*\{[^}]*grid-template-columns:\s*64px minmax\(0, 1fr\)/s);
+  assert.match(styles, /\.strength-metrics\s*\{[^}]*grid-template-columns:\s*repeat\(3, minmax\(0, 1fr\)\)/s);
   assert.match(styles, /\.strength-rank-icon\s*\{[^}]*background-size:\s*500% 400%[^}]*image-rendering:\s*pixelated/s);
+  assert.doesNotMatch(styles, /\.strength-metrics\s*>\s*\.strength-rank/);
+  for (const source of [script, page]) {
+    assert.match(source, /const RANK_INSIGNIA_SETS/);
+    assert.match(source, /kinance_rank_insignia_set/);
+    assert.match(source, /rank-insignia-south-korea\.png/);
+    assert.match(source, /writePreferenceCookie\(RANK_INSIGNIA_COOKIE/);
+  }
   assert.doesNotMatch(styles, /\.allowance-guide-label/);
   assert.doesNotMatch(styles, /\.apexcharts-yaxis-annotations rect\s*\{/);
   assert.match(styles, /\.salary-locked\s*\{/);

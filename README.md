@@ -494,9 +494,9 @@ The frontend remains read-only. Show the latest attempt as compact metrics and t
 The card must remain compact and scannable:
 
 - score and latest date form the first hierarchy;
-- weight, pull-ups, and push-ups receive equal emphasis;
+- weight, pull-ups, and push-ups receive equal emphasis, with the compact visible labels `Weight`, `Pull-ups`, and `Push-ups` and equivalent Russian labels;
 - pull-up and push-up metrics show `current / target`, where the target is the minimum whole-number repetition count required for a 10.0 score at the recorded body weight;
-- a compact military rank cell appears immediately before Weight, using the derived score and a visible abbreviated rank name below its insignia;
+- a compact military rank control appears beside the three-column metric table, never as a fourth table column, using the derived score and a visible abbreviated rank name below its insignia;
 - long labels wrap instead of truncating;
 - the Relative Strength line key and methodology remain secondary but readable;
 - locale controls the decimal separator.
@@ -513,7 +513,11 @@ Formula version 3 must match in JavaScript and React:
 
 Calculate the displayed 10.0 targets from the same mass adjustment: `pullUpTarget = ceil(20 / massAdjustment)` and `pushUpTarget = ceil(50 / massAdjustment)`. Derive them at render time from the latest recorded weight; never store or hard-code them.
 
-Relative Strength has 20 attainable rank bands. Promote from Private at 1.0 through Major General at 9.5 in 0.5-point steps, then use 9.8 for Lieutenant General and exactly 10.0 for General. The final split is necessary because the inclusive 1.0-to-10.0 scale contains only 19 half-point values. Keep the rank list, thresholds, English and Russian full names, and visible abbreviations identical in JavaScript and React. The insignia is an RPGMaker-style pixel atlas inspired by Russian Imperial-era metal rank components, without fabric shoulder boards or epaulette backings. Keep the icon decorative, display the abbreviation as real HTML text beneath it, and expose the localized full rank and level accessibly.
+Relative Strength has 20 attainable rank bands. Promote from Private at 1.0 through Major General at 9.5 in 0.5-point steps, then use 9.8 for Lieutenant General and exactly 10.0 for General. The final split is necessary because the inclusive 1.0-to-10.0 scale contains only 19 half-point values. Keep the rank list, thresholds, English and Russian full names, and visible abbreviations identical in JavaScript and React.
+
+The rank control cycles through ten complete 20-rank RPGMaker-style pixel atlases when clicked or tapped: Imperial blend, Modern Russia, France, Britain, China, Japan, Germany, Italy, Poland, and South Korea. Persist the selected ID in the one-year site-wide `kinance_rank_insignia_set` cookie with `SameSite=Lax` and `Secure` on HTTPS. Every atlas uses isolated realistic metal rank components without fabric shoulder boards, epaulettes, flags, labels, or exact official state emblems. Keep the rank abbreviation as real HTML text beneath the decorative sprite and expose the localized full rank, level, selected set, and change action accessibly.
+
+The whole application uses a centered 430-pixel maximum phone canvas on wider screens. Desktop must preserve the same single-column composition, control sizing, chart width, banner width, and content hierarchy as the phone view instead of expanding into a separate desktop dashboard. Full-bleed elements go edge to edge within the app canvas, not the physical monitor.
 
 The 20- and 50-repetition anchors calibrate this personal display and are not population norms. Recompute all historical scores from raw attempts with the current formula. If the formula changes, increment the strength schema version, document the formula version, and update regression fixtures. Version 3 introduced allometric adjustment and equal weighting; version 2 used the discontinued `0.12` clamped mass factor and 60/40 weighting.
 

@@ -13,9 +13,9 @@
     <meta property="og:image" content="https://finance.bekulov.com/public/og.png" />
     <title>Kinance</title>
     <link rel="icon" type="image/jpeg" href="/kinance-favicon.jpg" />
-    <link rel="stylesheet" href="/styles.css?v=45" />
+    <link rel="stylesheet" href="/styles.css?v=46" />
     <script src="/public/vendor/apexcharts.min.js?v=21" defer></script>
-    <script src="/script.js?v=51" defer></script>
+    <script src="/script.js?v=52" defer></script>
   </head>
   <body>
     <main>
@@ -115,14 +115,16 @@
             <div class="strength-score"><strong id="strength-score">N/A</strong><small>/ 10</small></div>
             <p id="strength-status" data-i18n="strengthNoAttempts">Log an attempt to establish your baseline</p>
           </div>
-          <div class="strength-metrics" aria-label="Latest relative strength attempt metrics" data-i18n-aria-label="strengthLatestMetrics">
-            <div class="strength-rank" id="strength-rank">
+          <div class="strength-metrics-row">
+            <button class="strength-rank" id="strength-rank" type="button">
               <span class="strength-rank-icon" id="strength-rank-icon" aria-hidden="true" style="background-image: url('/public/rank-icons/rank-insignia-atlas.png?v=1')"></span>
               <small id="strength-rank-abbreviation">—</small>
+            </button>
+            <div class="strength-metrics" aria-label="Latest relative strength attempt metrics" data-i18n-aria-label="strengthLatestMetrics">
+              <div><span data-i18n="strengthWeight">Weight</span><strong><span id="strength-weight-value">0</span><small data-i18n="strengthWeightUnit">kg</small></strong></div>
+              <div><span data-i18n="strengthPullUps">Pull-ups</span><strong><span id="strength-pull-ups-value">0</span><small class="strength-target" id="strength-pull-ups-target-label"><span aria-hidden="true">/</span> <span id="strength-pull-ups-target">—</span></small></strong></div>
+              <div><span data-i18n="strengthPushUps">Push-ups</span><strong><span id="strength-push-ups-value">0</span><small class="strength-target" id="strength-push-ups-target-label"><span aria-hidden="true">/</span> <span id="strength-push-ups-target">—</span></small></strong></div>
             </div>
-            <div><span data-i18n="strengthWeight">Weight</span><strong><span id="strength-weight-value">0</span><small data-i18n="strengthWeightUnit">kg</small></strong></div>
-            <div><span data-i18n="strengthPullUps">Best pull-up set</span><strong><span id="strength-pull-ups-value">0</span><small class="strength-target" id="strength-pull-ups-target-label"><span aria-hidden="true">/</span> <span id="strength-pull-ups-target">—</span></small></strong></div>
-            <div><span data-i18n="strengthPushUps">Best push-up set</span><strong><span id="strength-push-ups-value">0</span><small class="strength-target" id="strength-push-ups-target-label"><span aria-hidden="true">/</span> <span id="strength-push-ups-target">—</span></small></strong></div>
           </div>
           <div class="strength-meta">
             <span><i class="strength-key"></i><span data-i18n="relativeStrengthSeries">Relative strength</span></span>

@@ -41,6 +41,20 @@ const STRENGTH_RANKS = [
   { threshold: 10, abbreviation: "Gen.", en: "General", ru: "Генерал" },
 ] as const;
 
+const RANK_INSIGNIA_SETS = [
+  { id: "imperial-blend", file: "rank-insignia-atlas.png", en: "Imperial blend", ru: "Имперский стиль" },
+  { id: "modern-russia", file: "rank-insignia-modern-russia.png", en: "Modern Russia", ru: "Современная Россия" },
+  { id: "france", file: "rank-insignia-france.png", en: "France", ru: "Франция" },
+  { id: "britain", file: "rank-insignia-britain.png", en: "Britain", ru: "Британия" },
+  { id: "china", file: "rank-insignia-china.png", en: "China", ru: "Китай" },
+  { id: "japan", file: "rank-insignia-japan.png", en: "Japan", ru: "Япония" },
+  { id: "germany", file: "rank-insignia-germany.png", en: "Germany", ru: "Германия" },
+  { id: "italy", file: "rank-insignia-italy.png", en: "Italy", ru: "Италия" },
+  { id: "poland", file: "rank-insignia-poland.png", en: "Poland", ru: "Польша" },
+  { id: "south-korea", file: "rank-insignia-south-korea.png", en: "South Korea", ru: "Южная Корея" },
+] as const;
+type RankInsigniaSetId = (typeof RANK_INSIGNIA_SETS)[number]["id"];
+
 const THEMES = [
   { id: "kinance", label: "Kinance", banners: ["/theme-banners/kinance.png?v=7", "/theme-banners/kinance-frame-2.png?v=7"] },
   { id: "kinance-moon", label: "Kinance Moon", banners: ["/theme-banners/kinance.png?v=7", "/theme-banners/kinance-frame-2.png?v=7"] },
@@ -52,6 +66,7 @@ type ThemeId = (typeof THEMES)[number]["id"];
 const PREFERENCE_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
 const THEME_COOKIE = "kinance_theme";
 const LANGUAGE_COOKIE = "kinance_language";
+const RANK_INSIGNIA_COOKIE = "kinance_rank_insignia_set";
 
 type Expense = {
   id: string;
@@ -228,10 +243,11 @@ const COPY = {
     strengthNoAttempts: "Log an attempt to establish your baseline",
     strengthLatest: "Latest attempt · {date}",
     strengthWeight: "Weight",
-    strengthPullUps: "Best pull-up set",
-    strengthPushUps: "Best push-up set",
+    strengthPullUps: "Pull-ups",
+    strengthPushUps: "Push-ups",
     strengthTarget: "Target for a 10.0 score: {value}",
     strengthRank: "{rank}, strength rank {level} of 20",
+    strengthRankControl: "{rank}, strength rank {level} of 20. Insignia style: {set}. Tap to change.",
     strengthLatestMetrics: "Latest relative strength attempt metrics",
     strengthSave: "Save attempt",
     strengthNote: "Best single sets · never summed · body-mass adjusted personal index",
@@ -324,10 +340,11 @@ const COPY = {
     strengthNoAttempts: "Добавьте попытку, чтобы определить исходный уровень",
     strengthLatest: "Последняя попытка · {date}",
     strengthWeight: "Вес",
-    strengthPullUps: "Лучший подход: подтягивания",
-    strengthPushUps: "Лучший подход: отжимания",
+    strengthPullUps: "Подтягивания",
+    strengthPushUps: "Отжимания",
     strengthTarget: "Цель для оценки 10,0: {value}",
     strengthRank: "{rank}, ранг силы {level} из 20",
+    strengthRankControl: "{rank}, ранг силы {level} из 20. Стиль знаков различия: {set}. Нажмите, чтобы сменить.",
     strengthLatestMetrics: "Показатели последней попытки относительной силы",
     strengthSave: "Сохранить попытку",
     strengthNote: "Лучшие одиночные подходы · подходы не суммируются · персональный индекс с поправкой на массу тела",
@@ -653,6 +670,7 @@ export default function Home() {
   const data = financeDataForMonth(selectedMonth);
   const [language, setLanguage] = useState<Language>("ru");
   const [theme, setTheme] = useState<ThemeId>("kinance");
+  const [rankInsigniaSet, setRankInsigniaSet] = useState<RankInsigniaSetId>("imperial-blend");
   const [bannerFrame, setBannerFrame] = useState(0);
   const [spendingInsightOpen, setSpendingInsightOpen] = useState(false);
   const [recurringExpanded, setRecurringExpanded] = useState(true);
@@ -667,6 +685,15 @@ export default function Home() {
     const nextLanguage: Language = savedLanguage === "en" ? "en" : "ru";
     setLanguage(nextLanguage);
     writePreferenceCookie(LANGUAGE_COOKIE, nextLanguage);
+  }, []);
+
+  useEffect(() => {
+    const savedSet = readPreferenceCookie(RANK_INSIGNIA_COOKIE);
+    const nextSet = RANK_INSIGNIA_SETS.some(({ id }) => id === savedSet)
+      ? (savedSet as RankInsigniaSetId)
+      : "imperial-blend";
+    setRankInsigniaSet(nextSet);
+    writePreferenceCookie(RANK_INSIGNIA_COOKIE, nextSet);
   }, []);
 
   useEffect(() => {
@@ -781,6 +808,8 @@ export default function Home() {
     [locale],
   );
   const copy = COPY[language];
+  const selectedRankInsigniaSet = RANK_INSIGNIA_SETS.find(({ id }) => id === rankInsigniaSet)
+    ?? RANK_INSIGNIA_SETS[0];
   const selectedTheme = THEMES.find(({ id }) => id === theme) ?? THEMES[0];
   const themeBannerSrc = selectedTheme.banners[bannerFrame % selectedTheme.banners.length];
   useEffect(() => {
@@ -1260,30 +1289,41 @@ export default function Home() {
                 : copy.strengthNoAttempts}
             </p>
           </div>
-          <div className="strength-metrics" aria-label={copy.strengthLatestMetrics}>
-            <div
+          <div className="strength-metrics-row">
+            <button
               className="strength-rank"
+              type="button"
               aria-label={latestStrengthRank
-                ? fillTemplate(copy.strengthRank, {
+                ? fillTemplate(copy.strengthRankControl, {
                     rank: latestStrengthRank[language],
                     level: latestStrengthRank.level,
+                    set: selectedRankInsigniaSet[language],
                   })
                 : copy.strengthNoAttempts}
+              title={selectedRankInsigniaSet[language]}
+              onClick={() => {
+                const currentIndex = RANK_INSIGNIA_SETS.findIndex(({ id }) => id === rankInsigniaSet);
+                const nextSet = RANK_INSIGNIA_SETS[(currentIndex + 1) % RANK_INSIGNIA_SETS.length];
+                setRankInsigniaSet(nextSet.id);
+                writePreferenceCookie(RANK_INSIGNIA_COOKIE, nextSet.id);
+              }}
             >
               <span
                 className="strength-rank-icon"
                 aria-hidden="true"
                 hidden={!latestStrengthRank}
                 style={{
-                  backgroundImage: "url('/rank-icons/rank-insignia-atlas.png?v=1')",
+                  backgroundImage: `url('/rank-icons/${selectedRankInsigniaSet.file}?v=1')`,
                   backgroundPosition: latestStrengthRank?.backgroundPosition ?? "0% 0%",
                 }}
               />
               <small>{latestStrengthRank?.abbreviation ?? "—"}</small>
+            </button>
+            <div className="strength-metrics" aria-label={copy.strengthLatestMetrics}>
+              <div><span>{copy.strengthWeight}</span><strong>{latestStrength?.weightKg ?? 0}<small>{copy.strengthWeightUnit}</small></strong></div>
+              <div><span>{copy.strengthPullUps}</span><strong>{latestStrength?.maxPullUpsSingleSet ?? 0}<small className="strength-target" aria-label={fillTemplate(copy.strengthTarget, { value: latestStrengthTargets?.pullUps ?? "—" })}><span aria-hidden="true">/</span> {latestStrengthTargets?.pullUps ?? "—"}</small></strong></div>
+              <div><span>{copy.strengthPushUps}</span><strong>{latestStrength?.maxPushUpsSingleSet ?? 0}<small className="strength-target" aria-label={fillTemplate(copy.strengthTarget, { value: latestStrengthTargets?.pushUps ?? "—" })}><span aria-hidden="true">/</span> {latestStrengthTargets?.pushUps ?? "—"}</small></strong></div>
             </div>
-            <div><span>{copy.strengthWeight}</span><strong>{latestStrength?.weightKg ?? 0}<small>{copy.strengthWeightUnit}</small></strong></div>
-            <div><span>{copy.strengthPullUps}</span><strong>{latestStrength?.maxPullUpsSingleSet ?? 0}<small className="strength-target" aria-label={fillTemplate(copy.strengthTarget, { value: latestStrengthTargets?.pullUps ?? "—" })}><span aria-hidden="true">/</span> {latestStrengthTargets?.pullUps ?? "—"}</small></strong></div>
-            <div><span>{copy.strengthPushUps}</span><strong>{latestStrength?.maxPushUpsSingleSet ?? 0}<small className="strength-target" aria-label={fillTemplate(copy.strengthTarget, { value: latestStrengthTargets?.pushUps ?? "—" })}><span aria-hidden="true">/</span> {latestStrengthTargets?.pushUps ?? "—"}</small></strong></div>
           </div>
           <div className="strength-meta">
             <span><i className="strength-key" />{copy.relativeStrengthSeries}</span>

@@ -35,6 +35,19 @@ const STRENGTH_RANKS = [
   { threshold: 10, abbreviation: "Gen.", en: "General", ru: "Генерал" },
 ];
 
+const RANK_INSIGNIA_SETS = [
+  { id: "imperial-blend", file: "rank-insignia-atlas.png", en: "Imperial blend", ru: "Имперский стиль" },
+  { id: "modern-russia", file: "rank-insignia-modern-russia.png", en: "Modern Russia", ru: "Современная Россия" },
+  { id: "france", file: "rank-insignia-france.png", en: "France", ru: "Франция" },
+  { id: "britain", file: "rank-insignia-britain.png", en: "Britain", ru: "Британия" },
+  { id: "china", file: "rank-insignia-china.png", en: "China", ru: "Китай" },
+  { id: "japan", file: "rank-insignia-japan.png", en: "Japan", ru: "Япония" },
+  { id: "germany", file: "rank-insignia-germany.png", en: "Germany", ru: "Германия" },
+  { id: "italy", file: "rank-insignia-italy.png", en: "Italy", ru: "Италия" },
+  { id: "poland", file: "rank-insignia-poland.png", en: "Poland", ru: "Польша" },
+  { id: "south-korea", file: "rank-insignia-south-korea.png", en: "South Korea", ru: "Южная Корея" },
+];
+
 const KINANCE_CATEGORY_ICONS = {
   Food: "/public/category-icons/food-rpg.png?v=1",
   "Subscriptions & services": "/public/category-icons/services-rpg.png?v=1",
@@ -112,6 +125,7 @@ const THEMES = [
 const PREFERENCE_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
 const THEME_COOKIE = "kinance_theme";
 const LANGUAGE_COOKIE = "kinance_language";
+const RANK_INSIGNIA_COOKIE = "kinance_rank_insignia_set";
 
 function readPreferenceCookie(name) {
   const prefix = `${encodeURIComponent(name)}=`;
@@ -155,10 +169,11 @@ const TRANSLATIONS = {
     strengthNoAttempts: "Log an attempt to establish your baseline",
     strengthLatest: "Latest attempt · {date}",
     strengthWeight: "Weight",
-    strengthPullUps: "Best pull-up set",
-    strengthPushUps: "Best push-up set",
+    strengthPullUps: "Pull-ups",
+    strengthPushUps: "Push-ups",
     strengthTarget: "Target for a 10.0 score: {value}",
     strengthRank: "{rank}, strength rank {level} of 20",
+    strengthRankControl: "{rank}, strength rank {level} of 20. Insignia style: {set}. Tap to change.",
     strengthSave: "Save attempt",
     strengthNote: "Best single sets · never summed · body-mass adjusted personal index",
     strengthLatestMetrics: "Latest relative strength attempt metrics",
@@ -264,10 +279,11 @@ const TRANSLATIONS = {
     strengthNoAttempts: "Добавьте попытку, чтобы определить исходный уровень",
     strengthLatest: "Последняя попытка · {date}",
     strengthWeight: "Вес",
-    strengthPullUps: "Лучший подход: подтягивания",
-    strengthPushUps: "Лучший подход: отжимания",
+    strengthPullUps: "Подтягивания",
+    strengthPushUps: "Отжимания",
     strengthTarget: "Цель для оценки 10,0: {value}",
     strengthRank: "{rank}, ранг силы {level} из 20",
+    strengthRankControl: "{rank}, ранг силы {level} из 20. Стиль знаков различия: {set}. Нажмите, чтобы сменить.",
     strengthSave: "Сохранить попытку",
     strengthNote: "Лучшие одиночные подходы · подходы не суммируются · персональный индекс с поправкой на массу тела",
     strengthLatestMetrics: "Показатели последней попытки относительной силы",
@@ -362,8 +378,13 @@ let theme = THEMES.some(({ id }) => id === savedThemePreference)
   : "kinance";
 const savedLanguagePreference = readPreferenceCookie(LANGUAGE_COOKIE);
 let language = savedLanguagePreference === "en" ? "en" : "ru";
+const savedRankInsigniaPreference = readPreferenceCookie(RANK_INSIGNIA_COOKIE);
+let rankInsigniaSet = RANK_INSIGNIA_SETS.some(({ id }) => id === savedRankInsigniaPreference)
+  ? savedRankInsigniaPreference
+  : "imperial-blend";
 writePreferenceCookie(THEME_COOKIE, theme);
 writePreferenceCookie(LANGUAGE_COOKIE, language);
+writePreferenceCookie(RANK_INSIGNIA_COOKIE, rankInsigniaSet);
 
 function t(key, replacements = {}) {
   let value = TRANSLATIONS[language][key] ?? TRANSLATIONS.en[key] ?? key;
@@ -1038,15 +1059,23 @@ function renderStrengthSummary() {
     t("strengthTarget", { value: targets?.pushUps ?? "—" }),
   );
   const rankIcon = element("strength-rank-icon");
+  const selectedSet = RANK_INSIGNIA_SETS.find(({ id }) => id === rankInsigniaSet)
+    ?? RANK_INSIGNIA_SETS[0];
   rankIcon.hidden = !rank;
+  rankIcon.style.backgroundImage = `url('/public/rank-icons/${selectedSet.file}?v=1')`;
   rankIcon.style.backgroundPosition = rank?.backgroundPosition ?? "0% 0%";
   element("strength-rank-abbreviation").textContent = rank?.abbreviation ?? "—";
   element("strength-rank").setAttribute(
     "aria-label",
     rank
-      ? t("strengthRank", { rank: rank[language], level: rank.level })
+      ? t("strengthRankControl", {
+          rank: rank[language],
+          level: rank.level,
+          set: selectedSet[language],
+        })
       : t("strengthNoAttempts"),
   );
+  element("strength-rank").title = selectedSet[language];
 }
 
 function renderDailyExpenseChart(allFundsDailyPace, savingsSafeDailyPace) {
@@ -1253,6 +1282,13 @@ function bindControls() {
     writePreferenceCookie(THEME_COOKIE, theme);
     applyTheme();
     if (data) render();
+  });
+  element("strength-rank").addEventListener("click", () => {
+    const currentIndex = RANK_INSIGNIA_SETS.findIndex(({ id }) => id === rankInsigniaSet);
+    const nextSet = RANK_INSIGNIA_SETS[(currentIndex + 1) % RANK_INSIGNIA_SETS.length];
+    rankInsigniaSet = nextSet.id;
+    writePreferenceCookie(RANK_INSIGNIA_COOKIE, rankInsigniaSet);
+    if (data) renderStrengthSummary();
   });
   document.querySelectorAll("[data-language]").forEach((button) => {
     button.addEventListener("click", () => {

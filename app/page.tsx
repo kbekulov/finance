@@ -66,15 +66,58 @@ const CATEGORIES: Category[] = [
   "Alcohol & nightlife",
 ];
 
-const CATEGORY_ICONS: Record<Category, string> = {
-  Food: "/category-icons/food.png?v=5",
-  "Subscriptions & services": "/category-icons/subscriptions-services.png?v=5",
-  "Luxury purchases": "/category-icons/luxury-purchases.png?v=5",
-  "Debt & repayments": "/category-icons/debt-repayments.png?v=5",
-  "Devices & installments": "/category-icons/devices-installments.png?v=5",
-  "Transport & Travel": "/category-icons/transport-travel.png?v=5",
-  "Alcohol & nightlife": "/category-icons/alcohol-nightlife.png?v=5",
+const CATEGORY_ICON_POOLS: Record<Category, readonly string[]> = {
+  Food: [
+    "/category-icons/food.png?v=5",
+    "/category-icons/food-kohaku.png?v=1",
+    "/category-icons/food-soujuurou.png?v=1",
+  ],
+  "Subscriptions & services": [
+    "/category-icons/subscriptions-services.png?v=5",
+    "/category-icons/subscriptions-bb.png?v=1",
+    "/category-icons/subscriptions-sion.png?v=1",
+  ],
+  "Luxury purchases": [
+    "/category-icons/luxury-purchases.png?v=5",
+    "/category-icons/luxury-nero.png?v=1",
+    "/category-icons/luxury-alice.png?v=1",
+  ],
+  "Debt & repayments": [
+    "/category-icons/debt-repayments.png?v=5",
+    "/category-icons/debt-mash.png?v=1",
+    "/category-icons/debt-shiki-ryougi.png?v=1",
+  ],
+  "Devices & installments": [
+    "/category-icons/devices-installments.png?v=5",
+    "/category-icons/devices-ciel.png?v=1",
+    "/category-icons/devices-touko.png?v=1",
+  ],
+  "Transport & Travel": [
+    "/category-icons/transport-travel.png?v=5",
+    "/category-icons/transport-arcueid.png?v=1",
+    "/category-icons/transport-shiki-tohno.png?v=1",
+  ],
+  "Alcohol & nightlife": [
+    "/category-icons/alcohol-nightlife.png?v=5",
+    "/category-icons/alcohol-shuten.png?v=1",
+    "/category-icons/alcohol-aoko.png?v=1",
+  ],
 };
+
+function categoryIconFor(expense: Expense) {
+  const pool = CATEGORY_ICON_POOLS[expense.category];
+  let hash = 2166136261;
+  for (const character of expense.id) {
+    hash ^= character.charCodeAt(0);
+    hash = Math.imul(hash, 16777619);
+  }
+  hash ^= hash >>> 16;
+  hash = Math.imul(hash, 0x7feb352d);
+  hash ^= hash >>> 15;
+  hash = Math.imul(hash, 0x846ca68b);
+  hash ^= hash >>> 16;
+  return pool[(hash >>> 0) % pool.length];
+}
 
 const COPY = {
   en: {
@@ -629,7 +672,7 @@ export default function Home() {
             {/* Category art is decorative because the localized category name follows in text. */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={CATEGORY_ICONS[expense.category]}
+              src={categoryIconFor(expense)}
               alt=""
               width={256}
               height={256}

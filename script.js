@@ -8,15 +8,58 @@ const CATEGORIES = [
   "Alcohol & nightlife",
 ];
 
-const CATEGORY_ICONS = {
-  Food: "/public/category-icons/food.png?v=5",
-  "Subscriptions & services": "/public/category-icons/subscriptions-services.png?v=5",
-  "Luxury purchases": "/public/category-icons/luxury-purchases.png?v=5",
-  "Debt & repayments": "/public/category-icons/debt-repayments.png?v=5",
-  "Devices & installments": "/public/category-icons/devices-installments.png?v=5",
-  "Transport & Travel": "/public/category-icons/transport-travel.png?v=5",
-  "Alcohol & nightlife": "/public/category-icons/alcohol-nightlife.png?v=5",
+const CATEGORY_ICON_POOLS = {
+  Food: [
+    "/public/category-icons/food.png?v=5",
+    "/public/category-icons/food-kohaku.png?v=1",
+    "/public/category-icons/food-soujuurou.png?v=1",
+  ],
+  "Subscriptions & services": [
+    "/public/category-icons/subscriptions-services.png?v=5",
+    "/public/category-icons/subscriptions-bb.png?v=1",
+    "/public/category-icons/subscriptions-sion.png?v=1",
+  ],
+  "Luxury purchases": [
+    "/public/category-icons/luxury-purchases.png?v=5",
+    "/public/category-icons/luxury-nero.png?v=1",
+    "/public/category-icons/luxury-alice.png?v=1",
+  ],
+  "Debt & repayments": [
+    "/public/category-icons/debt-repayments.png?v=5",
+    "/public/category-icons/debt-mash.png?v=1",
+    "/public/category-icons/debt-shiki-ryougi.png?v=1",
+  ],
+  "Devices & installments": [
+    "/public/category-icons/devices-installments.png?v=5",
+    "/public/category-icons/devices-ciel.png?v=1",
+    "/public/category-icons/devices-touko.png?v=1",
+  ],
+  "Transport & Travel": [
+    "/public/category-icons/transport-travel.png?v=5",
+    "/public/category-icons/transport-arcueid.png?v=1",
+    "/public/category-icons/transport-shiki-tohno.png?v=1",
+  ],
+  "Alcohol & nightlife": [
+    "/public/category-icons/alcohol-nightlife.png?v=5",
+    "/public/category-icons/alcohol-shuten.png?v=1",
+    "/public/category-icons/alcohol-aoko.png?v=1",
+  ],
 };
+
+function categoryIconFor(expense) {
+  const pool = CATEGORY_ICON_POOLS[expense.category];
+  let hash = 2166136261;
+  for (const character of expense.id) {
+    hash ^= character.charCodeAt(0);
+    hash = Math.imul(hash, 16777619);
+  }
+  hash ^= hash >>> 16;
+  hash = Math.imul(hash, 0x7feb352d);
+  hash ^= hash >>> 15;
+  hash = Math.imul(hash, 0x846ca68b);
+  hash ^= hash >>> 16;
+  return pool[(hash >>> 0) % pool.length];
+}
 
 const THEMES = [
   { id: "kinance", label: "Kinance", banner: "/public/theme-banners/kinance.png?v=2" },
@@ -662,7 +705,7 @@ function createExpenseList(expenses) {
   const list = document.createElement("ul");
   list.className = "expense-list";
   expenses.forEach((expense) => {
-    const categoryIcon = CATEGORY_ICONS[expense.category];
+    const categoryIcon = categoryIconFor(expense);
     const date = new Date(`${expense.date}T12:00:00`).toLocaleDateString(locale(), {
       day: "numeric",
       month: "short",

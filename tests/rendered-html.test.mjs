@@ -166,13 +166,14 @@ test("keeps database history and translations aligned", async () => {
   assert.match(manual, /never misdate it into the current cycle/);
   assert.match(manual, /Synthetic expense history is exceptional/);
   assert.match(manual, /`synthetic: true` and a stable shared `backfillBatch` identifier/);
-  assert.match(manual, /category-specific transparent Fate\/stay night chibi PNG/);
+  assert.match(manual, /category-relevant transparent Type-Moon chibi PNG/);
   assert.match(manual, /Every expense-recording request that adds at least one new canonical expense/);
   assert.match(manual, /Generate one fresh banner per request/);
   assert.match(manual, /increment the Kinance banner query version in `index\.html`, `script\.js`, and `app\/page\.tsx`/);
   assert.match(manual, /Finance accuracy takes priority/);
-  assert.match(manual, /Taiga Fujimura as a curry-shop cook hugging a giant curry platter for Food/);
-  assert.match(manual, /Lancer Cu Chulainn as a pub tapmaster hoisting a ruby beer stein for Alcohol & nightlife/);
+  assert.match(manual, /Taiga Fujimura, Kohaku, and Soujuurou Shizuki for Food/);
+  assert.match(manual, /Lancer Cu Chulainn, Shuten-Douji, and Aoko Aozaki for Alcohol & nightlife/);
+  assert.match(manual, /stable expense-ID hash/);
   assert.match(manual, /create new concepts from a blank canvas instead of tracing an older icon/);
   assert.match(manual, /sits entirely over the lower 168 pixels of the character artwork/);
   assert.equal(current.updatedAt, "2026-07-26");
@@ -568,7 +569,7 @@ test("keeps database history and translations aligned", async () => {
   assert.match(index, /id="theme-select"/);
   assert.match(index, /styles\.css\?v=36/);
   assert.match(index, /public\/vendor\/apexcharts\.min\.js\?v=21/);
-  assert.match(index, /script\.js\?v=36/);
+  assert.match(index, /script\.js\?v=37/);
   assert.match(index, /data-current-theme="kinance"/);
   assert.match(index, /id="credit-alert"[^>]*hidden/);
   assert.match(index, /id="payment-method"/);
@@ -586,6 +587,9 @@ test("keeps database history and translations aligned", async () => {
   assert.match(script, /public\/category-icons\/alcohol-nightlife\.png/);
   assert.match(script, /category-icons\/food\.png\?v=5/);
   assert.match(script, /category-icons\/subscriptions-services\.png\?v=5/);
+  assert.match(script, /const CATEGORY_ICON_POOLS/);
+  assert.match(script, /function categoryIconFor\(expense\)/);
+  assert.match(script, /Math\.imul\(hash, 16777619\)/);
   for (const source of [page]) {
     assert.match(source, /themeBannerLabel/);
     assert.match(source, /theme-banners\/kinance\.png/);
@@ -595,11 +599,16 @@ test("keeps database history and translations aligned", async () => {
     assert.match(source, /category-icons\/alcohol-nightlife\.png/);
     assert.match(source, /category-icons\/food\.png\?v=5/);
     assert.match(source, /category-icons\/subscriptions-services\.png\?v=5/);
+    assert.match(source, /const CATEGORY_ICON_POOLS/);
+    assert.match(source, /function categoryIconFor\(expense: Expense\)/);
+    assert.match(source, /Math\.imul\(hash, 16777619\)/);
     assert.doesNotMatch(source, /className="hero-copy"/);
     assert.doesNotMatch(source, /className="hero-intro"/);
   }
   assert.equal((script.match(/category-icons\/[\w-]+\.png\?v=5/g) ?? []).length, 7);
   assert.equal((page.match(/category-icons\/[\w-]+\.png\?v=5/g) ?? []).length, 7);
+  assert.equal((script.match(/category-icons\/[\w-]+\.png\?v=1/g) ?? []).length, 14);
+  assert.equal((page.match(/category-icons\/[\w-]+\.png\?v=1/g) ?? []).length, 14);
   for (const filename of [
     "food.png",
     "subscriptions-services.png",
@@ -608,6 +617,20 @@ test("keeps database history and translations aligned", async () => {
     "devices-installments.png",
     "transport-travel.png",
     "alcohol-nightlife.png",
+    "food-kohaku.png",
+    "food-soujuurou.png",
+    "subscriptions-bb.png",
+    "subscriptions-sion.png",
+    "luxury-nero.png",
+    "luxury-alice.png",
+    "debt-mash.png",
+    "debt-shiki-ryougi.png",
+    "devices-ciel.png",
+    "devices-touko.png",
+    "transport-arcueid.png",
+    "transport-shiki-tohno.png",
+    "alcohol-shuten.png",
+    "alcohol-aoko.png",
   ]) {
     const icon = await readFile(
       new URL(`../public/category-icons/${filename}`, import.meta.url),

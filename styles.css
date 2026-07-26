@@ -909,7 +909,7 @@ main::before {
   width: 100vw;
   height: 168px;
   min-height: 168px;
-  margin: -136px 0 18px;
+  margin: -168px 0 18px;
   overflow: hidden;
   transform: translateX(-50%);
   filter: drop-shadow(0 4px 8px var(--chart-glow));
@@ -2103,7 +2103,7 @@ footer p {
   .daily-expense-chart {
     height: 168px;
     min-height: 168px;
-    margin-top: -120px;
+    margin-top: -168px;
     margin-bottom: 12px;
   }
 

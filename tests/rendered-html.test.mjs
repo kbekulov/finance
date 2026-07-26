@@ -80,7 +80,7 @@ test("server-renders the current finance tracker", async () => {
   assert.match(html, /<details[^>]*class="expense-table recurring-expenses"/);
   assert.match(html, /<summary class="expense-table-summary"/);
   assert.match(html, /One-time expenses/);
-  assert.match(html, /€994\.02/);
+  assert.match(html, /€995\.71/);
   assert.match(html, /Expected monthly expenses/);
   assert.equal((html.match(/Expected monthly expenses/g) ?? []).length, 1);
   assert.doesNotMatch(html, /Expected monthly total/);
@@ -95,9 +95,10 @@ test("server-renders the current finance tracker", async () => {
   assert.match(html, /Keturi vėjai 0\.4 l/);
   assert.match(html, /Shelton&#x27;s pear cider/);
   assert.match(html, /Alcohol &amp; nightlife/);
-  assert.match(html, /€1,930\.49/);
-  assert.match(html, /€219\.51/);
-  assert.match(html, /€19\.51/);
+  assert.match(html, /Alita Spritz Limon/);
+  assert.match(html, /€1,932\.18/);
+  assert.match(html, /€217\.82/);
+  assert.match(html, /€17\.82/);
   assert.match(html, /90%<!-- --> <!-- -->SPENT|90% SPENT/);
   assert.match(html, /All funds/);
   assert.match(html, /Savings safe/);
@@ -113,8 +114,8 @@ test("server-renders the current finance tracker", async () => {
     Math.round((cycleEndUtc - todayUtc) / 86400000),
     1,
   );
-  const renderedAllFundsPace = Math.round(219.51 / renderedRemainingDays);
-  const renderedSavingsSafePace = Math.round(19.51 / renderedRemainingDays);
+  const renderedAllFundsPace = Math.round(217.82 / renderedRemainingDays);
+  const renderedSavingsSafePace = Math.round(17.82 / renderedRemainingDays);
   assert.match(
     html,
     new RegExp(`€${renderedAllFundsPace}(?:<!-- --> <!-- -->)?/ day`),
@@ -132,7 +133,10 @@ test("server-renders the current finance tracker", async () => {
   assert.doesNotMatch(html, /class="daily-chart-panel"/);
   assert.match(html, /class="daily-expense-chart"/);
   assert.match(html, /class="expense-category-icon"/);
-  assert.match(html, /category-icons\/debt-repayments\.png/);
+  assert.match(
+    html,
+    /category-icons\/(?:debt-repayments|debt-mash|debt-shiki-ryougi)\.png/,
+  );
   assert.doesNotMatch(html, /class="expense-monogram"/);
   assert.match(html, /aria-label="Daily non-recurring expense movement"/);
   assert.doesNotMatch(html, /Your site is taking shape|Building your site/);
@@ -177,7 +181,7 @@ test("keeps database history and translations aligned", async () => {
   assert.match(manual, /create new concepts from a blank canvas instead of tracing an older icon/);
   assert.match(manual, /sits entirely over the lower 168 pixels of the character artwork/);
   assert.equal(current.updatedAt, "2026-07-26");
-  assert.equal(current.revision, 24);
+  assert.equal(current.revision, 25);
   assert.equal(current.savingsGoal, 200);
   const supportedCategories = new Set([
     "Food",
@@ -470,6 +474,38 @@ test("keeps database history and translations aligned", async () => {
     )
     .reduce((sum, expense) => sum + expense.amount, 0);
   assert.equal(outstandingCredit, 0);
+  assert.deepEqual(
+    current.expenses.find((expense) => expense.id === "2026-07-rimi-alita-spritz-001"),
+    {
+      id: "2026-07-rimi-alita-spritz-001",
+      amount: 1.69,
+      note: "Alita Spritz Limon",
+      noteTranslations: {
+        en: "Alita Spritz Limon",
+        ru: "Alita Spritz Limon, 0,2 л",
+      },
+      date: "2026-07-26",
+      category: "Alcohol & nightlife",
+      source: "receipt",
+      merchant: "Rimi",
+      legalEntity: "UAB RIMI LIETUVA",
+      merchantAddress: "Rygos g. 8, Vilnius",
+      description: "Alita Spritz Limon 8% 0.2 l with refundable metal packaging deposit",
+      originalCurrency: "EUR",
+      originalAmount: 1.69,
+      receiptReference: "13/854/127400",
+      paymentMethod: "debit",
+      transactionTime: "11:26:35",
+      vatRate: 21,
+      vatAmount: 0.28,
+      containerDeposit: 0.1,
+      lineItems: [
+        { description: "Alita Spritz Limon 8% 0.2 l", amount: 1.59 },
+        { description: "Refundable metal packaging deposit", amount: 0.1 },
+      ],
+      receiptPaymentDescription: "Contactless debit Mastercard",
+    },
+  );
   const sumCents = (expenses) =>
     expenses.reduce((sum, expense) => sum + Math.round(expense.amount * 100), 0);
   const spentCents = sumCents(current.expenses);
@@ -489,14 +525,14 @@ test("keeps database history and translations aligned", async () => {
     assert.ok(expense.date >= "2026-07-12");
     assert.ok(expense.date <= "2026-07-25");
   }
-  assert.equal(spentCents, 193049);
+  assert.equal(spentCents, 193218);
   assert.equal(recurringCents, 93647);
-  assert.equal(oneTimeCents, 99402);
+  assert.equal(oneTimeCents, 99571);
   assert.equal(recurringCents + oneTimeCents, spentCents);
   const cashRemainingCents = current.salary * 100 - spentCents;
   const safeRemainingCents = cashRemainingCents - current.savingsGoal * 100;
-  assert.equal(cashRemainingCents, 21951);
-  assert.equal(safeRemainingCents, 1951);
+  assert.equal(cashRemainingCents, 21782);
+  assert.equal(safeRemainingCents, 1782);
   const calendarDay = (dateKey) => {
     const [year, month, day] = dateKey.split("-").map(Number);
     return Date.UTC(year, month - 1, day) / 86400000;
@@ -512,15 +548,15 @@ test("keeps database history and translations aligned", async () => {
   assert.equal(Math.round((spentCents / (current.salary * 100)) * 100), 90);
 
   const salaryHistoryScenario = [
-    { salary: 2150, savingsGoal: 200, spent: 1930.49 },
-    { salary: 2750, savingsGoal: 200, spent: 1930.49 },
+    { salary: 2150, savingsGoal: 200, spent: 1932.18 },
+    { salary: 2750, savingsGoal: 200, spent: 1932.18 },
   ].map((cycle) => ({
     cashRemaining: Math.round((cycle.salary - cycle.spent) * 100) / 100,
     safeRemaining: Math.round((cycle.salary - cycle.spent - cycle.savingsGoal) * 100) / 100,
     usedPercent: (cycle.spent / cycle.salary) * 100,
   }));
-  assert.deepEqual(salaryHistoryScenario.map(({ cashRemaining }) => cashRemaining), [219.51, 819.51]);
-  assert.deepEqual(salaryHistoryScenario.map(({ safeRemaining }) => safeRemaining), [19.51, 619.51]);
+  assert.deepEqual(salaryHistoryScenario.map(({ cashRemaining }) => cashRemaining), [217.82, 817.82]);
+  assert.deepEqual(salaryHistoryScenario.map(({ safeRemaining }) => safeRemaining), [17.82, 617.82]);
   assert.ok(salaryHistoryScenario[1].usedPercent < salaryHistoryScenario[0].usedPercent);
   for (const expense of current.expenses) {
     assert.equal(typeof expense.noteTranslations?.en, "string");
@@ -569,7 +605,7 @@ test("keeps database history and translations aligned", async () => {
   assert.match(index, /id="theme-select"/);
   assert.match(index, /styles\.css\?v=36/);
   assert.match(index, /public\/vendor\/apexcharts\.min\.js\?v=21/);
-  assert.match(index, /script\.js\?v=37/);
+  assert.match(index, /script\.js\?v=38/);
   assert.match(index, /data-current-theme="kinance"/);
   assert.match(index, /id="credit-alert"[^>]*hidden/);
   assert.match(index, /id="payment-method"/);
@@ -579,8 +615,9 @@ test("keeps database history and translations aligned", async () => {
   assert.doesNotMatch(index, /class="hero-copy"/);
   assert.doesNotMatch(index, /class="hero-intro"/);
   assert.match(index, /<h1 id="page-title"[^>]*data-i18n="availableAfterPlan"/);
-  assert.match(index, /public\/theme-banners\/kinance\.png/);
-  assert.match(script, /public\/theme-banners\/kinance\.png/);
+  assert.match(index, /public\/theme-banners\/kinance\.png\?v=3/);
+  assert.match(script, /public\/theme-banners\/kinance\.png\?v=3/);
+  assert.match(page, /theme-banners\/kinance\.png\?v=3/);
   assert.match(script, /public\/theme-banners\/nier-automata\.png/);
   assert.match(script, /public\/theme-banners\/tohsaka-rin\.png/);
   assert.match(script, /public\/category-icons\/food\.png/);

@@ -18,7 +18,7 @@
       "currency": "EUR",
       "timezone": "Europe/Vilnius",
       "updatedAt": "2026-07-26",
-      "revision": 24,
+      "revision": 25,
       "salary": 2150,
       "savingsGoal": 200,
       "expenses": [
@@ -231,6 +231,41 @@
           "recurring": true,
           "frequency": "monthly",
           "paymentMethod": "debit"
+        },
+        {
+          "id": "2026-07-rimi-alita-spritz-001",
+          "amount": 1.69,
+          "note": "Alita Spritz Limon",
+          "noteTranslations": {
+            "en": "Alita Spritz Limon",
+            "ru": "Alita Spritz Limon, 0,2 л"
+          },
+          "date": "2026-07-26",
+          "category": "Alcohol & nightlife",
+          "source": "receipt",
+          "merchant": "Rimi",
+          "legalEntity": "UAB RIMI LIETUVA",
+          "merchantAddress": "Rygos g. 8, Vilnius",
+          "description": "Alita Spritz Limon 8% 0.2 l with refundable metal packaging deposit",
+          "originalCurrency": "EUR",
+          "originalAmount": 1.69,
+          "receiptReference": "13/854/127400",
+          "paymentMethod": "debit",
+          "transactionTime": "11:26:35",
+          "vatRate": 21,
+          "vatAmount": 0.28,
+          "containerDeposit": 0.1,
+          "lineItems": [
+            {
+              "description": "Alita Spritz Limon 8% 0.2 l",
+              "amount": 1.59
+            },
+            {
+              "description": "Refundable metal packaging deposit",
+              "amount": 0.1
+            }
+          ],
+          "receiptPaymentDescription": "Contactless debit Mastercard"
         },
         {
           "id": "2026-07-istorijos-001",

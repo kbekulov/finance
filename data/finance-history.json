@@ -18,7 +18,7 @@
       "currency": "EUR",
       "timezone": "Europe/Vilnius",
       "updatedAt": "2026-07-26",
-      "revision": 25,
+      "revision": 26,
       "salary": 2150,
       "savingsGoal": 200,
       "expenses": [
@@ -231,6 +231,36 @@
           "recurring": true,
           "frequency": "monthly",
           "paymentMethod": "debit"
+        },
+        {
+          "id": "2026-07-greet-bocmano-usai-ipa-001",
+          "amount": 6.12,
+          "note": "Bočmano Ūsai IPA 0.4 l",
+          "noteTranslations": {
+            "en": "Bočmano Ūsai IPA 0.4 l",
+            "ru": "Bočmano Ūsai IPA, 0,4 л"
+          },
+          "date": "2026-07-26",
+          "category": "Alcohol & nightlife",
+          "source": "receipt",
+          "description": "Bočmano Ūsai IPA 0.4 l with service fee",
+          "originalCurrency": "EUR",
+          "originalAmount": 6.12,
+          "receiptReference": "Order #8",
+          "paymentMethod": "debit",
+          "orderingPlatform": "app.greet.menu",
+          "dateFallbackReason": "No transaction date visible in order confirmation screenshot",
+          "lineItems": [
+            {
+              "description": "Bočmano Ūsai IPA 0.4 l",
+              "amount": 6
+            },
+            {
+              "description": "Service fee",
+              "amount": 0.12
+            }
+          ],
+          "receiptPaymentDescription": "Apple Pay"
         },
         {
           "id": "2026-07-rimi-alita-spritz-001",

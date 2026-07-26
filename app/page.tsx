@@ -14,8 +14,8 @@ type Category =
 type Language = "en" | "ru";
 
 const THEMES = [
-  { id: "kinance", label: "Kinance", banner: "/theme-banners/kinance.png?v=3" },
-  { id: "kinance-moon", label: "Kinance Moon", banner: "/theme-banners/kinance.png?v=3" },
+  { id: "kinance", label: "Kinance", banner: "/theme-banners/kinance.png?v=4" },
+  { id: "kinance-moon", label: "Kinance Moon", banner: "/theme-banners/kinance.png?v=4" },
   { id: "nier-automata", label: "NieR:Automata", banner: "/theme-banners/nier-automata.png" },
   { id: "tohsaka-rin", label: "Tohsaka Rin", banner: "/theme-banners/tohsaka-rin.png" },
 ] as const;

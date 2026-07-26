@@ -1124,7 +1124,7 @@ main::before {
 
 .strength-metrics {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 0.7fr) repeat(2, minmax(0, 1fr));
   align-items: stretch;
   gap: 1px;
   overflow: hidden;
@@ -2605,7 +2605,7 @@ footer p {
   }
 
   .strength-metrics {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 0.7fr) repeat(2, minmax(0, 1fr));
   }
 
   .strength-metrics-row {

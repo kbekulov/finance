@@ -822,7 +822,7 @@ test("keeps database history and translations aligned", async () => {
   }
   assert.match(index, /id="theme-select"/);
   assert.match(index, /<html lang="ru">/);
-  assert.match(index, /styles\.css\?v=47/);
+  assert.match(index, /styles\.css\?v=48/);
   assert.match(index, /public\/vendor\/apexcharts\.min\.js\?v=21/);
   assert.match(index, /script\.js\?v=52/);
   assert.match(index, /id="strength-pull-ups-target"/);
@@ -1026,7 +1026,7 @@ test("keeps database history and translations aligned", async () => {
   assert.match(styles, /--app-viewport-width:\s*min\(100vw, 430px\)/);
   assert.match(styles, /main\s*\{[^}]*width:\s*var\(--app-viewport-width\)[^}]*margin-inline:\s*auto/s);
   assert.match(styles, /\.strength-metrics-row\s*\{[^}]*grid-template-columns:\s*80px minmax\(0, 1fr\)/s);
-  assert.match(styles, /\.strength-metrics\s*\{[^}]*grid-template-columns:\s*repeat\(3, minmax\(0, 1fr\)\)/s);
+  assert.match(styles, /\.strength-metrics\s*\{[^}]*grid-template-columns:\s*minmax\(0, 0\.7fr\) repeat\(2, minmax\(0, 1fr\)\)/s);
   assert.match(styles, /\.strength-rank\s*\{[^}]*border:\s*0[^}]*background:\s*transparent[^}]*padding:\s*0/s);
   assert.match(styles, /\.strength-rank-icon\s*\{[^}]*width:\s*76px[^}]*height:\s*76px[^}]*background-size:\s*500% 400%[^}]*image-rendering:\s*pixelated/s);
   assert.doesNotMatch(styles, /\.strength-rank::after/);

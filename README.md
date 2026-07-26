@@ -494,7 +494,7 @@ The frontend remains read-only. Show the latest attempt as compact metrics and t
 The card must remain compact and scannable:
 
 - score and latest date form the first hierarchy;
-- weight, pull-ups, and push-ups receive equal emphasis, with the compact visible labels `Weight`, `Pull-ups`, and `Push-ups` and equivalent Russian labels;
+- pull-ups and push-ups receive equal emphasis, while the simpler Weight column is 30% narrower; use the compact visible labels `Weight`, `Pull-ups`, and `Push-ups` and equivalent Russian labels;
 - pull-up and push-up metrics show `current / target`, where the target is the minimum whole-number repetition count required for a 10.0 score at the recorded body weight;
 - a large frameless military rank control appears beside the three-column metric table, never as a fourth table column or a bordered card, using the derived score and a visible abbreviated rank name below its insignia;
 - long labels wrap instead of truncating;

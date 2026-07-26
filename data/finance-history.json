@@ -18,7 +18,7 @@
       "currency": "EUR",
       "timezone": "Europe/Vilnius",
       "updatedAt": "2026-07-26",
-      "revision": 28,
+      "revision": 29,
       "salary": 2150,
       "savingsGoal": 200,
       "additionalIncome": [
@@ -35,6 +35,45 @@
         }
       ],
       "expenses": [
+        {
+          "id": "2026-07-beer-debit-002",
+          "amount": 5,
+          "note": "Beer",
+          "noteTranslations": {
+            "en": "Beer",
+            "ru": "Пиво"
+          },
+          "date": "2026-07-26",
+          "category": "Alcohol & nightlife",
+          "source": "chat",
+          "paymentMethod": "debit"
+        },
+        {
+          "id": "2026-07-red-wine-001",
+          "amount": 8,
+          "note": "Red wine",
+          "noteTranslations": {
+            "en": "Red wine",
+            "ru": "Красное вино"
+          },
+          "date": "2026-07-26",
+          "category": "Alcohol & nightlife",
+          "source": "chat",
+          "paymentMethod": "debit"
+        },
+        {
+          "id": "2026-07-mcdonalds-001",
+          "amount": 5.8,
+          "note": "McDonald's",
+          "noteTranslations": {
+            "en": "McDonald's",
+            "ru": "McDonald's"
+          },
+          "date": "2026-07-26",
+          "category": "Food",
+          "source": "chat",
+          "paymentMethod": "debit"
+        },
         {
           "id": "2026-07-caffeine-iced-peach-tea-001",
           "amount": 3.4,

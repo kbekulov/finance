@@ -13,9 +13,9 @@
     <meta property="og:image" content="https://finance.bekulov.com/public/og.png" />
     <title>Kinance</title>
     <link rel="icon" type="image/jpeg" href="/kinance-favicon.jpg" />
-    <link rel="stylesheet" href="/styles.css?v=38" />
+    <link rel="stylesheet" href="/styles.css?v=39" />
     <script src="/public/vendor/apexcharts.min.js?v=21" defer></script>
-    <script src="/script.js?v=43" defer></script>
+    <script src="/script.js?v=44" defer></script>
   </head>
   <body>
     <main>
@@ -76,7 +76,7 @@
         <section class="theme-banner" aria-label="Kinance theme artwork">
           <img
             id="theme-banner-image"
-            src="/public/theme-banners/kinance.png?v=5"
+            src="/public/theme-banners/kinance.png?v=6"
             alt="Kinance theme artwork"
             width="2048"
             height="683"
@@ -89,9 +89,48 @@
           id="daily-expense-chart"
           class="daily-expense-chart"
           role="img"
-          aria-label="Daily non-recurring expense movement with daily allowance guides"
+          aria-label="Daily spending bars with relative strength and daily allowance guides"
           data-i18n-aria-label="dailySpendingChartLabel"
-        ></div>
+        >
+          <div id="daily-expense-chart-canvas" class="daily-expense-chart-canvas" aria-hidden="true"></div>
+          <div id="allowance-guide-all" class="allowance-guide allowance-guide-all" aria-hidden="true">
+            <i></i><span id="allowance-guide-all-label"></span><i></i>
+          </div>
+          <div id="allowance-guide-safe" class="allowance-guide allowance-guide-safe" aria-hidden="true">
+            <i></i><span id="allowance-guide-safe-label"></span><i></i>
+          </div>
+        </div>
+
+        <section class="strength-panel" aria-labelledby="strength-title">
+          <div class="strength-scoreboard">
+            <span id="strength-title" data-i18n="strengthTitle">RELATIVE STRENGTH</span>
+            <div class="strength-score"><strong id="strength-score">N/A</strong><small>/ 10</small></div>
+            <p id="strength-status" data-i18n="strengthNoAttempts">Log an attempt to establish your baseline</p>
+          </div>
+          <form id="strength-form" class="strength-form">
+            <label>
+              <span data-i18n="strengthWeight">Weight</span>
+              <span class="strength-input">
+                <input id="strength-weight" inputmode="decimal" type="number" min="30" max="250" step="0.1" required />
+                <small data-i18n="strengthWeightUnit">kg</small>
+              </span>
+            </label>
+            <label>
+              <span data-i18n="strengthPullUps">Max pull-ups</span>
+              <input id="strength-pull-ups" inputmode="numeric" type="number" min="0" max="200" step="1" required />
+            </label>
+            <label>
+              <span data-i18n="strengthPushUps">Max push-ups</span>
+              <input id="strength-push-ups" inputmode="numeric" type="number" min="0" max="300" step="1" required />
+            </label>
+            <button type="submit" data-i18n="strengthSave">Save attempt</button>
+          </form>
+          <div class="strength-meta">
+            <span><i class="spending-key"></i><span data-i18n="dailyExpenseSeries">Daily spending</span></span>
+            <span><i class="strength-key"></i><span data-i18n="relativeStrengthSeries">Relative strength</span></span>
+            <small data-i18n="strengthNote">Personal training index · best daily score · saved on this device</small>
+          </div>
+        </section>
 
         <section class="hero" id="top">
           <div class="balance-card" aria-labelledby="page-title">

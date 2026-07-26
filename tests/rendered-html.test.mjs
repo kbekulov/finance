@@ -45,7 +45,7 @@ test("server-renders the current finance tracker", async () => {
   assert.match(html, /class="payment-badge credit-repaid"/);
   assert.doesNotMatch(html, /class="payment-badge credit-outstanding"/);
   assert.match(html, /Контроль расходов/);
-  assert.match(html, /Самая крупная статья расходов: Долги и выплаты, 555,00/);
+  assert.match(html, /Самая крупная статья расходов: Еда, 560,64/);
   assert.match(html, /Устройства Apple/);
   assert.match(html, /iPad/);
   assert.match(html, /Обновлено 26 июля 2026 г\./);
@@ -82,7 +82,7 @@ test("server-renders the current finance tracker", async () => {
   assert.match(html, /<details[^>]*class="expense-table recurring-expenses"/);
   assert.match(html, /<summary class="expense-table-summary"/);
   assert.match(html, /Разовые расходы/);
-  assert.match(html, /1.{0,4}005,23.{0,8}€/);
+  assert.match(html, /1.{0,4}024,03.{0,8}€/);
   assert.match(html, /Плановые ежемесячные расходы/);
   assert.equal((html.match(/Плановые ежемесячные расходы/g) ?? []).length, 1);
   assert.doesNotMatch(html, /Expected monthly total/);
@@ -100,15 +100,15 @@ test("server-renders the current finance tracker", async () => {
   assert.match(html, /Alita Spritz Limon/);
   assert.match(html, /Холодный персиковый чай/);
   assert.match(html, /Bočmano Ūsai IPA, 0,4 л/);
-  assert.match(html, /1.{0,4}941,70.{0,8}€/);
-  assert.match(html, /218,30.{0,8}€/);
-  assert.match(html, /18,30.{0,8}€/);
+  assert.match(html, /1.{0,4}960,50.{0,8}€/);
+  assert.match(html, /199,50.{0,8}€/);
+  assert.match(html, /-0,50.{0,8}€/);
   assert.match(html, /ДОПОЛНИТЕЛЬНЫЕ ДОХОДЫ/);
   assert.match(html, /\+.{0,8}10,00.{0,8}€/);
   assert.match(html, /ОБЩИЙ ДОХОД/);
   assert.match(html, /2.{0,4}160,00.{0,8}€/);
-  assert.match(html, /Учтено расходов: 41/);
-  assert.match(html, /90%<!-- --> <!-- -->ПОТРАЧЕНО|90% ПОТРАЧЕНО/);
+  assert.match(html, /Учтено расходов: 44/);
+  assert.match(html, /91%<!-- --> <!-- -->ПОТРАЧЕНО|91% ПОТРАЧЕНО/);
   assert.match(html, /Без сохранения накоплений/);
   assert.match(html, /С сохранением накоплений/);
   assert.match(html, /class="pace-limit pace-limit-all"/);
@@ -123,8 +123,8 @@ test("server-renders the current finance tracker", async () => {
     Math.round((cycleEndUtc - todayUtc) / 86400000),
     1,
   );
-  const renderedAllFundsPace = Math.round(218.3 / renderedRemainingDays);
-  const renderedSavingsSafePace = Math.round(18.3 / renderedRemainingDays);
+  const renderedAllFundsPace = Math.round(199.5 / renderedRemainingDays);
+  const renderedSavingsSafePace = 0;
   assert.match(
     html,
     new RegExp(`${renderedAllFundsPace}.{0,12}€(?:<!-- --> <!-- -->)?в день`),
@@ -133,6 +133,8 @@ test("server-renders the current finance tracker", async () => {
     html,
     new RegExp(`${renderedSavingsSafePace}.{0,12}€(?:<!-- --> <!-- -->)?в день`),
   );
+  assert.match(html, /Красное вино/);
+  assert.match(html, /McDonald&#x27;s/);
   assert.match(html, /Пиво/);
   assert.match(html, /Мороженое/);
   assert.match(html, /class="stat-card salary salary-locked"/);
@@ -147,7 +149,13 @@ test("server-renders the current finance tracker", async () => {
     /category-icons\/debt-item\.png/,
   );
   assert.doesNotMatch(html, /class="expense-monogram"/);
-  assert.match(html, /aria-label="График разовых расходов по дням с линиями дневных лимитов"/);
+  assert.match(html, /aria-label="Расходы по дням в виде столбцов, график относительной силы и линии дневных лимитов"/);
+  assert.match(html, /class="strength-panel"/);
+  assert.match(html, /ОТНОСИТЕЛЬНАЯ СИЛА/);
+  assert.match(html, /Можно 12.{0,8}€ в день · Накопления используются/);
+  assert.match(html, /Можно 0.{0,8}€ в день · Накопления сохранены/);
+  assert.match(html, /allowance-guide-all" style="--guide-top:79%"/);
+  assert.match(html, /allowance-guide-safe" style="--guide-top:91%"/);
   assert.doesNotMatch(html, /Your site is taking shape|Building your site/);
 });
 
@@ -182,26 +190,30 @@ test("keeps database history and translations aligned", async () => {
   assert.match(manual, /default `kinance` theme uses one bold, item-only chibi icon per category/);
   assert.match(manual, /Every expense-recording request that adds at least one new canonical expense/);
   assert.match(manual, /Generate one fresh banner per request/);
-  assert.match(manual, /Every new banner must meaningfully represent the topic of the newly recorded expense/);
+  assert.match(manual, /Every new banner must meaningfully represent the topic of the expense/);
+  assert.match(manual, /RPGMaker-style in-game moment/);
+  assert.match(manual, /character visibly performing the activity related to the newly recorded expense/);
   assert.match(manual, /increment the shared banner query version for both `kinance` and `kinance-moon`/);
   assert.match(manual, /Finance accuracy takes priority/);
   assert.match(manual, /Taiga Fujimura, Kohaku, and Soujuurou Shizuki for Food/);
   assert.match(manual, /Lancer Cu Chulainn, Shuten-Douji, and Aoko Aozaki for Alcohol & nightlife/);
   assert.match(manual, /stable expense-ID hash/);
   assert.match(manual, /create new concepts from a blank canvas instead of tracing an older icon/);
-  assert.match(manual, /sits entirely over the lower 168 pixels of the character artwork/);
-  assert.match(manual, /red long-dashed rule labeled `Savings violated` for all available funds/);
-  assert.match(manual, /green short-dashed rule labeled `Savings preserved` for the savings-safe allowance/);
-  assert.match(manual, /rule reads visually as line, text, line/);
-  assert.match(manual, /must never look like a pill, badge, outlined container, or floating callout/);
+  assert.match(manual, /sits entirely over the lower 168 pixels of the banner artwork/);
+  assert.match(manual, /red long-dashed rule for the all-funds allowance/);
+  assert.match(manual, /green short-dashed rule for the savings-safe allowance/);
+  assert.match(manual, /visually `line, text, line`/);
+  assert.match(manual, /no pill, badge, rectangle, outline, or floating callout/);
+  assert.match(manual, /`kinance:relative-strength:v1`/);
+  assert.match(manual, /personal training index, not a medical assessment/);
   assert.match(manual, /Keep it separate from `salary` so the fixed salary and salary history remain truthful/);
   assert.match(manual, /Russian is the default language when no preference exists/);
   assert.match(manual, /`kinance_language` cookie/);
   assert.match(manual, /`kinance_theme` cookie/);
   assert.equal(current.updatedAt, "2026-07-26");
-  assert.equal(current.revision, 28);
+  assert.equal(current.revision, 29);
   assert.equal(current.savingsGoal, 200);
-  assert.equal(current.expenses.length, 41);
+  assert.equal(current.expenses.length, 44);
   const supportedCategories = new Set([
     "Food",
     "Subscriptions & services",
@@ -510,6 +522,45 @@ test("keeps database history and translations aligned", async () => {
     .reduce((sum, expense) => sum + expense.amount, 0);
   assert.equal(outstandingCredit, 0);
   assert.deepEqual(
+    current.expenses.filter((expense) => [
+      "2026-07-beer-debit-002",
+      "2026-07-red-wine-001",
+      "2026-07-mcdonalds-001",
+    ].includes(expense.id)),
+    [
+      {
+        id: "2026-07-beer-debit-002",
+        amount: 5,
+        note: "Beer",
+        noteTranslations: { en: "Beer", ru: "Пиво" },
+        date: "2026-07-26",
+        category: "Alcohol & nightlife",
+        source: "chat",
+        paymentMethod: "debit",
+      },
+      {
+        id: "2026-07-red-wine-001",
+        amount: 8,
+        note: "Red wine",
+        noteTranslations: { en: "Red wine", ru: "Красное вино" },
+        date: "2026-07-26",
+        category: "Alcohol & nightlife",
+        source: "chat",
+        paymentMethod: "debit",
+      },
+      {
+        id: "2026-07-mcdonalds-001",
+        amount: 5.8,
+        note: "McDonald's",
+        noteTranslations: { en: "McDonald's", ru: "McDonald's" },
+        date: "2026-07-26",
+        category: "Food",
+        source: "chat",
+        paymentMethod: "debit",
+      },
+    ],
+  );
+  assert.deepEqual(
     current.expenses.find(
       (expense) => expense.id === "2026-07-caffeine-iced-peach-tea-001",
     ),
@@ -623,9 +674,9 @@ test("keeps database history and translations aligned", async () => {
     assert.ok(expense.date >= "2026-07-12");
     assert.ok(expense.date <= "2026-07-25");
   }
-  assert.equal(spentCents, 194170);
+  assert.equal(spentCents, 196050);
   assert.equal(recurringCents, 93647);
-  assert.equal(oneTimeCents, 100523);
+  assert.equal(oneTimeCents, 102403);
   assert.equal(recurringCents + oneTimeCents, spentCents);
   const additionalIncomeCents = sumCents(current.additionalIncome);
   const totalIncomeCents = current.salary * 100 + additionalIncomeCents;
@@ -646,8 +697,8 @@ test("keeps database history and translations aligned", async () => {
   ]);
   const cashRemainingCents = totalIncomeCents - spentCents;
   const safeRemainingCents = cashRemainingCents - current.savingsGoal * 100;
-  assert.equal(cashRemainingCents, 21830);
-  assert.equal(safeRemainingCents, 1830);
+  assert.equal(cashRemainingCents, 19950);
+  assert.equal(safeRemainingCents, -50);
   const calendarDay = (dateKey) => {
     const [year, month, day] = dateKey.split("-").map(Number);
     return Date.UTC(year, month - 1, day) / 86400000;
@@ -658,20 +709,20 @@ test("keeps database history and translations aligned", async () => {
   assert.equal(totalCycleDays, 33);
   assert.equal(elapsedCycleDays, 17);
   assert.equal(remainingDaysAfterToday, 16);
-  assert.equal(Math.round((cashRemainingCents / 100) / remainingDaysAfterToday), 14);
-  assert.equal(Math.round((safeRemainingCents / 100) / remainingDaysAfterToday), 1);
-  assert.equal(Math.round((spentCents / totalIncomeCents) * 100), 90);
+  assert.equal(Math.round((cashRemainingCents / 100) / remainingDaysAfterToday), 12);
+  assert.equal(Math.round(Math.max(safeRemainingCents / 100, 0) / remainingDaysAfterToday), 0);
+  assert.equal(Math.round((spentCents / totalIncomeCents) * 100), 91);
 
   const salaryHistoryScenario = [
-    { salary: 2150, additionalIncome: 10, savingsGoal: 200, spent: 1941.7 },
-    { salary: 2750, additionalIncome: 0, savingsGoal: 200, spent: 1941.7 },
+    { salary: 2150, additionalIncome: 10, savingsGoal: 200, spent: 1960.5 },
+    { salary: 2750, additionalIncome: 0, savingsGoal: 200, spent: 1960.5 },
   ].map((cycle) => ({
     cashRemaining: Math.round((cycle.salary + cycle.additionalIncome - cycle.spent) * 100) / 100,
     safeRemaining: Math.round((cycle.salary + cycle.additionalIncome - cycle.spent - cycle.savingsGoal) * 100) / 100,
     usedPercent: (cycle.spent / (cycle.salary + cycle.additionalIncome)) * 100,
   }));
-  assert.deepEqual(salaryHistoryScenario.map(({ cashRemaining }) => cashRemaining), [218.3, 808.3]);
-  assert.deepEqual(salaryHistoryScenario.map(({ safeRemaining }) => safeRemaining), [18.3, 608.3]);
+  assert.deepEqual(salaryHistoryScenario.map(({ cashRemaining }) => cashRemaining), [199.5, 789.5]);
+  assert.deepEqual(salaryHistoryScenario.map(({ safeRemaining }) => safeRemaining), [-0.5, 589.5]);
   assert.ok(salaryHistoryScenario[1].usedPercent < salaryHistoryScenario[0].usedPercent);
   for (const expense of current.expenses) {
     assert.equal(typeof expense.noteTranslations?.en, "string");
@@ -727,9 +778,9 @@ test("keeps database history and translations aligned", async () => {
   }
   assert.match(index, /id="theme-select"/);
   assert.match(index, /<html lang="ru">/);
-  assert.match(index, /styles\.css\?v=38/);
+  assert.match(index, /styles\.css\?v=39/);
   assert.match(index, /public\/vendor\/apexcharts\.min\.js\?v=21/);
-  assert.match(index, /script\.js\?v=43/);
+  assert.match(index, /script\.js\?v=44/);
   assert.match(index, /data-current-theme="kinance"/);
   assert.match(index, /id="credit-alert"[^>]*hidden/);
   assert.match(index, /id="payment-method"/);
@@ -739,9 +790,9 @@ test("keeps database history and translations aligned", async () => {
   assert.doesNotMatch(index, /class="hero-copy"/);
   assert.doesNotMatch(index, /class="hero-intro"/);
   assert.match(index, /<h1 id="page-title"[^>]*data-i18n="availableAfterPlan"/);
-  assert.match(index, /public\/theme-banners\/kinance\.png\?v=5/);
-  assert.equal((script.match(/public\/theme-banners\/kinance\.png\?v=5/g) ?? []).length, 2);
-  assert.equal((page.match(/theme-banners\/kinance\.png\?v=5/g) ?? []).length, 2);
+  assert.match(index, /public\/theme-banners\/kinance\.png\?v=6/);
+  assert.equal((script.match(/public\/theme-banners\/kinance\.png\?v=6/g) ?? []).length, 2);
+  assert.equal((page.match(/theme-banners\/kinance\.png\?v=6/g) ?? []).length, 2);
   assert.match(script, /id: "kinance-moon", label: "Kinance Moon"/);
   assert.match(page, /id: "kinance-moon", label: "Kinance Moon"/);
   assert.match(script, /public\/theme-banners\/nier-automata\.png/);
@@ -839,26 +890,29 @@ test("keeps database history and translations aligned", async () => {
   assert.match(styles, /:root\[data-theme="nier-automata"\][^{]*\{[^}]*--chart-accent:\s*#526f78/s);
   assert.match(styles, /:root\[data-theme="tohsaka-rin"\][^{]*\{[^}]*--chart-accent:\s*#ff5b82/s);
   assert.match(script, /height:\s*168/);
-  assert.match(script, /stroke:\s*\{\s*curve:\s*"smooth",\s*width:\s*2\.25/);
-  assert.match(script, /text:\s*t\("savingsViolated"\)/);
-  assert.match(script, /text:\s*t\("savingsPreserved"\)/);
+  assert.match(script, /stroke:\s*\{\s*curve:\s*\["straight",\s*"smooth"\],\s*width:\s*\[0,\s*2\.5\]/);
+  assert.match(script, /allowance-guide-all-label/);
+  assert.match(script, /allowance-guide-safe-label/);
   assert.match(page, /height:\s*168/);
-  assert.match(page, /stroke:\s*\{\s*curve:\s*"smooth",\s*width:\s*2\.25/);
-  assert.match(page, /text:\s*copy\.savingsViolated/);
-  assert.match(page, /text:\s*copy\.savingsPreserved/);
+  assert.match(page, /stroke:\s*\{\s*curve:\s*\["straight",\s*"smooth"\],\s*width:\s*\[0,\s*2\.5\]/);
   for (const source of [script, page]) {
-    assert.equal((source.match(/borderColor:\s*"transparent"/g) ?? []).length, 2);
-    assert.equal((source.match(/borderRadius:\s*0/g) ?? []).length, 2);
-    assert.equal((source.match(/background:\s*guideLabelBackground/g) ?? []).length, 2);
-    assert.match(source, /getPropertyValue\("--banner-fade"\)/);
-    assert.match(source, /position:\s*"left",\s*offsetX:\s*142/s);
-    assert.equal((source.match(/offsetY:\s*5/g) ?? []).length, 2);
-    assert.equal((source.match(/padding:\s*\{\s*left:\s*5,\s*right:\s*5,\s*top:\s*1,\s*bottom:\s*1\s*\}/g) ?? []).length, 2);
-    assert.match(source, /color:\s*savingsSafeColor/);
-    assert.match(source, /color:\s*allFundsColor/);
+    assert.match(source, /relativeStrengthScore/);
+    assert.match(source, /dailyStrengthPoints/);
+    assert.match(source, /kinance:relative-strength:v1/);
+    assert.match(source, /type:\s*"column"/);
+    assert.match(source, /type:\s*"line"/);
+    assert.match(source, /min:\s*1,\s*max:\s*10/);
+    assert.match(source, /allowanceGuide/);
+    assert.match(source, /pullUps[\s\S]{0,90}\/ 20/);
+    assert.match(source, /pushUps[\s\S]{0,90}\/ 50/);
+    assert.match(source, /pullComponent \* 0\.6 \+ pushComponent \* 0\.4/);
+    assert.match(source, /\(weightKg \/ 75\) \*\* 0\.12/);
+    assert.match(source, /savingsSafeTop - allFundsTop < 12/);
   }
-  assert.match(styles, /\.allowance-guide-label\s*\{/);
-  assert.match(styles, /\.allowance-guide-label\s*\{[^}]*filter:\s*none[^}]*stroke:\s*none/s);
+  assert.match(styles, /\.allowance-guide\s*\{/);
+  assert.match(styles, /\.allowance-guide i\s*\{/);
+  assert.match(styles, /\.strength-panel\s*\{/);
+  assert.doesNotMatch(styles, /\.allowance-guide-label/);
   assert.doesNotMatch(styles, /\.apexcharts-yaxis-annotations rect\s*\{/);
   assert.match(styles, /\.salary-locked\s*\{/);
   assert.match(styles, /\.stat-card\.salary-locked\s*\{[^}]*align-self:\s*start/s);
@@ -878,19 +932,14 @@ test("keeps database history and translations aligned", async () => {
   assert.match(page, /hydratedStorageKey !== selectedStorageKey/);
   for (const source of [page, script]) {
     assert.match(source, /dailyExpensePoints/);
-    assert.match(source, /type:\s*"area"/);
+    assert.match(source, /type:\s*"column"/);
     assert.match(source, /type:\s*"datetime"/);
     assert.match(source, /sparkline:\s*\{\s*enabled:\s*true/);
     assert.match(source, /tooltip:\s*\{\s*enabled:\s*false/);
-    assert.match(source, /opacityFrom:\s*0\.52/);
+    assert.match(source, /fill:\s*\{\s*opacity:\s*\[0\.68,\s*1\]/);
     assert.match(source, /dropShadow:\s*\{\s*enabled:\s*true/);
     assert.match(source, /data\.expenses\.filter\(\(expense\) => !expense\.recurring\)/);
-    assert.match(source, /annotations:\s*\{\s*yaxis:/);
-    assert.match(source, /borderColor:\s*allFundsColor/);
-    assert.match(source, /borderColor:\s*savingsSafeColor/);
-    assert.match(source, /strokeDashArray:\s*5/);
-    assert.match(source, /strokeDashArray:\s*3/);
-    assert.match(source, /yaxis:\s*\{\s*min:\s*0,\s*max:\s*chartMaximum/);
+    assert.match(source, /seriesName:[\s\S]{0,120}min:\s*0,[\s\S]{0,80}max:\s*(?:drawChartMaximum|chartMaximum)/);
     assert.match(source, /creditStatus !== "repaid"/);
   }
   assert.match(page, /import\("apexcharts"\)/);

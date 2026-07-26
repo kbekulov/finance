@@ -76,8 +76,8 @@ function categoryIconFor(expense) {
 }
 
 const THEMES = [
-  { id: "kinance", label: "Kinance", banner: "/public/theme-banners/kinance.png?v=5" },
-  { id: "kinance-moon", label: "Kinance Moon", banner: "/public/theme-banners/kinance.png?v=5" },
+  { id: "kinance", label: "Kinance", banner: "/public/theme-banners/kinance.png?v=6" },
+  { id: "kinance-moon", label: "Kinance Moon", banner: "/public/theme-banners/kinance.png?v=6" },
   { id: "nier-automata", label: "NieR:Automata", banner: "/public/theme-banners/nier-automata.png" },
   { id: "tohsaka-rin", label: "Tohsaka Rin", banner: "/public/theme-banners/tohsaka-rin.png" },
 ];
@@ -85,6 +85,7 @@ const THEMES = [
 const PREFERENCE_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
 const THEME_COOKIE = "kinance_theme";
 const LANGUAGE_COOKIE = "kinance_language";
+const STRENGTH_STORAGE_KEY = "kinance:relative-strength:v1";
 
 function readPreferenceCookie(name) {
   const prefix = `${encodeURIComponent(name)}=`;
@@ -108,8 +109,9 @@ const TRANSLATIONS = {
     dailyPace: "DAILY LIMITS",
     allFunds: "All funds",
     savingsSafe: "Savings safe",
-    savingsPreserved: "Savings preserved",
-    savingsViolated: "Savings violated",
+    savingsPreserved: "Savings protected",
+    savingsViolated: "Savings used",
+    allowanceGuide: "Allowed {amount}/day · {label}",
     monthlySalary: "SALARY THIS CYCLE",
     salaryLocked: "Locked to this salary cycle",
     additionalIncome: "SIDE INCOME",
@@ -119,7 +121,18 @@ const TRANSLATIONS = {
     dailySpendingIntro: "What left your account each day this salary cycle",
     thisCycleTotal: "This cycle",
     dailyExpenseSeries: "Daily spending",
-    dailySpendingChartLabel: "Daily non-recurring expense movement with daily allowance guides",
+    relativeStrengthSeries: "Relative strength",
+    dailySpendingChartLabel: "Daily spending bars with relative strength and daily allowance guides",
+    strengthTitle: "RELATIVE STRENGTH",
+    strengthScore: "CURRENT SCORE",
+    strengthNoAttempts: "Log an attempt to establish your baseline",
+    strengthLatest: "Latest attempt · {date}",
+    strengthWeight: "Weight",
+    strengthPullUps: "Max pull-ups",
+    strengthPushUps: "Max push-ups",
+    strengthSave: "Save attempt",
+    strengthNote: "Personal training index · best daily score · saved on this device",
+    strengthWeightUnit: "kg",
     tapToEdit: "Tap the amount to edit",
     savingsRequirement: "SAVINGS REQUIREMENT",
     protectedSpending: "Protected from spending",
@@ -202,7 +215,8 @@ const TRANSLATIONS = {
     allFunds: "Без сохранения накоплений",
     savingsSafe: "С сохранением накоплений",
     savingsPreserved: "Накопления сохранены",
-    savingsViolated: "Накопления затронуты",
+    savingsViolated: "Накопления используются",
+    allowanceGuide: "Можно {amount} в день · {label}",
     monthlySalary: "ЗАРПЛАТА ЗА ЭТОТ ЦИКЛ",
     salaryLocked: "Зафиксирована для этого зарплатного цикла",
     additionalIncome: "ДОПОЛНИТЕЛЬНЫЕ ДОХОДЫ",
@@ -212,7 +226,18 @@ const TRANSLATIONS = {
     dailySpendingIntro: "Сколько списывалось со счёта каждый день текущего зарплатного цикла",
     thisCycleTotal: "За текущий цикл",
     dailyExpenseSeries: "Расходы за день",
-    dailySpendingChartLabel: "График разовых расходов по дням с линиями дневных лимитов",
+    relativeStrengthSeries: "Относительная сила",
+    dailySpendingChartLabel: "Расходы по дням в виде столбцов, график относительной силы и линии дневных лимитов",
+    strengthTitle: "ОТНОСИТЕЛЬНАЯ СИЛА",
+    strengthScore: "ТЕКУЩИЙ БАЛЛ",
+    strengthNoAttempts: "Добавьте попытку, чтобы определить исходный уровень",
+    strengthLatest: "Последняя попытка · {date}",
+    strengthWeight: "Вес",
+    strengthPullUps: "Макс. подтягиваний",
+    strengthPushUps: "Макс. отжиманий",
+    strengthSave: "Сохранить попытку",
+    strengthNote: "Персональный индекс · лучший результат дня · хранится на этом устройстве",
+    strengthWeightUnit: "кг",
     tapToEdit: "Нажмите на сумму, чтобы изменить её",
     savingsRequirement: "ЦЕЛЬ НАКОПЛЕНИЙ",
     protectedSpending: "Зарезервировано и не тратится",
@@ -293,6 +318,7 @@ let history = [];
 let selectedMonth = null;
 let data = null;
 let dailyExpenseChart = null;
+let strengthEntries = [];
 let salarySchedule = { dayOfMonth: 12, weekendRule: "previousFriday" };
 const savedThemePreference = readPreferenceCookie(THEME_COOKIE);
 let theme = THEMES.some(({ id }) => id === savedThemePreference)
@@ -871,8 +897,79 @@ function dailyExpensePoints(expenses, period, asOfDate) {
   return points;
 }
 
+function relativeStrengthScore(weightKg, pullUps, pushUps) {
+  const pullComponent = Math.min(Math.max(pullUps, 0) / 20, 1);
+  const pushComponent = Math.min(Math.max(pushUps, 0) / 50, 1);
+  const massFactor = Math.min(Math.max((weightKg / 75) ** 0.12, 0.9), 1.1);
+  const score = 1 + 9 * (pullComponent * 0.6 + pushComponent * 0.4) * massFactor;
+  return Math.round(Math.min(Math.max(score, 1), 10) * 10) / 10;
+}
+
+function dailyStrengthPoints(entries, period, asOfDate) {
+  const dailyBest = new Map();
+  entries.forEach((entry) => {
+    if (entry.date < period.start || entry.date > period.end || entry.date > asOfDate) return;
+    dailyBest.set(entry.date, Math.max(dailyBest.get(entry.date) ?? 0, entry.score));
+  });
+  return [...dailyBest.entries()]
+    .sort(([left], [right]) => left.localeCompare(right))
+    .map(([date, score]) => ({ x: dateFromKey(date).getTime(), y: score }));
+}
+
+function allowanceGuideTop(value, maximum) {
+  const percentage = 100 - (value / maximum) * 100;
+  return Math.min(Math.max(percentage, 8), 91);
+}
+
+function allowanceGuideTops(allFunds, savingsSafe, maximum) {
+  let allFundsTop = allowanceGuideTop(allFunds, maximum);
+  let savingsSafeTop = allowanceGuideTop(savingsSafe, maximum);
+  if (savingsSafeTop - allFundsTop < 12) {
+    allFundsTop = 79;
+    savingsSafeTop = 91;
+  }
+  return { allFundsTop, savingsSafeTop };
+}
+
+function loadStrengthEntries() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(STRENGTH_STORAGE_KEY) ?? "[]");
+    strengthEntries = Array.isArray(saved)
+      ? saved.filter((entry) =>
+          typeof entry?.id === "string" &&
+          /^\d{4}-\d{2}-\d{2}$/.test(entry?.date) &&
+          typeof entry?.recordedAt === "string" &&
+          Number.isFinite(entry?.weightKg) &&
+          Number.isFinite(entry?.pullUps) &&
+          Number.isFinite(entry?.pushUps) &&
+          Number.isFinite(entry?.score),
+        )
+      : [];
+  } catch {
+    strengthEntries = [];
+  }
+}
+
+function saveStrengthEntries() {
+  try {
+    localStorage.setItem(STRENGTH_STORAGE_KEY, JSON.stringify(strengthEntries));
+  } catch {
+    // The tracker remains usable for the active session.
+  }
+}
+
+function renderStrengthSummary() {
+  const latest = [...strengthEntries].sort((left, right) =>
+    right.recordedAt.localeCompare(left.recordedAt),
+  )[0];
+  element("strength-score").textContent = latest ? latest.score.toFixed(1) : "N/A";
+  element("strength-status").textContent = latest
+    ? t("strengthLatest", { date: formatShortDate(dateFromKey(latest.date)) })
+    : t("strengthNoAttempts");
+}
+
 function renderDailyExpenseChart(allFundsDailyPace, savingsSafeDailyPace) {
-  const container = element("daily-expense-chart");
+  const container = element("daily-expense-chart-canvas");
   dailyExpenseChart?.destroy();
   dailyExpenseChart = null;
 
@@ -881,108 +978,70 @@ function renderDailyExpenseChart(allFundsDailyPace, savingsSafeDailyPace) {
     return;
   }
 
-  container.textContent = "";
   const themeStyles = getComputedStyle(document.documentElement);
   const accent = themeStyles.getPropertyValue("--chart-accent").trim() || "#5ac8fa";
   const glow = themeStyles.getPropertyValue("--chart-glow").trim() || accent;
-  const allFundsColor = themeStyles.getPropertyValue("--red").trim() || "#ff453a";
-  const savingsSafeColor = themeStyles.getPropertyValue("--green").trim() || "#30d158";
-  const guideLabelBackground =
-    themeStyles.getPropertyValue("--banner-fade").trim() || "#050506";
-  const points = dailyExpensePoints(
+  const strengthAccent = themeStyles.getPropertyValue("--strength-accent").trim() || "#bf5af2";
+  const spendingPoints = dailyExpensePoints(
     data.expenses.filter((expense) => !expense.recurring),
     selectedMonth.period,
     todayInVilnius(),
   );
+  const strengthPoints = dailyStrengthPoints(
+    strengthEntries,
+    selectedMonth.period,
+    todayInVilnius(),
+  );
   const chartMaximum = Math.max(
-    ...points.map(({ y }) => y),
+    ...spendingPoints.map(({ y }) => y),
     allFundsDailyPace,
     savingsSafeDailyPace,
     1,
   ) * 1.08;
+  const allFundsGuide = element("allowance-guide-all");
+  const savingsSafeGuide = element("allowance-guide-safe");
+  const guidePositions = allowanceGuideTops(allFundsDailyPace, savingsSafeDailyPace, chartMaximum);
+  allFundsGuide.style.setProperty("--guide-top", `${guidePositions.allFundsTop}%`);
+  savingsSafeGuide.style.setProperty("--guide-top", `${guidePositions.savingsSafeTop}%`);
+  element("allowance-guide-all-label").textContent = t("allowanceGuide", {
+    label: t("savingsViolated"),
+    amount: formatEuro(allFundsDailyPace, true),
+  });
+  element("allowance-guide-safe-label").textContent = t("allowanceGuide", {
+    label: t("savingsPreserved"),
+    amount: formatEuro(savingsSafeDailyPace, true),
+  });
 
   dailyExpenseChart = new window.ApexCharts(container, {
     chart: {
-      type: "area",
+      type: "line",
       height: 168,
       background: "transparent",
       fontFamily: getComputedStyle(document.documentElement).getPropertyValue("--font-family"),
       animations: { enabled: !window.matchMedia("(prefers-reduced-motion: reduce)").matches },
       sparkline: { enabled: true },
-      dropShadow: { enabled: true, top: 2, left: 0, blur: 5, color: glow, opacity: 0.28 },
+      dropShadow: { enabled: true, top: 2, left: 0, blur: 4, color: glow, opacity: 0.2 },
       toolbar: { show: false },
       zoom: { enabled: false },
     },
-    series: [{
-      name: t("dailyExpenseSeries"),
-      data: points,
-    }],
-    annotations: {
-      yaxis: [
-        {
-          y: allFundsDailyPace,
-          borderColor: allFundsColor,
-          borderWidth: 1.4,
-          strokeDashArray: 5,
-          opacity: 0.82,
-          label: {
-            borderColor: "transparent",
-            borderRadius: 0,
-            position: "right",
-            offsetX: -12,
-            offsetY: 5,
-            text: t("savingsViolated"),
-            style: {
-              background: guideLabelBackground,
-              color: allFundsColor,
-              cssClass: "allowance-guide-label allowance-guide-label-danger",
-              fontSize: "10px",
-              fontWeight: 800,
-              padding: { left: 5, right: 5, top: 1, bottom: 1 },
-            },
-          },
-        },
-        {
-          y: savingsSafeDailyPace,
-          borderColor: savingsSafeColor,
-          borderWidth: 1.4,
-          strokeDashArray: 3,
-          opacity: 0.9,
-          label: {
-            borderColor: "transparent",
-            borderRadius: 0,
-            position: "left",
-            offsetX: 142,
-            offsetY: 5,
-            text: t("savingsPreserved"),
-            style: {
-              background: guideLabelBackground,
-              color: savingsSafeColor,
-              cssClass: "allowance-guide-label allowance-guide-label-safe",
-              fontSize: "10px",
-              fontWeight: 800,
-              padding: { left: 5, right: 5, top: 1, bottom: 1 },
-            },
-          },
-        },
-      ],
+    series: [
+      { name: t("dailyExpenseSeries"), type: "column", data: spendingPoints },
+      { name: t("relativeStrengthSeries"), type: "line", data: strengthPoints },
+    ],
+    colors: [accent, strengthAccent],
+    plotOptions: {
+      bar: { columnWidth: "48%", borderRadius: 4, borderRadiusApplication: "end" },
     },
-    colors: [accent],
-    stroke: { curve: "smooth", width: 2.25, lineCap: "round" },
-    fill: {
-      type: "gradient",
-      gradient: {
-        shadeIntensity: 0.12,
-        opacityFrom: 0.52,
-        opacityTo: 0.04,
-        stops: [0, 68, 100],
-      },
-    },
-    markers: { size: 0 },
+    stroke: { curve: ["straight", "smooth"], width: [0, 2.5], lineCap: "round" },
+    fill: { opacity: [0.68, 1] },
+    markers: { size: [0, 3.5], strokeWidth: 0, hover: { sizeOffset: 2 } },
     dataLabels: { enabled: false },
     grid: { show: false, padding: { left: 3, right: 3, top: 8, bottom: 1 } },
     xaxis: { type: "datetime" },
-    yaxis: { min: 0, max: chartMaximum },
+    yaxis: [
+      { seriesName: t("dailyExpenseSeries"), min: 0, max: chartMaximum, show: false },
+      { seriesName: t("relativeStrengthSeries"), min: 1, max: 10, opposite: true, show: false },
+    ],
     tooltip: { enabled: false },
   });
   dailyExpenseChart.render();
@@ -1051,6 +1110,7 @@ function render() {
   element("daily-pace-safe").textContent = `${formatEuro(Math.max(safeRemaining, 0) / daysLeft, true)} ${t("perDay")}`;
 
   applyTranslations();
+  renderStrengthSummary();
   renderDailyExpenseChart(
     Math.max(cashRemaining, 0) / daysLeft,
     Math.max(safeRemaining, 0) / daysLeft,
@@ -1112,6 +1172,32 @@ function bindControls() {
     save();
     render();
   });
+  element("strength-form").addEventListener("submit", (event) => {
+    event.preventDefault();
+    const weightInput = element("strength-weight");
+    const pullUpsInput = element("strength-pull-ups");
+    const pushUpsInput = element("strength-push-ups");
+    const weightKg = Number(String(weightInput.value).replace(",", "."));
+    const pullUps = Number(pullUpsInput.value);
+    const pushUps = Number(pushUpsInput.value);
+    if (
+      !Number.isFinite(weightKg) || weightKg < 30 || weightKg > 250 ||
+      !Number.isInteger(pullUps) || pullUps < 0 || pullUps > 200 ||
+      !Number.isInteger(pushUps) || pushUps < 0 || pushUps > 300
+    ) return;
+
+    strengthEntries.push({
+      id: crypto.randomUUID(),
+      date: todayInVilnius(),
+      recordedAt: new Date().toISOString(),
+      weightKg,
+      pullUps,
+      pushUps,
+      score: relativeStrengthScore(weightKg, pullUps, pushUps),
+    });
+    saveStrengthEntries();
+    render();
+  });
 }
 
 async function start() {
@@ -1125,6 +1211,7 @@ async function start() {
     salarySchedule = financeHistory.salarySchedule ?? salarySchedule;
     history = financeHistory.months.slice(-12);
     if (!history.length) throw new Error("Finance history is empty.");
+    loadStrengthEntries();
     bindControls();
     loadMonth(history.at(-1));
   } catch (error) {

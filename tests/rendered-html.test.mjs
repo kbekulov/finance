@@ -159,20 +159,26 @@ test("server-renders the current finance tracker", async () => {
   assert.match(html, /aria-label="Составные столбцы расходов по дебету и кредиту, график относительной силы и линии дневных лимитов"/);
   assert.match(html, /class="strength-panel"/);
   assert.match(html, /ОТНОСИТЕЛЬНАЯ СИЛА/);
-  assert.match(html, /<strong>4,6<\/strong>/);
-  assert.match(html, /aria-label="Мастер-сержант, ранг силы 8 из 20\.[^"]*Имперский стиль[^"]*"/);
-  assert.match(html, /class="strength-rank-icon"[^>]*background-position:50% 33\.333333333333336%/);
-  assert.match(html, /<small>MSgt\.<\/small>/);
+  assert.match(html, /<strong>5,0<\/strong>/);
+  assert.match(html, /aria-label="Главный сержант-майор, ранг силы 9 из 20\.[^"]*Имперский стиль[^"]*"/);
+  assert.match(html, /class="strength-rank-icon"[^>]*background-position:75% 33\.333333333333336%/);
+  assert.match(html, /<small>CSM<\/small>/);
   assert.match(html, /<strong>51<small>кг<\/small><\/strong>/);
   assert.match(html, /Подтягивания<\/span><strong>8<small class="strength-target"[^>]*>.*?23<\/small><\/strong>/);
-  assert.match(html, /Отжимания<\/span><strong>25<small class="strength-target"[^>]*>.*?57<\/small><\/strong>/);
+  assert.match(html, /Отжимания<\/span><strong>30<small class="strength-target"[^>]*>.*?57<\/small><\/strong>/);
   assert.doesNotMatch(html, /Лучший подход|Best (?:pull-up|push-up) set/);
   assert.match(html, /подходы не суммируются/);
   assert.doesNotMatch(html, /<form\b/);
   assert.doesNotMatch(html, /class="add-panel"/);
   assert.doesNotMatch(html, /class="editable-value"/);
-  assert.match(html, /12.{0,8}€\/день · Накопления используются/);
-  assert.match(html, /0.{0,8}€\/день · Накопления сохранены/);
+  assert.match(
+    html,
+    new RegExp(`${renderedAllFundsPace}.{0,8}€/день · Накопления используются`),
+  );
+  assert.match(
+    html,
+    new RegExp(`${renderedSavingsSafePace}.{0,8}€/день · Накопления сохранены`),
+  );
   assert.match(html, /allowance-guide-all" style="--guide-top:79%"/);
   assert.match(html, /allowance-guide-safe" style="--guide-top:91%"/);
   assert.doesNotMatch(html, /Your site is taking shape|Building your site/);
@@ -262,16 +268,26 @@ test("keeps database history and translations aligned", async () => {
   assert.deepEqual(strengthDatabase, {
     version: 3,
     timezone: "Europe/Vilnius",
-    updatedAt: "2026-07-26",
-    revision: 5,
-    entries: [{
-      id: "2026-07-26-rs-001",
-      date: "2026-07-26",
-      weightKg: 51,
-      maxPullUpsSingleSet: 8,
-      maxPushUpsSingleSet: 25,
-      source: "chat",
-    }],
+    updatedAt: "2026-07-27",
+    revision: 6,
+    entries: [
+      {
+        id: "2026-07-26-rs-001",
+        date: "2026-07-26",
+        weightKg: 51,
+        maxPullUpsSingleSet: 8,
+        maxPushUpsSingleSet: 25,
+        source: "chat",
+      },
+      {
+        id: "2026-07-27-rs-001",
+        date: "2026-07-27",
+        weightKg: 51,
+        maxPullUpsSingleSet: 8,
+        maxPushUpsSingleSet: 30,
+        source: "chat",
+      },
+    ],
   });
   const supportedCategories = new Set([
     "Food",

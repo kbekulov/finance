@@ -169,7 +169,7 @@ test("keeps database history and translations aligned", async () => {
   assert.match(manual, /category-specific transparent Fate\/stay night chibi PNG/);
   assert.match(manual, /Sakura Matou for Food/);
   assert.match(manual, /Rider for Alcohol & nightlife/);
-  assert.match(manual, /overlaps the lower portion of the character artwork by 68 pixels/);
+  assert.match(manual, /overlaps the lower portion of the character artwork by 136 pixels/);
   assert.equal(current.updatedAt, "2026-07-26");
   assert.equal(current.revision, 24);
   assert.equal(current.savingsGoal, 200);
@@ -561,7 +561,7 @@ test("keeps database history and translations aligned", async () => {
     assert.doesNotMatch(source, /const TODAY\s*=/);
   }
   assert.match(index, /id="theme-select"/);
-  assert.match(index, /styles\.css\?v=33/);
+  assert.match(index, /styles\.css\?v=34/);
   assert.match(index, /public\/vendor\/apexcharts\.min\.js\?v=21/);
   assert.match(index, /script\.js\?v=33/);
   assert.match(index, /data-current-theme="kinance"/);
@@ -613,7 +613,8 @@ test("keeps database history and translations aligned", async () => {
   assert.doesNotMatch(styles, /\.daily-chart-panel\s*\{/);
   assert.match(styles, /\.daily-expense-chart\s*\{[^}]*left:\s*50%[^}]*width:\s*100vw/s);
   assert.match(styles, /\.daily-expense-chart\s*\{[^}]*height:\s*168px[^}]*min-height:\s*168px/s);
-  assert.match(styles, /\.daily-expense-chart\s*\{[^}]*margin:\s*-68px 0 18px/s);
+  assert.match(styles, /\.daily-expense-chart\s*\{[^}]*margin:\s*-136px 0 18px/s);
+  assert.match(styles, /@media \(max-width:\s*640px\)[\s\S]*\.daily-expense-chart\s*\{[^}]*margin-top:\s*-120px/s);
   assert.match(styles, /\.daily-expense-chart\s*\{[^}]*transform:\s*translateX\(-50%\)/s);
   assert.match(styles, /\.progress-ring\s*\{[^}]*--spent-end:\s*0deg[^}]*--savings-start:\s*360deg/s);
   assert.match(styles, /var\(--red\) var\(--savings-start\) 360deg/);

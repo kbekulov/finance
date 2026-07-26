@@ -167,6 +167,10 @@ test("keeps database history and translations aligned", async () => {
   assert.match(manual, /Synthetic expense history is exceptional/);
   assert.match(manual, /`synthetic: true` and a stable shared `backfillBatch` identifier/);
   assert.match(manual, /category-specific transparent Fate\/stay night chibi PNG/);
+  assert.match(manual, /Every expense-recording request that adds at least one new canonical expense/);
+  assert.match(manual, /Generate one fresh banner per request/);
+  assert.match(manual, /increment the Kinance banner query version in `index\.html`, `script\.js`, and `app\/page\.tsx`/);
+  assert.match(manual, /Finance accuracy takes priority/);
   assert.match(manual, /Sakura Matou as a cook with an oversized ramen bowl for Food/);
   assert.match(manual, /Rider as a bartender with a large cocktail for Alcohol & nightlife/);
   assert.match(manual, /sits entirely over the lower 168 pixels of the character artwork/);

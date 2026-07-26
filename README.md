@@ -8,13 +8,14 @@ Treat each user message as a possible finance or product update. When it changes
 
 1. inspect the current `dev` branch and remote state;
 2. update the canonical JSON and both website implementations;
-3. set the current salary cycle’s visible update date to the actual current date;
-4. increment the current salary cycle’s `revision` for every canonical finance-data change;
-5. check English/Russian parity for every visible or accessible string;
-6. validate JSON, static JavaScript, calculations, responsive behavior, and the production build;
-7. commit intentionally and push `dev`;
-8. publish the exact pushed commit to the connected Site when Sites tools are available;
-9. verify the worktree is clean and local `HEAD` equals `origin/dev`.
+3. when the request adds one or more new expenses, refresh the active Kinance banner as defined under Theme system;
+4. set the current salary cycle’s visible update date to the actual current date;
+5. increment the current salary cycle’s `revision` for every canonical finance-data change;
+6. check English/Russian parity for every visible or accessible string;
+7. validate JSON, static JavaScript, calculations, responsive behavior, and the production build;
+8. commit intentionally and push `dev`;
+9. publish the exact pushed commit to the connected Site when Sites tools are available;
+10. verify the worktree is clean and local `HEAD` equals `origin/dev`.
 
 Never leave a completed code/data change uncommitted or unpushed. Do not force-push, discard unrelated work, or overwrite a newer remote commit. Fetch and integrate concurrent remote changes safely.
 
@@ -286,6 +287,8 @@ Do not introduce heavy libraries for behavior that plain TypeScript/JavaScript/C
 ## Theme system
 
 Theme selection is a device-local preference stored as `kinance:theme`. Keep the switcher data-driven so the number of themes is not artificially limited. Every theme must have one stable ID, display label, and PNG banner path in the `THEMES` collection in both JavaScript and React, matching `data-theme` CSS selectors. Store theme banners in `public/theme-banners/`, use `/public/theme-banners/...` paths in the static site and `/theme-banners/...` paths in React, use a wide composition with the important characters inside the central crop-safe area, and provide localized accessible alt text through `themeBannerLabel`. Character artwork must span the viewport as a borderless, edge-faded page-background band independent of the content shell width, with responsive height and crop positioning that preserve the main composition. It must not read as a rounded card or standalone wrapper.
+
+Every expense-recording request that adds at least one new canonical expense must also refresh the active `kinance` theme banner in the same committed update. Generate one fresh banner per request, even when the request adds several expenses. Use the built-in image-generation workflow to create a substantially new Fate/stay night composition with no text, logos, financial figures, merchant details, or receipt-derived personal information. The newly recorded category may inspire a playful visual motif, but keep important characters in the central crop-safe area and preserve the existing dark Kinance mood, full-viewport treatment, and chart legibility. Replace `public/theme-banners/kinance.png`, inspect the result, and increment the Kinance banner query version in `index.html`, `script.js`, and `app/page.tsx` so browsers load it immediately. Do not refresh the banner for corrections, deletions, or credit repayments that add no expense. Finance accuracy takes priority: if image generation is temporarily unavailable or produces no usable result after one focused retry, record and publish the expense normally, retain the current banner, and report that the optional visual refresh could not be completed.
 
 Every expense row uses a category-specific transparent Fate/stay night chibi PNG from `public/category-icons/` instead of a letter monogram. Keep the category-to-icon map complete and identical in JavaScript and React whenever categories change. Treat the image as decorative because the localized category name remains visible in text, preserve the original square aspect ratio, and use a borderless cutout with a restrained shadow rather than another badge or card. Design for the actual 48-pixel UI size: give each character category-specific work clothing and one dominant, high-contrast prop that occupies roughly one third of the canvas. Avoid tiny secondary props or symbolism that only reads at full resolution. The current cast and cues are Sakura Matou as a cook with an oversized ramen bowl for Food, Tohsaka Rin as a digital-services operator with an oversized app phone for Subscriptions & services, Gilgamesh in luxury formalwear with a gold shopping bag for Luxury purchases, Shirou Emiya as an accountant with a calculator and bound cash for Debt & repayments, Illyasviel von Einzbern as a repair technician with a laptop and screwdriver for Devices & installments, Saber as a bus driver with a large city bus for Transport & Travel, and Rider as a bartender with a large cocktail for Alcohol & nightlife.
 

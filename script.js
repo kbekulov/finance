@@ -117,8 +117,8 @@ function categoryIconFor(expense) {
 }
 
 const THEMES = [
-  { id: "kinance", label: "Kinance", banners: ["/public/theme-banners/kinance.png?v=7", "/public/theme-banners/kinance-frame-2.png?v=7"] },
-  { id: "kinance-moon", label: "Kinance Moon", banners: ["/public/theme-banners/kinance.png?v=7", "/public/theme-banners/kinance-frame-2.png?v=7"] },
+  { id: "kinance", label: "Kinance", banners: ["/public/theme-banners/kinance.png?v=8", "/public/theme-banners/kinance-frame-2.png?v=8"] },
+  { id: "kinance-moon", label: "Kinance Moon", banners: ["/public/theme-banners/kinance.png?v=8", "/public/theme-banners/kinance-frame-2.png?v=8"] },
   { id: "nier-automata", label: "NieR:Automata", banners: ["/public/theme-banners/nier-automata.png?v=2"] },
   { id: "tohsaka-rin", label: "Tohsaka Rin", banners: ["/public/theme-banners/tohsaka-rin.png?v=2"] },
 ];

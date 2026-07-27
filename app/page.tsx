@@ -57,8 +57,8 @@ const RANK_INSIGNIA_SETS = [
 type RankInsigniaSetId = (typeof RANK_INSIGNIA_SETS)[number]["id"];
 
 const THEMES = [
-  { id: "kinance", label: "Kinance", banners: ["/theme-banners/kinance.png?v=9", "/theme-banners/kinance-frame-2.png?v=9"] },
-  { id: "kinance-moon", label: "Kinance Moon", banners: ["/theme-banners/kinance.png?v=9", "/theme-banners/kinance-frame-2.png?v=9"] },
+  { id: "kinance", label: "Kinance", banners: ["/theme-banners/kinance.png?v=10", "/theme-banners/kinance-frame-2.png?v=10"] },
+  { id: "kinance-moon", label: "Kinance Moon", banners: ["/theme-banners/kinance.png?v=10", "/theme-banners/kinance-frame-2.png?v=10"] },
   { id: "nier-automata", label: "NieR:Automata", banners: ["/theme-banners/nier-automata.png?v=2"] },
   { id: "tohsaka-rin", label: "Tohsaka Rin", banners: ["/theme-banners/tohsaka-rin.png?v=2"] },
 ] as const;

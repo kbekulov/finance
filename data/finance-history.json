@@ -18,7 +18,7 @@
       "currency": "EUR",
       "timezone": "Europe/Vilnius",
       "updatedAt": "2026-07-27",
-      "revision": 31,
+      "revision": 32,
       "salary": 2150,
       "savingsGoal": 200,
       "additionalIncome": [
@@ -35,6 +35,19 @@
         }
       ],
       "expenses": [
+        {
+          "id": "2026-07-drink-001",
+          "amount": 2.79,
+          "note": "Drink",
+          "noteTranslations": {
+            "en": "Drink",
+            "ru": "\u041d\u0430\u043f\u0438\u0442\u043e\u043a"
+          },
+          "date": "2026-07-27",
+          "category": "Alcohol & nightlife",
+          "source": "chat",
+          "paymentMethod": "debit"
+        },
         {
           "id": "2026-07-vodka-001",
           "amount": 3.5,

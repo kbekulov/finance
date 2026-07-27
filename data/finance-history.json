@@ -18,7 +18,7 @@
       "currency": "EUR",
       "timezone": "Europe/Vilnius",
       "updatedAt": "2026-07-27",
-      "revision": 35,
+      "revision": 36,
       "salary": 2150,
       "savingsGoal": 200,
       "additionalIncome": [
@@ -35,6 +35,20 @@
         }
       ],
       "expenses": [
+        {
+          "id": "2026-07-asahi-super-dry-001",
+          "amount": 3.98,
+          "note": "Asahi Super Dry beer, 2 cans",
+          "noteTranslations": {
+            "en": "Asahi Super Dry beer, 2 cans",
+            "ru": "Пиво Asahi Super Dry, 2 банки"
+          },
+          "date": "2026-07-27",
+          "category": "Alcohol & nightlife",
+          "source": "receipt",
+          "paymentMethod": "debit",
+          "transactionTime": "19:28:10"
+        },
         {
           "id": "2026-07-drink-003",
           "amount": 3.09,

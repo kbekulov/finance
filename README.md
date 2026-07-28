@@ -396,6 +396,7 @@ Allowance guides:
 - Use no pill, badge, outline, or floating callout.
 - A subtle edge-faded canvas mask may protect label legibility, but it must not look like a rectangle or glow. Do not use text shadow.
 - Keep both guides within the spending y-axis range.
+- Calculate both guide positions from their real euro values using the exact chart height and top/bottom plot padding used by ApexCharts. A zero-euro guide must share the bar baseline, and a bar above an allowance must visibly cross its guide. Never move a financial guide to avoid a label collision; adjust only label presentation when needed.
 
 The visible chart has no numeric axes, grid, built-in legend, or tooltip. Recalculate it when cycle, theme, expenses, savings, remaining days, or strength history changes. Disable animation for reduced motion and retain a localized accessible label describing all series.
 

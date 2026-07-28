@@ -653,19 +653,23 @@ function dailyStrengthPoints(
     .map(([date, score]) => ({ x: dateFromKey(date).getTime(), y: score }));
 }
 
+const DAILY_CHART_HEIGHT = 168;
+const DAILY_CHART_TOP_PADDING = 8;
+const DAILY_CHART_BOTTOM_PADDING = 14;
+
 function allowanceGuideTop(value: number, maximum: number) {
-  const percentage = 100 - (value / maximum) * 100;
-  return Math.min(Math.max(percentage, 8), 91);
+  const safeMaximum = Number.isFinite(maximum) && maximum > 0 ? maximum : 1;
+  const normalizedValue = Math.min(Math.max(value / safeMaximum, 0), 1);
+  const plotHeight = DAILY_CHART_HEIGHT - DAILY_CHART_TOP_PADDING - DAILY_CHART_BOTTOM_PADDING;
+  const pixelTop = DAILY_CHART_TOP_PADDING + (1 - normalizedValue) * plotHeight;
+  return Math.round((pixelTop / DAILY_CHART_HEIGHT) * 10000) / 100;
 }
 
 function allowanceGuideTops(allFunds: number, savingsSafe: number, maximum: number) {
-  let allFundsTop = allowanceGuideTop(allFunds, maximum);
-  let savingsSafeTop = allowanceGuideTop(savingsSafe, maximum);
-  if (savingsSafeTop - allFundsTop < 12) {
-    allFundsTop = 79;
-    savingsSafeTop = 91;
-  }
-  return { allFundsTop, savingsSafeTop };
+  return {
+    allFundsTop: allowanceGuideTop(allFunds, maximum),
+    savingsSafeTop: allowanceGuideTop(savingsSafe, maximum),
+  };
 }
 
 export default function Home() {
@@ -1075,7 +1079,7 @@ export default function Home() {
       chart = new ApexCharts(container, {
         chart: {
           type: "line",
-          height: 168,
+          height: DAILY_CHART_HEIGHT,
           stacked: true,
           stackOnlyBar: true,
           background: "transparent",
@@ -1111,7 +1115,15 @@ export default function Home() {
         fill: { opacity: [0.68, 0.84, 1] },
         markers: { size: [0, 0, 3.5], strokeWidth: 0, hover: { sizeOffset: 2 } },
         dataLabels: { enabled: false },
-        grid: { show: false, padding: { left: 3, right: 3, top: 8, bottom: 1 } },
+        grid: {
+          show: false,
+          padding: {
+            left: 3,
+            right: 3,
+            top: DAILY_CHART_TOP_PADDING,
+            bottom: DAILY_CHART_BOTTOM_PADDING,
+          },
+        },
         xaxis: { type: "datetime" },
         yaxis: [
           { seriesName: [copy.dailyExpenseSeries, copy.creditExpenseSeries], min: 0, max: drawChartMaximum, show: false },

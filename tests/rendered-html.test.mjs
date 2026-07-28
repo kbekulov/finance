@@ -179,8 +179,8 @@ test("server-renders the current finance tracker", async () => {
     html,
     new RegExp(`${renderedSavingsSafePace}.{0,8}€/день · Накопления сохранены`),
   );
-  assert.match(html, /allowance-guide-all" style="--guide-top:79%"/);
-  assert.match(html, /allowance-guide-safe" style="--guide-top:91%"/);
+  assert.match(html, /allowance-guide-all" style="--guide-top:84\.04%"/);
+  assert.match(html, /allowance-guide-safe" style="--guide-top:91\.67%"/);
   assert.doesNotMatch(html, /Your site is taking shape|Building your site/);
 });
 
@@ -230,6 +230,8 @@ test("keeps database history and translations aligned", async () => {
   assert.match(manual, /Alternate the frames with a hard pixel-art cut every 1000 milliseconds/);
   assert.match(manual, /Clicking or tapping a debit or credit bar reveals one compact theme-aware readout/);
   assert.match(manual, /that day's total debit-plus-credit spending/);
+  assert.match(manual, /A zero-euro guide must share the bar baseline/);
+  assert.match(manual, /Never move a financial guide to avoid a label collision/);
   assert.match(manual, /latest explicit instruction always takes precedence/);
   assert.match(manual, /Do not reinterpret a one-time exception as a permanent rule/);
   assert.match(manual, /committed cycle spending/);
@@ -882,6 +884,29 @@ test("keeps database history and translations aligned", async () => {
   assert.equal(Math.round(Math.max(safeRemainingCents / 100, 0) / remainingDaysAfterToday), 0);
   assert.equal(Math.round((spentCents / totalIncomeCents) * 100), 93);
 
+  const dailyOneTimeCents = new Map();
+  for (const expense of current.expenses.filter((expense) => !expense.recurring)) {
+    dailyOneTimeCents.set(
+      expense.date,
+      (dailyOneTimeCents.get(expense.date) ?? 0) + Math.round(expense.amount * 100),
+    );
+  }
+  const todaySpentEuros = dailyOneTimeCents.get("2026-07-28") / 100;
+  const allFundsPaceEuros = (cashRemainingCents / 100) / remainingDaysAfterToday;
+  const chartMaximum = Math.max(
+    ...[...dailyOneTimeCents.values()].map((value) => value / 100),
+    allFundsPaceEuros,
+    1,
+  ) * 1.08;
+  const chartTop = (value) => {
+    const normalized = Math.min(Math.max(value / chartMaximum, 0), 1);
+    return (8 + (1 - normalized) * (168 - 8 - 14)) / 168;
+  };
+  assert.equal(todaySpentEuros, 20.16);
+  assert.equal(chartTop(0), (168 - 14) / 168);
+  assert.ok(todaySpentEuros > allFundsPaceEuros);
+  assert.ok(chartTop(todaySpentEuros) < chartTop(allFundsPaceEuros));
+
   const salaryHistoryScenario = [
     { salary: 2150, additionalIncome: 10, savingsGoal: 200, spent: 2014.39 },
     { salary: 2750, additionalIncome: 0, savingsGoal: 200, spent: 2014.39 },
@@ -951,7 +976,7 @@ test("keeps database history and translations aligned", async () => {
   assert.doesNotMatch(index, /property="og:|name="twitter:/);
   assert.match(index, /styles\.css\?v=51/);
   assert.match(index, /public\/vendor\/apexcharts\.min\.js\?v=21/);
-  assert.match(index, /script\.js\?v=59/);
+  assert.match(index, /script\.js\?v=60/);
   assert.match(index, /id="chart-day-detail"[^>]*role="status"[^>]*aria-live="polite"[^>]*hidden/);
   assert.match(index, /id="strength-pull-ups-target"/);
   assert.match(index, /id="strength-push-ups-target"/);
@@ -1117,11 +1142,11 @@ test("keeps database history and translations aligned", async () => {
   assert.match(styles, /data-current-theme="kinance-moon"/);
   assert.match(styles, /:root\[data-theme="nier-automata"\][^{]*\{[^}]*--chart-accent:\s*#526f78/s);
   assert.match(styles, /:root\[data-theme="tohsaka-rin"\][^{]*\{[^}]*--chart-accent:\s*#ff5b82/s);
-  assert.match(script, /height:\s*168/);
+  assert.match(script, /height:\s*DAILY_CHART_HEIGHT/);
   assert.match(script, /stroke:\s*\{\s*curve:\s*\["straight",\s*"straight",\s*"smooth"\],\s*width:\s*\[0,\s*0,\s*2\.5\]/);
   assert.match(script, /allowance-guide-all-label/);
   assert.match(script, /allowance-guide-safe-label/);
-  assert.match(page, /height:\s*168/);
+  assert.match(page, /height:\s*DAILY_CHART_HEIGHT/);
   assert.match(page, /stroke:\s*\{\s*curve:\s*\["straight",\s*"straight",\s*"smooth"\],\s*width:\s*\[0,\s*0,\s*2\.5\]/);
   for (const source of [script, page]) {
     assert.match(source, /relativeStrengthScore/);
@@ -1144,7 +1169,12 @@ test("keeps database history and translations aligned", async () => {
     assert.match(source, /safePushUps \* massAdjustment/);
     assert.match(source, /\(pullComponent \+ pushComponent\) \/ 2/);
     assert.doesNotMatch(source, /\* 0\.6 \+ pushComponent \* 0\.4|\*\* 0\.12/);
-    assert.match(source, /savingsSafeTop - allFundsTop < 12/);
+    assert.doesNotMatch(source, /savingsSafeTop - allFundsTop < 12|allFundsTop = 79|savingsSafeTop = 91/);
+    assert.match(source, /const DAILY_CHART_HEIGHT = 168/);
+    assert.match(source, /const DAILY_CHART_TOP_PADDING = 8/);
+    assert.match(source, /const DAILY_CHART_BOTTOM_PADDING = 14/);
+    assert.match(source, /pixelTop = DAILY_CHART_TOP_PADDING \+ \(1 - normalizedValue\) \* plotHeight/);
+    assert.match(source, /bottom: DAILY_CHART_BOTTOM_PADDING/);
     assert.match(source, /dataPointSelection/);
     assert.match(source, /chartDaySpent/);
     assert.match(source, /seriesIndex > 1/);

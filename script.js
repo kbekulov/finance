@@ -165,6 +165,7 @@ const TRANSLATIONS = {
     creditExpenseSeries: "Credit spending",
     relativeStrengthSeries: "Relative strength",
     dailySpendingChartLabel: "Stacked debit and credit spending bars with relative strength and daily allowance guides",
+    chartDaySpent: "{amount} spent on {date}",
     strengthTitle: "RELATIVE STRENGTH",
     strengthScore: "CURRENT SCORE",
     strengthNoAttempts: "Log an attempt to establish your baseline",
@@ -275,6 +276,7 @@ const TRANSLATIONS = {
     creditExpenseSeries: "Расходы по кредиту",
     relativeStrengthSeries: "Относительная сила",
     dailySpendingChartLabel: "Составные столбцы расходов по дебету и кредиту, график относительной силы и линии дневных лимитов",
+    chartDaySpent: "Расходы за {date}: {amount}",
     strengthTitle: "ОТНОСИТЕЛЬНАЯ СИЛА",
     strengthScore: "ТЕКУЩИЙ БАЛЛ",
     strengthNoAttempts: "Добавьте попытку, чтобы определить исходный уровень",
@@ -1081,6 +1083,8 @@ function renderStrengthSummary() {
 
 function renderDailyExpenseChart(allFundsDailyPace, savingsSafeDailyPace) {
   const container = element("daily-expense-chart-canvas");
+  const dayDetail = element("chart-day-detail");
+  dayDetail.hidden = true;
   dailyExpenseChart?.destroy();
   dailyExpenseChart = null;
 
@@ -1147,6 +1151,20 @@ function renderDailyExpenseChart(allFundsDailyPace, savingsSafeDailyPace) {
       sparkline: { enabled: true },
       toolbar: { show: false },
       zoom: { enabled: false },
+      events: {
+        dataPointSelection: (event, _chartContext, config) => {
+          if (config.seriesIndex > 1 || config.dataPointIndex < 0) return;
+          const point = spendingPoints[config.dataPointIndex];
+          if (!point) return;
+          event?.stopPropagation();
+          const date = formatShortDate(new Date(point.x));
+          const amount = formatEuro(point.y);
+          element("chart-day-detail-date").textContent = date;
+          element("chart-day-detail-amount").textContent = amount;
+          dayDetail.setAttribute("aria-label", t("chartDaySpent", { date, amount }));
+          dayDetail.hidden = false;
+        },
+      },
     },
     series: [
       { name: t("dailyExpenseSeries"), type: "column", data: debitPoints },
@@ -1269,6 +1287,9 @@ function bindControls() {
   });
   document.addEventListener("pointerdown", (event) => {
     if (!spendingInsight.contains(event.target)) setSpendingInsightOpen(false);
+    if (!element("daily-expense-chart").contains(event.target)) {
+      element("chart-day-detail").hidden = true;
+    }
   });
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape") setSpendingInsightOpen(false);

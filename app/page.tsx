@@ -239,6 +239,7 @@ const COPY = {
     creditExpenseSeries: "Credit spending",
     relativeStrengthSeries: "Relative strength",
     dailySpendingChartLabel: "Stacked debit and credit spending bars with relative strength and daily allowance guides",
+    chartDaySpent: "{amount} spent on {date}",
     strengthTitle: "RELATIVE STRENGTH",
     strengthScore: "CURRENT SCORE",
     strengthNoAttempts: "Log an attempt to establish your baseline",
@@ -336,6 +337,7 @@ const COPY = {
     creditExpenseSeries: "Расходы по кредиту",
     relativeStrengthSeries: "Относительная сила",
     dailySpendingChartLabel: "Составные столбцы расходов по дебету и кредиту, график относительной силы и линии дневных лимитов",
+    chartDaySpent: "Расходы за {date}: {amount}",
     strengthTitle: "ОТНОСИТЕЛЬНАЯ СИЛА",
     strengthScore: "ТЕКУЩИЙ БАЛЛ",
     strengthNoAttempts: "Добавьте попытку, чтобы определить исходный уровень",
@@ -677,7 +679,9 @@ export default function Home() {
   const [recurringExpanded, setRecurringExpanded] = useState(true);
   const [oneTimeExpanded, setOneTimeExpanded] = useState(true);
   const dailyChartRef = useRef<HTMLDivElement>(null);
+  const dailyChartShellRef = useRef<HTMLDivElement>(null);
   const spendingInsightRef = useRef<HTMLDivElement>(null);
+  const [selectedChartDay, setSelectedChartDay] = useState<{ timestamp: number; total: number } | null>(null);
 
   /* Cookie preferences hydrate only after the client mounts. */
   /* eslint-disable react-hooks/set-state-in-effect */
@@ -1028,6 +1032,7 @@ export default function Home() {
   useEffect(() => {
     const container = dailyChartRef.current;
     if (!container) return;
+    setSelectedChartDay(null);
     let active = true;
     let chart: { destroy: () => void } | null = null;
 
@@ -1079,6 +1084,19 @@ export default function Home() {
           sparkline: { enabled: true },
           toolbar: { show: false },
           zoom: { enabled: false },
+          events: {
+            dataPointSelection: (
+              event: Event,
+              _chartContext: unknown,
+              config: { seriesIndex: number; dataPointIndex: number },
+            ) => {
+              if (config.seriesIndex > 1 || config.dataPointIndex < 0) return;
+              const point = spendingPoints[config.dataPointIndex];
+              if (!point) return;
+              event?.stopPropagation();
+              setSelectedChartDay({ timestamp: point.x, total: point.y });
+            },
+          },
         },
         series: [
           { name: copy.dailyExpenseSeries, type: "column", data: debitPoints },
@@ -1120,6 +1138,15 @@ export default function Home() {
     theme,
     todayKey,
   ]);
+
+  useEffect(() => {
+    const closeDayDetail = (event: PointerEvent) => {
+      if (event.target instanceof Node && dailyChartShellRef.current?.contains(event.target)) return;
+      setSelectedChartDay(null);
+    };
+    document.addEventListener("pointerdown", closeDayDetail);
+    return () => document.removeEventListener("pointerdown", closeDayDetail);
+  }, []);
 
   return (
     <main>
@@ -1259,8 +1286,22 @@ export default function Home() {
           />
         </section>
 
-        <div className="daily-expense-chart" role="img" aria-label={copy.dailySpendingChartLabel}>
+        <div ref={dailyChartShellRef} className="daily-expense-chart" role="group" aria-label={copy.dailySpendingChartLabel}>
           <div ref={dailyChartRef} className="daily-expense-chart-canvas" aria-hidden="true" />
+          {selectedChartDay ? (
+            <output
+              className="chart-day-detail"
+              role="status"
+              aria-live="polite"
+              aria-label={fillTemplate(copy.chartDaySpent, {
+                date: shortDate(new Date(selectedChartDay.timestamp)),
+                amount: euro.format(selectedChartDay.total),
+              })}
+            >
+              <span>{shortDate(new Date(selectedChartDay.timestamp))}</span>
+              <strong>{euro.format(selectedChartDay.total)}</strong>
+            </output>
+          ) : null}
           <div
             className="allowance-guide allowance-guide-all"
             style={{ "--guide-top": `${allowanceGuidePositions.allFundsTop}%` } as React.CSSProperties}

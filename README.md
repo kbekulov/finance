@@ -399,6 +399,8 @@ Allowance guides:
 
 The visible chart has no numeric axes, grid, built-in legend, or tooltip. Recalculate it when cycle, theme, expenses, savings, remaining days, or strength history changes. Disable animation for reduced motion and retain a localized accessible label describing all series.
 
+Clicking or tapping a debit or credit bar reveals one compact theme-aware readout inside the chart with the localized date and that day's total debit-plus-credit spending. Keep it visible until another bar is selected or the user clicks elsewhere. The readout must have a restrained surface, clear hierarchy, no glow, no permanent chart clutter, and an `aria-live` status announcement.
+
 ## 10. Language, naming, and accessibility
 
 The EN/RU switch exposes identical information and functionality.

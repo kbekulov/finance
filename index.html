@@ -7,9 +7,9 @@
     <meta name="description" content="Kinance" />
     <title>Kinance</title>
     <link rel="icon" type="image/jpeg" href="/kinance-favicon.jpg" />
-    <link rel="stylesheet" href="/styles.css?v=50" />
+    <link rel="stylesheet" href="/styles.css?v=51" />
     <script src="/public/vendor/apexcharts.min.js?v=21" defer></script>
-    <script src="/script.js?v=58" defer></script>
+    <script src="/script.js?v=59" defer></script>
   </head>
   <body>
     <main>
@@ -90,11 +90,15 @@
         <div
           id="daily-expense-chart"
           class="daily-expense-chart"
-          role="img"
+          role="group"
           aria-label="Stacked debit and credit spending bars with relative strength and daily allowance guides"
           data-i18n-aria-label="dailySpendingChartLabel"
         >
           <div id="daily-expense-chart-canvas" class="daily-expense-chart-canvas" aria-hidden="true"></div>
+          <output id="chart-day-detail" class="chart-day-detail" role="status" aria-live="polite" hidden>
+            <span id="chart-day-detail-date"></span>
+            <strong id="chart-day-detail-amount"></strong>
+          </output>
           <div id="allowance-guide-all" class="allowance-guide allowance-guide-all" aria-hidden="true">
             <i></i><span id="allowance-guide-all-label"></span><i></i>
           </div>

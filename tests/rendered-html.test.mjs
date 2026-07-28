@@ -228,6 +228,8 @@ test("keeps database history and translations aligned", async () => {
   assert.match(manual, /Finance accuracy takes priority/);
   assert.match(manual, /consecutive frames of a deliberately low-frame-rate idle animation/);
   assert.match(manual, /Alternate the frames with a hard pixel-art cut every 1000 milliseconds/);
+  assert.match(manual, /Clicking or tapping a debit or credit bar reveals one compact theme-aware readout/);
+  assert.match(manual, /that day's total debit-plus-credit spending/);
   assert.match(manual, /latest explicit instruction always takes precedence/);
   assert.match(manual, /Do not reinterpret a one-time exception as a permanent rule/);
   assert.match(manual, /committed cycle spending/);
@@ -947,9 +949,10 @@ test("keeps database history and translations aligned", async () => {
   assert.match(index, /<html lang="ru">/);
   assert.match(index, /<meta name="description" content="Kinance" \/>/);
   assert.doesNotMatch(index, /property="og:|name="twitter:/);
-  assert.match(index, /styles\.css\?v=50/);
+  assert.match(index, /styles\.css\?v=51/);
   assert.match(index, /public\/vendor\/apexcharts\.min\.js\?v=21/);
-  assert.match(index, /script\.js\?v=58/);
+  assert.match(index, /script\.js\?v=59/);
+  assert.match(index, /id="chart-day-detail"[^>]*role="status"[^>]*aria-live="polite"[^>]*hidden/);
   assert.match(index, /id="strength-pull-ups-target"/);
   assert.match(index, /id="strength-push-ups-target"/);
   assert.match(index, /rank-icons\/rank-insignia-atlas\.png\?v=1/);
@@ -1142,8 +1145,18 @@ test("keeps database history and translations aligned", async () => {
     assert.match(source, /\(pullComponent \+ pushComponent\) \/ 2/);
     assert.doesNotMatch(source, /\* 0\.6 \+ pushComponent \* 0\.4|\*\* 0\.12/);
     assert.match(source, /savingsSafeTop - allFundsTop < 12/);
+    assert.match(source, /dataPointSelection/);
+    assert.match(source, /chartDaySpent/);
+    assert.match(source, /seriesIndex > 1/);
+    assert.match(source, /spendingPoints\[config\.dataPointIndex\]/);
   }
+  assert.match(script, /chart-day-detail-date/);
+  assert.match(script, /chart-day-detail-amount/);
+  assert.match(page, /selectedChartDay/);
+  assert.match(page, /dailyChartShellRef/);
   assert.match(styles, /\.allowance-guide\s*\{/);
+  assert.match(styles, /\.chart-day-detail\s*\{[^}]*border-left:\s*2px solid var\(--chart-accent\)[^}]*background:\s*var\(--glass-strong\)/s);
+  assert.match(styles, /\.chart-day-detail\[hidden\]\s*\{[^}]*display:\s*none/s);
   assert.match(styles, /\.allowance-guide i\s*\{/);
   assert.match(styles, /\.allowance-guide i:first-child\s*\{[^}]*flex:\s*0 0 24px/s);
   assert.match(styles, /\.allowance-guide span\s*\{[^}]*text-align:\s*left/s);

@@ -18,7 +18,7 @@
       "currency": "EUR",
       "timezone": "Europe/Vilnius",
       "updatedAt": "2026-07-28",
-      "revision": 40,
+      "revision": 41,
       "salary": 2150,
       "savingsGoal": 200,
       "additionalIncome": [
@@ -35,6 +35,19 @@
         }
       ],
       "expenses": [
+        {
+          "id": "2026-07-gift-001",
+          "amount": 13.98,
+          "note": "Gift",
+          "noteTranslations": {
+            "en": "Gift",
+            "ru": "Подарок"
+          },
+          "date": "2026-07-28",
+          "category": "Luxury purchases",
+          "source": "chat",
+          "paymentMethod": "debit"
+        },
         {
           "id": "2026-07-drink-005",
           "amount": 2.99,

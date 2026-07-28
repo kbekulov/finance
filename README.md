@@ -38,7 +38,7 @@ Use this sequence for every mutation:
    - finance data change: update the target cycle's `updatedAt` and increment its `revision`;
    - fitness data change: update the strength root `updatedAt` and increment its `revision`;
    - visible UI copy: update English, Russian, and accessibility text in both implementations;
-   - new expense: also refresh the Kinance banner pair as specified under Themes and visual assets.
+   - new expense: refresh the Kinance banner pair only when no pair has yet been generated on that Vilnius calendar day, as specified under Themes and visual assets.
 6. Keep static and React implementations behaviorally equivalent. When static CSS, JavaScript, or a replaced asset uses a query-string version, increment only the affected reference so GitHub Pages does not serve stale content.
 7. Run the validation matrix in section 13.
 8. Review the diff and confirm only intended files changed.
@@ -451,9 +451,9 @@ Neutral directional shadows may communicate elevation. Solid outlines may commun
 
 Store banners in `public/theme-banners/`. Static paths use `/public/theme-banners/...`; React paths use `/theme-banners/...`. Banners are borderless, edge-faded page-background bands independent of the content-shell width. Use a wide composition, central crop-safe subject, responsive crop, and quiet lower region for chart legibility. Never present a banner as a rounded card or wrapper.
 
-Every expense-recording request that adds at least one new canonical expense must also refresh the shared Kinance and Kinance Moon pair:
+At most one expense-recording request per `Europe/Vilnius` calendar day refreshes the shared Kinance and Kinance Moon pair. Use `public/theme-banners/banner-manifest.json` as the authoritative generation record. Before generating, compare its `lastGeneratedOn` with the actual Vilnius date. If they match, record the expense without image generation or banner version changes. If they differ, refresh the pair once and update the manifest in the same commit.
 
-1. Generate one fresh two-frame banner set per request, even when the request contains several expenses.
+1. Generate one fresh two-frame banner set for the day's first eligible expense-recording request. If that request contains several expenses, use one coherent scene for all of them.
 2. Use the built-in image-generation workflow.
 3. Create a substantially new 16-bit or 32-bit pixel-art scene that reads as an RPGMaker-style in-game moment.
 4. Show an in-game character visibly performing the activity related to the newly recorded expense. Make the purchased item or service readable at mobile banner size through action, setting, clothing, and large props.
@@ -470,6 +470,8 @@ Every new banner must meaningfully represent the topic of the expense. The two i
 - inspect both and increment the shared banner query version for both `kinance` and `kinance-moon` in `index.html`, `script.js`, and `app/page.tsx`;
 - preload both. Alternate the frames with a hard pixel-art cut every 1000 milliseconds;
 - freeze on frame one for reduced motion.
+
+The banner manifest stores `timezone`, `lastGeneratedOn`, a short privacy-safe `topic`, `queryVersion`, and the two frame filenames. It contains no expense amount, merchant, location, receipt metadata, or personal information. Never update `lastGeneratedOn` unless a usable new pair was actually generated and saved.
 
 Do not refresh the Kinance pair for corrections, deletions, credit repayments, or other updates that add no expense. The NieR and Tohsaka banners are static and are not regenerated for expenses. Finance accuracy takes priority: if image generation fails to produce a usable pair after one focused retry, record and publish the expense normally, keep the existing pair, and report the optional visual limitation.
 

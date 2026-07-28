@@ -17,8 +17,8 @@
       },
       "currency": "EUR",
       "timezone": "Europe/Vilnius",
-      "updatedAt": "2026-07-27",
-      "revision": 36,
+      "updatedAt": "2026-07-28",
+      "revision": 37,
       "salary": 2150,
       "savingsGoal": 200,
       "additionalIncome": [
@@ -35,6 +35,32 @@
         }
       ],
       "expenses": [
+        {
+          "id": "2026-07-food-002",
+          "amount": 5.5,
+          "note": "Food purchase",
+          "noteTranslations": {
+            "en": "Food purchase",
+            "ru": "Покупка еды"
+          },
+          "date": "2026-07-28",
+          "category": "Food",
+          "source": "chat",
+          "paymentMethod": "debit"
+        },
+        {
+          "id": "2026-07-food-001",
+          "amount": 2.39,
+          "note": "Food purchase",
+          "noteTranslations": {
+            "en": "Food purchase",
+            "ru": "Покупка еды"
+          },
+          "date": "2026-07-28",
+          "category": "Food",
+          "source": "chat",
+          "paymentMethod": "debit"
+        },
         {
           "id": "2026-07-asahi-super-dry-001",
           "amount": 3.98,

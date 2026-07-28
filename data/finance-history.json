@@ -18,7 +18,7 @@
       "currency": "EUR",
       "timezone": "Europe/Vilnius",
       "updatedAt": "2026-07-28",
-      "revision": 38,
+      "revision": 39,
       "salary": 2150,
       "savingsGoal": 200,
       "additionalIncome": [
@@ -35,6 +35,51 @@
         }
       ],
       "expenses": [
+        {
+          "id": "2026-07-balance-reconciliation-groceries-001",
+          "amount": 6.4,
+          "note": "Groceries",
+          "noteTranslations": {
+            "en": "Groceries",
+            "ru": "Продукты"
+          },
+          "date": "2026-07-28",
+          "category": "Food",
+          "source": "chat",
+          "paymentMethod": "debit",
+          "synthetic": true,
+          "backfillBatch": "2026-07-debit-balance-reconciliation-2026-07-28"
+        },
+        {
+          "id": "2026-07-balance-reconciliation-snack-001",
+          "amount": 3.2,
+          "note": "Snack",
+          "noteTranslations": {
+            "en": "Snack",
+            "ru": "Перекус"
+          },
+          "date": "2026-07-28",
+          "category": "Food",
+          "source": "chat",
+          "paymentMethod": "debit",
+          "synthetic": true,
+          "backfillBatch": "2026-07-debit-balance-reconciliation-2026-07-28"
+        },
+        {
+          "id": "2026-07-balance-reconciliation-soft-drink-001",
+          "amount": 3.29,
+          "note": "Soft drink",
+          "noteTranslations": {
+            "en": "Soft drink",
+            "ru": "Безалкогольный напиток"
+          },
+          "date": "2026-07-28",
+          "category": "Food",
+          "source": "chat",
+          "paymentMethod": "debit",
+          "synthetic": true,
+          "backfillBatch": "2026-07-debit-balance-reconciliation-2026-07-28"
+        },
         {
           "id": "2026-07-food-004",
           "amount": 7,

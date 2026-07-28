@@ -51,7 +51,7 @@ test("server-renders the current finance tracker", async () => {
   assert.match(html, /class="payment-badge credit-repaid"/);
   assert.doesNotMatch(html, /class="payment-badge credit-outstanding"/);
   assert.match(html, /Анализ расходов/);
-  assert.match(html, /Самая крупная статья расходов: Еда, 583,18/);
+  assert.match(html, /Самая крупная статья расходов: Еда, 596,07/);
   assert.match(html, /Устройства Apple/);
   assert.match(html, /iPad/);
   assert.match(html, /Обновлено 28 июля 2026 г\./);
@@ -88,7 +88,7 @@ test("server-renders the current finance tracker", async () => {
   assert.match(html, /<details[^>]*class="expense-table recurring-expenses"/);
   assert.match(html, /<summary class="expense-table-summary"/);
   assert.match(html, /Разовые расходы/);
-  assert.match(html, /1.{0,4}077,92.{0,8}€/);
+  assert.match(html, /1.{0,4}090,81.{0,8}€/);
   assert.match(html, /Плановые ежемесячные расходы/);
   assert.equal((html.match(/Плановые ежемесячные расходы/g) ?? []).length, 1);
   assert.doesNotMatch(html, /Expected monthly total/);
@@ -106,15 +106,15 @@ test("server-renders the current finance tracker", async () => {
   assert.match(html, /Alita Spritz Limon/);
   assert.match(html, /Холодный персиковый чай/);
   assert.match(html, /Bočmano Ūsai IPA, 0,4 л/);
-  assert.match(html, /2.{0,4}014,39.{0,8}€/);
-  assert.match(html, /145,61.{0,8}€/);
-  assert.match(html, /-54,39.{0,8}€/);
+  assert.match(html, /2.{0,4}027,28.{0,8}€/);
+  assert.match(html, /132,72.{0,8}€/);
+  assert.match(html, /-67,28.{0,8}€/);
   assert.match(html, /ДОПОЛНИТЕЛЬНЫЕ ДОХОДЫ/);
   assert.match(html, /\+.{0,8}10,00.{0,8}€/);
   assert.match(html, /ОБЩИЙ ДОХОД/);
   assert.match(html, /2.{0,4}160,00.{0,8}€/);
-  assert.match(html, /Учтено расходов: 55/);
-  assert.match(html, /93%<!-- --> <!-- -->ПОТРАЧЕНО|93% ПОТРАЧЕНО/);
+  assert.match(html, /Учтено расходов: 58/);
+  assert.match(html, /94%<!-- --> <!-- -->ПОТРАЧЕНО|94% ПОТРАЧЕНО/);
   assert.match(html, /Без сохранения накоплений/);
   assert.match(html, /С сохранением накоплений/);
   assert.match(html, /class="pace-limit pace-limit-all"/);
@@ -129,7 +129,7 @@ test("server-renders the current finance tracker", async () => {
     Math.round((cycleEndUtc - todayUtc) / 86400000),
     1,
   );
-  const renderedAllFundsPace = Math.round(145.61 / renderedRemainingDays);
+  const renderedAllFundsPace = Math.round(132.72 / renderedRemainingDays);
   const renderedSavingsSafePace = 0;
   assert.match(
     html,
@@ -179,7 +179,7 @@ test("server-renders the current finance tracker", async () => {
     html,
     new RegExp(`${renderedSavingsSafePace}.{0,8}€/день · Накопления сохранены`),
   );
-  assert.match(html, /allowance-guide-all" style="--guide-top:84\.04%"/);
+  assert.match(html, /allowance-guide-all" style="--guide-top:84\.72%"/);
   assert.match(html, /allowance-guide-safe" style="--guide-top:91\.67%"/);
   assert.doesNotMatch(html, /Your site is taking shape|Building your site/);
 });
@@ -278,10 +278,46 @@ test("keeps database history and translations aligned", async () => {
     frames: ["kinance.png", "kinance-frame-2.png"],
   });
   assert.equal(current.updatedAt, "2026-07-28");
-  assert.equal(current.revision, 38);
+  assert.equal(current.revision, 39);
   assert.equal(current.savingsGoal, 200);
-  assert.equal(current.expenses.length, 55);
+  assert.equal(current.expenses.length, 58);
   assert.deepEqual(current.expenses.slice(0, 5), [
+    {
+      id: "2026-07-balance-reconciliation-groceries-001",
+      amount: 6.4,
+      note: "Groceries",
+      noteTranslations: { en: "Groceries", ru: "Продукты" },
+      date: "2026-07-28",
+      category: "Food",
+      source: "chat",
+      paymentMethod: "debit",
+      synthetic: true,
+      backfillBatch: "2026-07-debit-balance-reconciliation-2026-07-28",
+    },
+    {
+      id: "2026-07-balance-reconciliation-snack-001",
+      amount: 3.2,
+      note: "Snack",
+      noteTranslations: { en: "Snack", ru: "Перекус" },
+      date: "2026-07-28",
+      category: "Food",
+      source: "chat",
+      paymentMethod: "debit",
+      synthetic: true,
+      backfillBatch: "2026-07-debit-balance-reconciliation-2026-07-28",
+    },
+    {
+      id: "2026-07-balance-reconciliation-soft-drink-001",
+      amount: 3.29,
+      note: "Soft drink",
+      noteTranslations: { en: "Soft drink", ru: "Безалкогольный напиток" },
+      date: "2026-07-28",
+      category: "Food",
+      source: "chat",
+      paymentMethod: "debit",
+      synthetic: true,
+      backfillBatch: "2026-07-debit-balance-reconciliation-2026-07-28",
+    },
     {
       id: "2026-07-food-004",
       amount: 7,
@@ -301,40 +337,6 @@ test("keeps database history and translations aligned", async () => {
       category: "Food",
       source: "chat",
       paymentMethod: "debit",
-    },
-    {
-      id: "2026-07-food-002",
-      amount: 5.5,
-      note: "Food purchase",
-      noteTranslations: { en: "Food purchase", ru: "Покупка еды" },
-      date: "2026-07-28",
-      category: "Food",
-      source: "chat",
-      paymentMethod: "debit",
-    },
-    {
-      id: "2026-07-food-001",
-      amount: 2.39,
-      note: "Food purchase",
-      noteTranslations: { en: "Food purchase", ru: "Покупка еды" },
-      date: "2026-07-28",
-      category: "Food",
-      source: "chat",
-      paymentMethod: "debit",
-    },
-    {
-      id: "2026-07-asahi-super-dry-001",
-      amount: 3.98,
-      note: "Asahi Super Dry beer, 2 cans",
-      noteTranslations: {
-        en: "Asahi Super Dry beer, 2 cans",
-        ru: "Пиво Asahi Super Dry, 2 банки",
-      },
-      date: "2026-07-27",
-      category: "Alcohol & nightlife",
-      source: "receipt",
-      paymentMethod: "debit",
-      transactionTime: "19:28:10",
     },
   ]);
   assert.deepEqual(strengthDatabase, {
@@ -845,9 +847,23 @@ test("keeps database history and translations aligned", async () => {
     assert.ok(expense.date >= "2026-07-12");
     assert.ok(expense.date <= "2026-07-25");
   }
-  assert.equal(spentCents, 201439);
+  const balanceReconciliation = current.expenses.filter(
+    (expense) =>
+      expense.backfillBatch === "2026-07-debit-balance-reconciliation-2026-07-28",
+  );
+  assert.equal(balanceReconciliation.length, 3);
+  assert.equal(sumCents(balanceReconciliation), 1289);
+  for (const expense of balanceReconciliation) {
+    assert.equal(expense.synthetic, true);
+    assert.equal(expense.source, "chat");
+    assert.equal(expense.paymentMethod, "debit");
+    assert.equal(expense.date, "2026-07-28");
+    assert.equal(expense.category, "Food");
+    assert.equal(expense.recurring, undefined);
+  }
+  assert.equal(spentCents, 202728);
   assert.equal(recurringCents, 93647);
-  assert.equal(oneTimeCents, 107792);
+  assert.equal(oneTimeCents, 109081);
   assert.equal(recurringCents + oneTimeCents, spentCents);
   const additionalIncomeCents = sumCents(current.additionalIncome);
   const totalIncomeCents = current.salary * 100 + additionalIncomeCents;
@@ -868,8 +884,8 @@ test("keeps database history and translations aligned", async () => {
   ]);
   const cashRemainingCents = totalIncomeCents - spentCents;
   const safeRemainingCents = cashRemainingCents - current.savingsGoal * 100;
-  assert.equal(cashRemainingCents, 14561);
-  assert.equal(safeRemainingCents, -5439);
+  assert.equal(cashRemainingCents, 13272);
+  assert.equal(safeRemainingCents, -6728);
   const calendarDay = (dateKey) => {
     const [year, month, day] = dateKey.split("-").map(Number);
     return Date.UTC(year, month - 1, day) / 86400000;
@@ -880,9 +896,9 @@ test("keeps database history and translations aligned", async () => {
   assert.equal(totalCycleDays, 33);
   assert.equal(elapsedCycleDays, 19);
   assert.equal(remainingDaysAfterToday, 14);
-  assert.equal(Math.round((cashRemainingCents / 100) / remainingDaysAfterToday), 10);
+  assert.equal(Math.round((cashRemainingCents / 100) / remainingDaysAfterToday), 9);
   assert.equal(Math.round(Math.max(safeRemainingCents / 100, 0) / remainingDaysAfterToday), 0);
-  assert.equal(Math.round((spentCents / totalIncomeCents) * 100), 93);
+  assert.equal(Math.round((spentCents / totalIncomeCents) * 100), 94);
 
   const dailyOneTimeCents = new Map();
   for (const expense of current.expenses.filter((expense) => !expense.recurring)) {
@@ -902,21 +918,21 @@ test("keeps database history and translations aligned", async () => {
     const normalized = Math.min(Math.max(value / chartMaximum, 0), 1);
     return (8 + (1 - normalized) * (168 - 8 - 14)) / 168;
   };
-  assert.equal(todaySpentEuros, 20.16);
+  assert.equal(todaySpentEuros, 33.05);
   assert.equal(chartTop(0), (168 - 14) / 168);
   assert.ok(todaySpentEuros > allFundsPaceEuros);
   assert.ok(chartTop(todaySpentEuros) < chartTop(allFundsPaceEuros));
 
   const salaryHistoryScenario = [
-    { salary: 2150, additionalIncome: 10, savingsGoal: 200, spent: 2014.39 },
-    { salary: 2750, additionalIncome: 0, savingsGoal: 200, spent: 2014.39 },
+    { salary: 2150, additionalIncome: 10, savingsGoal: 200, spent: 2027.28 },
+    { salary: 2750, additionalIncome: 0, savingsGoal: 200, spent: 2027.28 },
   ].map((cycle) => ({
     cashRemaining: Math.round((cycle.salary + cycle.additionalIncome - cycle.spent) * 100) / 100,
     safeRemaining: Math.round((cycle.salary + cycle.additionalIncome - cycle.spent - cycle.savingsGoal) * 100) / 100,
     usedPercent: (cycle.spent / (cycle.salary + cycle.additionalIncome)) * 100,
   }));
-  assert.deepEqual(salaryHistoryScenario.map(({ cashRemaining }) => cashRemaining), [145.61, 735.61]);
-  assert.deepEqual(salaryHistoryScenario.map(({ safeRemaining }) => safeRemaining), [-54.39, 535.61]);
+  assert.deepEqual(salaryHistoryScenario.map(({ cashRemaining }) => cashRemaining), [132.72, 722.72]);
+  assert.deepEqual(salaryHistoryScenario.map(({ safeRemaining }) => safeRemaining), [-67.28, 522.72]);
   assert.ok(salaryHistoryScenario[1].usedPercent < salaryHistoryScenario[0].usedPercent);
   for (const expense of current.expenses) {
     assert.equal(typeof expense.noteTranslations?.en, "string");

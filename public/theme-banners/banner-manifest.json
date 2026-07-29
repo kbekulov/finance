@@ -1,8 +1,8 @@
 {
   "timezone": "Europe/Vilnius",
-  "lastGeneratedOn": "2026-07-28",
-  "topic": "Two everyday food purchases",
-  "queryVersion": 12,
+  "lastGeneratedOn": "2026-07-29",
+  "topic": "Playing and listening to music",
+  "queryVersion": 13,
   "frames": [
     "kinance.png",
     "kinance-frame-2.png"

@@ -17,8 +17,8 @@
       },
       "currency": "EUR",
       "timezone": "Europe/Vilnius",
-      "updatedAt": "2026-07-28",
-      "revision": 41,
+      "updatedAt": "2026-07-29",
+      "revision": 42,
       "salary": 2150,
       "savingsGoal": 200,
       "additionalIncome": [
@@ -35,6 +35,19 @@
         }
       ],
       "expenses": [
+        {
+          "id": "2026-07-music-001",
+          "amount": 10,
+          "note": "Music",
+          "noteTranslations": {
+            "en": "Music",
+            "ru": "Музыка"
+          },
+          "date": "2026-07-29",
+          "category": "Luxury purchases",
+          "source": "chat",
+          "paymentMethod": "debit"
+        },
         {
           "id": "2026-07-gift-001",
           "amount": 13.98,

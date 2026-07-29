@@ -237,8 +237,9 @@ const COPY = {
     thisCycleTotal: "This cycle",
     dailyExpenseSeries: "Debit spending",
     creditExpenseSeries: "Credit spending",
+    weightSeries: "Body weight",
     relativeStrengthSeries: "Relative strength",
-    dailySpendingChartLabel: "Stacked debit and credit spending bars with relative strength and daily allowance guides",
+    dailySpendingChartLabel: "Stacked debit and credit spending bars with body-weight and relative-strength lines, plus daily allowance guides",
     chartDaySpent: "{amount} spent on {date}",
     strengthTitle: "RELATIVE STRENGTH",
     strengthScore: "CURRENT SCORE",
@@ -335,8 +336,9 @@ const COPY = {
     thisCycleTotal: "За текущий цикл",
     dailyExpenseSeries: "Расходы по дебету",
     creditExpenseSeries: "Расходы по кредиту",
+    weightSeries: "Вес тела",
     relativeStrengthSeries: "Относительная сила",
-    dailySpendingChartLabel: "Составные столбцы расходов по дебету и кредиту, график относительной силы и линии дневных лимитов",
+    dailySpendingChartLabel: "Составные столбцы расходов по дебету и кредиту, графики веса и относительной силы, а также линии дневных лимитов",
     chartDaySpent: "Расходы за {date}: {amount}",
     strengthTitle: "ОТНОСИТЕЛЬНАЯ СИЛА",
     strengthScore: "ТЕКУЩИЙ БАЛЛ",
@@ -651,6 +653,34 @@ function dailyStrengthPoints(
   return [...dailyBest.entries()]
     .sort(([left], [right]) => left.localeCompare(right))
     .map(([date, score]) => ({ x: dateFromKey(date).getTime(), y: score }));
+}
+
+function dailyWeightPoints(
+  entries: StrengthEntry[],
+  period: MonthRecord["period"],
+  asOfDate: string,
+) {
+  const dailyLatest = new Map<string, number>();
+  for (const entry of entries) {
+    if (entry.date < period.start || entry.date > period.end || entry.date > asOfDate) continue;
+    if (!Number.isFinite(entry.weightKg)) continue;
+    dailyLatest.set(entry.date, entry.weightKg);
+  }
+  return [...dailyLatest.entries()]
+    .sort(([left], [right]) => left.localeCompare(right))
+    .map(([date, weight]) => ({ x: dateFromKey(date).getTime(), y: weight }));
+}
+
+function weightAxisBounds(points: Array<{ x: number; y: number }>) {
+  if (!points.length) return { min: 0, max: 1 };
+  const values = points.map(({ y }) => y);
+  const minimum = Math.min(...values);
+  const maximum = Math.max(...values);
+  const padding = Math.max((maximum - minimum) * 0.2, 0.5);
+  return {
+    min: Math.max(Math.floor((minimum - padding) * 10) / 10, 0),
+    max: Math.ceil((maximum + padding) * 10) / 10,
+  };
 }
 
 const DAILY_CHART_HEIGHT = 168;
@@ -1046,6 +1076,7 @@ export default function Home() {
       const themeStyles = getComputedStyle(document.documentElement);
       const accent = themeStyles.getPropertyValue("--chart-accent").trim() || "#5ac8fa";
       const creditAccent = themeStyles.getPropertyValue("--red").trim() || "#ff453a";
+      const weightAccent = themeStyles.getPropertyValue("--weight-accent").trim() || "#f0a86b";
       const strengthAccent = themeStyles.getPropertyValue("--strength-accent").trim() || "#bf5af2";
       const spendingPoints = dailyExpensePoints(
         data.expenses.filter((expense) => !expense.recurring),
@@ -1069,6 +1100,12 @@ export default function Home() {
         selectedMonth.period,
         todayKey,
       );
+      const weightPoints = dailyWeightPoints(
+        STRENGTH_ENTRIES,
+        selectedMonth.period,
+        todayKey,
+      );
+      const weightBounds = weightAxisBounds(weightPoints);
       const drawChartMaximum = Math.max(
         ...spendingPoints.map(({ y }) => y),
         allFundsDailyPace,
@@ -1105,15 +1142,21 @@ export default function Home() {
         series: [
           { name: copy.dailyExpenseSeries, type: "column", data: debitPoints },
           { name: copy.creditExpenseSeries, type: "column", data: creditPoints },
+          { name: copy.weightSeries, type: "line", data: weightPoints },
           { name: copy.relativeStrengthSeries, type: "line", data: strengthPoints },
         ],
-        colors: [accent, creditAccent, strengthAccent],
+        colors: [accent, creditAccent, weightAccent, strengthAccent],
         plotOptions: {
           bar: { columnWidth: "48%", borderRadius: 4, borderRadiusApplication: "end" },
         },
-        stroke: { curve: ["straight", "straight", "smooth"], width: [0, 0, 2.5], lineCap: "round" },
-        fill: { opacity: [0.68, 0.84, 1] },
-        markers: { size: [0, 0, 3.5], strokeWidth: 0, hover: { sizeOffset: 2 } },
+        stroke: {
+          curve: ["straight", "straight", "smooth", "smooth"],
+          width: [0, 0, 1.5, 2.5],
+          dashArray: [0, 0, 4, 0],
+          lineCap: "round",
+        },
+        fill: { opacity: [0.68, 0.84, 0.62, 1] },
+        markers: { size: [0, 0, 2.5, 3.5], strokeWidth: 0, hover: { sizeOffset: 2 } },
         dataLabels: { enabled: false },
         grid: {
           show: false,
@@ -1127,6 +1170,7 @@ export default function Home() {
         xaxis: { type: "datetime" },
         yaxis: [
           { seriesName: [copy.dailyExpenseSeries, copy.creditExpenseSeries], min: 0, max: drawChartMaximum, show: false },
+          { seriesName: copy.weightSeries, min: weightBounds.min, max: weightBounds.max, opposite: true, show: false },
           { seriesName: copy.relativeStrengthSeries, min: 1, max: 10, opposite: true, show: false },
         ],
         tooltip: { enabled: false },
@@ -1142,6 +1186,7 @@ export default function Home() {
   }, [
     copy.dailyExpenseSeries,
     copy.creditExpenseSeries,
+    copy.weightSeries,
     copy.relativeStrengthSeries,
     allFundsDailyPace,
     data.expenses,
@@ -1374,7 +1419,7 @@ export default function Home() {
               <small>{latestStrengthRank?.abbreviation ?? "—"}</small>
             </button>
             <div className="strength-metrics" aria-label={copy.strengthLatestMetrics}>
-              <div><span>{copy.strengthWeight}</span><strong>{latestStrength?.weightKg ?? 0}<small>{copy.strengthWeightUnit}</small></strong></div>
+              <div className="weight-metric"><span>{copy.strengthWeight}</span><strong>{latestStrength?.weightKg ?? 0}<small>{copy.strengthWeightUnit}</small></strong></div>
               <div><span>{copy.strengthPullUps}</span><strong>{latestStrength?.maxPullUpsSingleSet ?? 0}<small className="strength-target" aria-label={fillTemplate(copy.strengthTarget, { value: latestStrengthTargets?.pullUps ?? "—" })}><span aria-hidden="true">/</span> {latestStrengthTargets?.pullUps ?? "—"}</small></strong></div>
               <div><span>{copy.strengthPushUps}</span><strong>{latestStrength?.maxPushUpsSingleSet ?? 0}<small className="strength-target" aria-label={fillTemplate(copy.strengthTarget, { value: latestStrengthTargets?.pushUps ?? "—" })}><span aria-hidden="true">/</span> {latestStrengthTargets?.pushUps ?? "—"}</small></strong></div>
             </div>

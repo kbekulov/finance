@@ -30,6 +30,7 @@
   --display-font: var(--font-family);
   --banner-fade: #050506;
   --chart-accent: #5ac8fa;
+  --weight-accent: #f0a86b;
   --strength-accent: #bf5af2;
   --focus-ring: #4ba3ff;
   --timeline-start: #0a84ff;
@@ -58,6 +59,7 @@
   --cyan: #70d4ef;
   --banner-fade: #060710;
   --chart-accent: #68c9f2;
+  --weight-accent: #8fa7c8;
   --strength-accent: #ca7cf2;
   --focus-ring: #8c9dff;
   --timeline-start: #6f9cff;
@@ -97,6 +99,7 @@
   --display-font: Georgia, "Times New Roman", serif;
   --banner-fade: #e7eff1;
   --chart-accent: #526f78;
+  --weight-accent: #927653;
   --strength-accent: #715f86;
   --focus-ring: #365f6b;
   --timeline-start: #4b7480;
@@ -131,6 +134,7 @@
   --display-font: Georgia, "Times New Roman", serif;
   --banner-fade: #080713;
   --chart-accent: #ff5b82;
+  --weight-accent: #78a7c9;
   --strength-accent: #f2b94b;
   --focus-ring: #ff7899;
   --timeline-start: #c91d49;
@@ -1190,6 +1194,21 @@ main::before {
   letter-spacing: 0.045em;
   line-height: 1.25;
   text-align: center;
+}
+
+.strength-metrics > .weight-metric > span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  color: var(--weight-accent);
+}
+
+.strength-metrics > .weight-metric > span::before {
+  width: 11px;
+  height: 2px;
+  background: repeating-linear-gradient(90deg, currentColor 0 3px, transparent 3px 5px);
+  content: "";
 }
 
 .strength-metrics strong {

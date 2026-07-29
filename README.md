@@ -381,11 +381,14 @@ Spending series:
 - Debit plus credit equals the true daily total.
 - Historical credit remains red whether its `creditStatus` is `outstanding` or `repaid`. Repayment status affects only the outstanding-credit alert.
 
-Relative Strength series:
+Fitness series:
 
-- Overlay the best score for each day as a smooth line.
-- Use a separate hidden 1-to-10 y-axis.
-- Do not place debit, credit, or other finance-series legends inside the Relative Strength card. That card identifies only its own line and methodology.
+- Overlay the best Relative Strength score for each day as a smooth line.
+- Overlay the latest recorded body weight for each day as a thinner, softly dashed, theme-aware line on a separate hidden kilogram axis. Give constant or tightly grouped weights at least 0.5 kg of vertical padding above and below so the line remains visible.
+- Declare and render the weight series before Relative Strength so it stays at a lower paint order when the lines cross. Keep Relative Strength visually dominant with its thicker solid line and larger markers.
+- Use a separate hidden 1-to-10 y-axis for Relative Strength.
+- Do not place debit, credit, or other finance-series legends inside the Relative Strength card. That card identifies only the two fitness lines and their methodology.
+- Connect the weight line to the compact weight metric using the same accent and dashed key, without adding another bulky legend or chart wrapper.
 
 Allowance guides:
 
@@ -398,7 +401,7 @@ Allowance guides:
 - Keep both guides within the spending y-axis range.
 - Calculate both guide positions from their real euro values using the exact chart height and top/bottom plot padding used by ApexCharts. A zero-euro guide must share the bar baseline, and a bar above an allowance must visibly cross its guide. Never move a financial guide to avoid a label collision; adjust only label presentation when needed.
 
-The visible chart has no numeric axes, grid, built-in legend, or tooltip. Recalculate it when cycle, theme, expenses, savings, remaining days, or strength history changes. Disable animation for reduced motion and retain a localized accessible label describing all series.
+The visible chart has no numeric axes, grid, built-in legend, or tooltip. Recalculate it when cycle, theme, expenses, savings, remaining days, or strength history changes. Disable animation for reduced motion and retain a localized accessible label describing spending, body weight, Relative Strength, and allowance guides.
 
 Clicking or tapping a debit or credit bar reveals one compact theme-aware readout inside the chart with the localized date and that day's total debit-plus-credit spending. Keep it visible until another bar is selected or the user clicks elsewhere. The readout must have a restrained surface, clear hierarchy, no glow, no permanent chart clutter, and an `aria-live` status announcement.
 

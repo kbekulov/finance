@@ -131,6 +131,11 @@ test("server-renders the current finance tracker", async () => {
   );
   const renderedAllFundsPace = Math.round(112.96 / renderedRemainingDays);
   const renderedSavingsSafePace = 0;
+  const renderedChartMaximum = 109.74 * 1.08;
+  const renderedAllFundsGuideTop = Math.round((
+    (8 + (1 - Math.min(Math.max((112.96 / renderedRemainingDays) / renderedChartMaximum, 0), 1)) * (168 - 8 - 14))
+    / 168
+  ) * 10000) / 100;
   assert.match(
     html,
     new RegExp(`${renderedAllFundsPace}.{0,12}€(?:<!-- --> <!-- -->)?в день`),
@@ -156,7 +161,7 @@ test("server-renders the current finance tracker", async () => {
     /category-icons\/debt-rpg\.png/,
   );
   assert.doesNotMatch(html, /class="expense-monogram"/);
-  assert.match(html, /aria-label="Составные столбцы расходов по дебету и кредиту, график относительной силы и линии дневных лимитов"/);
+  assert.match(html, /aria-label="Составные столбцы расходов по дебету и кредиту, графики веса и относительной силы, а также линии дневных лимитов"/);
   assert.match(html, /class="strength-panel"/);
   assert.match(html, /ОТНОСИТЕЛЬНАЯ СИЛА/);
   assert.match(html, /<strong>5,0<\/strong>/);
@@ -179,7 +184,10 @@ test("server-renders the current finance tracker", async () => {
     html,
     new RegExp(`${renderedSavingsSafePace}.{0,8}€/день · Накопления сохранены`),
   );
-  assert.match(html, /allowance-guide-all" style="--guide-top:85\.75%"/);
+  assert.match(
+    html,
+    new RegExp(`allowance-guide-all" style="--guide-top:${renderedAllFundsGuideTop}%"`),
+  );
   assert.match(html, /allowance-guide-safe" style="--guide-top:91\.67%"/);
   assert.doesNotMatch(html, /Your site is taking shape|Building your site/);
 });
@@ -266,6 +274,8 @@ test("keeps database history and translations aligned", async () => {
   assert.match(manual, /Spending insight` disclosure between the Kinance brand and the theme selector/);
   assert.match(manual, /clicking anywhere outside it or pressing Escape closes it/);
   assert.match(manual, /Do not place debit, credit, or other finance-series legends inside the Relative Strength card/);
+  assert.match(manual, /render the weight series before Relative Strength/);
+  assert.match(manual, /at least 0\.5 kg of vertical padding above and below/);
   assert.match(manual, /Keep it separate from `salary` so the fixed salary and salary history remain truthful/);
   assert.match(manual, /Russian is the default language when no preference exists/);
   assert.match(manual, /`kinance_language` cookie/);
@@ -988,9 +998,9 @@ test("keeps database history and translations aligned", async () => {
   assert.match(index, /<html lang="ru">/);
   assert.match(index, /<meta name="description" content="Kinance" \/>/);
   assert.doesNotMatch(index, /property="og:|name="twitter:/);
-  assert.match(index, /styles\.css\?v=51/);
+  assert.match(index, /styles\.css\?v=52/);
   assert.match(index, /public\/vendor\/apexcharts\.min\.js\?v=21/);
-  assert.match(index, /script\.js\?v=60/);
+  assert.match(index, /script\.js\?v=61/);
   assert.match(index, /id="chart-day-detail"[^>]*role="status"[^>]*aria-live="polite"[^>]*hidden/);
   assert.match(index, /id="strength-pull-ups-target"/);
   assert.match(index, /id="strength-push-ups-target"/);
@@ -1137,6 +1147,7 @@ test("keeps database history and translations aligned", async () => {
   assert.doesNotMatch(styles, /\.breakdown-item\s*\{[^}]*background:/s);
   assert.doesNotMatch(styles, /\.expense-monogram/);
   assert.match(styles, /--chart-accent:\s*#5ac8fa/);
+  assert.match(styles, /--weight-accent:\s*#f0a86b/);
   assert.match(styles, /--focus-ring:\s*#4ba3ff/);
   assert.match(styles, /--timeline-start:\s*#0a84ff/);
   assert.match(styles, /--bar-divider:\s*#111113/);
@@ -1155,13 +1166,27 @@ test("keeps database history and translations aligned", async () => {
   assert.doesNotMatch(styles, /var\(--accent\)/);
   assert.match(styles, /data-current-theme="kinance-moon"/);
   assert.match(styles, /:root\[data-theme="nier-automata"\][^{]*\{[^}]*--chart-accent:\s*#526f78/s);
+  assert.match(styles, /:root\[data-theme="nier-automata"\][^{]*\{[^}]*--weight-accent:\s*#927653/s);
   assert.match(styles, /:root\[data-theme="tohsaka-rin"\][^{]*\{[^}]*--chart-accent:\s*#ff5b82/s);
+  assert.match(styles, /:root\[data-theme="tohsaka-rin"\][^{]*\{[^}]*--weight-accent:\s*#78a7c9/s);
   assert.match(script, /height:\s*DAILY_CHART_HEIGHT/);
-  assert.match(script, /stroke:\s*\{\s*curve:\s*\["straight",\s*"straight",\s*"smooth"\],\s*width:\s*\[0,\s*0,\s*2\.5\]/);
+  assert.match(script, /curve:\s*\["straight",\s*"straight",\s*"smooth",\s*"smooth"\]/);
+  assert.match(script, /width:\s*\[0,\s*0,\s*1\.5,\s*2\.5\]/);
+  assert.match(script, /dashArray:\s*\[0,\s*0,\s*4,\s*0\]/);
   assert.match(script, /allowance-guide-all-label/);
   assert.match(script, /allowance-guide-safe-label/);
   assert.match(page, /height:\s*DAILY_CHART_HEIGHT/);
-  assert.match(page, /stroke:\s*\{\s*curve:\s*\["straight",\s*"straight",\s*"smooth"\],\s*width:\s*\[0,\s*0,\s*2\.5\]/);
+  assert.match(page, /curve:\s*\["straight",\s*"straight",\s*"smooth",\s*"smooth"\]/);
+  assert.match(page, /width:\s*\[0,\s*0,\s*1\.5,\s*2\.5\]/);
+  assert.match(page, /dashArray:\s*\[0,\s*0,\s*4,\s*0\]/);
+  assert.match(
+    script,
+    /\{ name: t\("weightSeries"\), type: "line", data: weightPoints \},\s*\{ name: t\("relativeStrengthSeries"\), type: "line", data: strengthPoints \}/,
+  );
+  assert.match(
+    page,
+    /\{ name: copy\.weightSeries, type: "line", data: weightPoints \},\s*\{ name: copy\.relativeStrengthSeries, type: "line", data: strengthPoints \}/,
+  );
   for (const source of [script, page]) {
     assert.match(source, /relativeStrengthScore/);
     assert.match(source, /relativeStrengthTargets/);
@@ -1169,6 +1194,12 @@ test("keeps database history and translations aligned", async () => {
     assert.match(source, /STRENGTH_RANKS/);
     assert.match(source, /threshold:\s*9\.8,\s*abbreviation:\s*"Lt\. Gen\."/);
     assert.match(source, /dailyStrengthPoints/);
+    assert.match(source, /dailyWeightPoints/);
+    assert.match(source, /weightAxisBounds/);
+    assert.match(source, /weightSeries/);
+    assert.match(source, /--weight-accent/);
+    assert.match(source, /padding = Math\.max\(\(maximum - minimum\) \* 0\.2, 0\.5\)/);
+    assert.match(source, /seriesName:\s*(?:t\("weightSeries"\)|copy\.weightSeries)/);
     assert.match(source, /strength-history\.json/);
     assert.match(source, /type:\s*"column"/);
     assert.match(source, /type:\s*"line"/);
@@ -1213,6 +1244,8 @@ test("keeps database history and translations aligned", async () => {
   assert.match(styles, /\.strength-rank\s*\{[^}]*display:\s*flex[^}]*align-items:\s*center[^}]*width:\s*100%/s);
   assert.match(styles, /\.strength-rank-icon\s*\{[^}]*width:\s*76px[^}]*height:\s*76px[^}]*background-size:\s*500% 400%[^}]*image-rendering:\s*pixelated/s);
   assert.match(styles, /\.strength-metrics > div\s*\{[^}]*justify-items:\s*center/s);
+  assert.match(styles, /\.strength-metrics > \.weight-metric > span\s*\{[^}]*color:\s*var\(--weight-accent\)/s);
+  assert.match(styles, /\.strength-metrics > \.weight-metric > span::before\s*\{[^}]*repeating-linear-gradient/s);
   assert.match(styles, /\.strength-metrics > div > span\s*\{[^}]*text-align:\s*center/s);
   assert.match(styles, /\.strength-metrics strong\s*\{[^}]*justify-content:\s*center/s);
   assert.match(styles, /\.strength-rank > small\s*\{[^}]*align-self:\s*stretch[^}]*width:\s*100%[^}]*margin-top:\s*-14px[^}]*text-align:\s*center/s);
@@ -1254,7 +1287,7 @@ test("keeps database history and translations aligned", async () => {
     assert.match(source, /type:\s*"datetime"/);
     assert.match(source, /sparkline:\s*\{\s*enabled:\s*true/);
     assert.match(source, /tooltip:\s*\{\s*enabled:\s*false/);
-    assert.match(source, /fill:\s*\{\s*opacity:\s*\[0\.68,\s*0\.84,\s*1\]/);
+    assert.match(source, /fill:\s*\{\s*opacity:\s*\[0\.68,\s*0\.84,\s*0\.62,\s*1\]/);
     assert.doesNotMatch(source, /dropShadow/);
     assert.match(source, /data\.expenses\.filter\(\(expense\) => !expense\.recurring\)/);
     assert.match(source, /paymentMethod && \(expense\.paymentMethod \?\? "debit"\) !== paymentMethod/);

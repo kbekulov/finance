@@ -18,7 +18,7 @@
       "currency": "EUR",
       "timezone": "Europe/Vilnius",
       "updatedAt": "2026-07-29",
-      "revision": 42,
+      "revision": 43,
       "salary": 2150,
       "savingsGoal": 200,
       "additionalIncome": [
@@ -35,6 +35,19 @@
         }
       ],
       "expenses": [
+        {
+          "id": "2026-07-cocoa-001",
+          "amount": 1.8,
+          "note": "Cocoa",
+          "noteTranslations": {
+            "en": "Cocoa",
+            "ru": "Какао"
+          },
+          "date": "2026-07-29",
+          "category": "Food",
+          "source": "chat",
+          "paymentMethod": "debit"
+        },
         {
           "id": "2026-07-music-001",
           "amount": 10,

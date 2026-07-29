@@ -18,7 +18,7 @@
       "currency": "EUR",
       "timezone": "Europe/Vilnius",
       "updatedAt": "2026-07-29",
-      "revision": 44,
+      "revision": 45,
       "salary": 2150,
       "savingsGoal": 200,
       "additionalIncome": [
@@ -35,6 +35,19 @@
         }
       ],
       "expenses": [
+        {
+          "id": "2026-07-drink-006",
+          "amount": 3.5,
+          "note": "Drink",
+          "noteTranslations": {
+            "en": "Drink",
+            "ru": "Напиток"
+          },
+          "date": "2026-07-29",
+          "category": "Alcohol & nightlife",
+          "source": "chat",
+          "paymentMethod": "debit"
+        },
         {
           "id": "2026-07-soup-001",
           "amount": 2.4,

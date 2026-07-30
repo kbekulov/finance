@@ -17,11 +17,22 @@
       },
       "currency": "EUR",
       "timezone": "Europe/Vilnius",
-      "updatedAt": "2026-07-29",
-      "revision": 47,
+      "updatedAt": "2026-07-30",
+      "revision": 48,
       "salary": 2150,
       "savingsGoal": 200,
       "additionalIncome": [
+        {
+          "id": "2026-07-side-income-002",
+          "amount": 17.2,
+          "note": "Side gig income",
+          "noteTranslations": {
+            "en": "Side gig income",
+            "ru": "Доход от подработки"
+          },
+          "date": "2026-07-30",
+          "source": "chat"
+        },
         {
           "id": "2026-07-side-income-001",
           "amount": 10,

@@ -18,7 +18,7 @@
       "currency": "EUR",
       "timezone": "Europe/Vilnius",
       "updatedAt": "2026-07-30",
-      "revision": 48,
+      "revision": 49,
       "salary": 2150,
       "savingsGoal": 200,
       "additionalIncome": [
@@ -46,6 +46,19 @@
         }
       ],
       "expenses": [
+        {
+          "id": "2026-07-bus-ticket-001",
+          "amount": 3.69,
+          "note": "Bus ticket",
+          "noteTranslations": {
+            "en": "Bus ticket",
+            "ru": "Билет на автобус"
+          },
+          "date": "2026-07-30",
+          "category": "Transport & Travel",
+          "source": "chat",
+          "paymentMethod": "debit"
+        },
         {
           "id": "2026-07-asahi-super-dry-002",
           "amount": 6.22,

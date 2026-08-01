@@ -38,7 +38,7 @@ Use this sequence for every mutation:
    - finance data change: update the target cycle's `updatedAt` and increment its `revision`;
    - fitness data change: update the strength root `updatedAt` and increment its `revision`;
    - visible UI copy: update English, Russian, and accessibility text in both implementations;
-   - new expense: refresh the Kinance banner pair only when no pair has yet been generated on that Vilnius calendar day, as specified under Themes and visual assets.
+   - new expense: give every newly recorded expense one independent 25% banner-generation roll, as specified under Themes and visual assets.
 6. Keep static and React implementations behaviorally equivalent. When static CSS, JavaScript, or a replaced asset uses a query-string version, increment only the affected reference so GitHub Pages does not serve stale content.
 7. Run the validation matrix in section 13.
 8. Review the diff and confirm only intended files changed.
@@ -457,9 +457,13 @@ Neutral directional shadows may communicate elevation. Solid outlines may commun
 
 Store banners in `public/theme-banners/`. Static paths use `/public/theme-banners/...`; React paths use `/theme-banners/...`. Banners are borderless, edge-faded page-background bands independent of the content-shell width. Use a wide composition, central crop-safe subject, responsive crop, and quiet lower region for chart legibility. Never present a banner as a rounded card or wrapper.
 
-At most one expense-recording request per `Europe/Vilnius` calendar day refreshes the shared Kinance and Kinance Moon pair. Use `public/theme-banners/banner-manifest.json` as the authoritative generation record. Before generating, compare its `lastGeneratedOn` with the actual Vilnius date. If they match, record the expense without image generation or banner version changes. If they differ, refresh the pair once and update the manifest in the same commit.
+Every newly recorded expense gets one independent 25% chance to refresh the shared Kinance and Kinance Moon pair. For each expense, draw one random integer from 1 through 100 exactly once; values 1 through 25 qualify and values 26 through 100 do not. Perform the draw when processing the expense, in request order, and never reroll because a generation failed, a result was disliked, or another agent pass revisits the same request. The probability has no daily cap, so qualifying purchases can refresh the banner at different times on the same `Europe/Vilnius` calendar day.
 
-1. Generate one fresh two-frame banner set for the day's first eligible expense-recording request. If that request contains several expenses, use one coherent scene for all of them.
+For a request containing several new expenses, roll independently for every expense but generate at most one two-frame pair for the request. If one or more expenses qualify, create one coherent scene representing the qualifying items, favoring the clearest shared topic. If none qualify, record and publish every expense without image generation or banner version changes. Corrections to an already-recorded expense never receive another roll.
+
+Use `public/theme-banners/banner-manifest.json` as the authoritative record of the most recent successful generation, not as an eligibility gate. Its `lastGeneratedOn` may equal the current Vilnius date and must not suppress a new roll or a qualifying refresh.
+
+1. Generate one fresh two-frame banner set when at least one new expense in the request passes its 25% roll.
 2. Use the built-in image-generation workflow.
 3. Create a substantially new 16-bit or 32-bit pixel-art scene that reads as an RPGMaker-style in-game moment.
 4. Show an in-game character visibly performing the activity related to the newly recorded expense. Make the purchased item or service readable at mobile banner size through action, setting, clothing, and large props.

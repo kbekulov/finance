@@ -18,7 +18,7 @@
       "currency": "EUR",
       "timezone": "Europe/Vilnius",
       "updatedAt": "2026-07-30",
-      "revision": 49,
+      "revision": 50,
       "salary": 2150,
       "savingsGoal": 200,
       "additionalIncome": [
@@ -46,6 +46,48 @@
         }
       ],
       "expenses": [
+        {
+          "id": "2026-07-mexican-beef-soup-001",
+          "amount": 2.5,
+          "note": "Mexican beef soup",
+          "noteTranslations": {
+            "en": "Mexican beef soup",
+            "ru": "Мексиканский суп с говядиной"
+          },
+          "date": "2026-07-30",
+          "transactionTime": "11:25:13",
+          "category": "Food",
+          "source": "receipt",
+          "paymentMethod": "debit"
+        },
+        {
+          "id": "2026-07-vodka-40ml-002",
+          "amount": 3.5,
+          "note": "Vodka, 40 ml",
+          "noteTranslations": {
+            "en": "Vodka, 40 ml",
+            "ru": "Водка, 40 мл"
+          },
+          "date": "2026-07-30",
+          "transactionTime": "11:25:13",
+          "category": "Alcohol & nightlife",
+          "source": "receipt",
+          "paymentMethod": "debit"
+        },
+        {
+          "id": "2026-07-transaction-fee-001",
+          "amount": 0.12,
+          "note": "Transaction fee",
+          "noteTranslations": {
+            "en": "Transaction fee",
+            "ru": "Комиссия за транзакцию"
+          },
+          "date": "2026-07-30",
+          "transactionTime": "11:25:13",
+          "category": "Food",
+          "source": "receipt",
+          "paymentMethod": "debit"
+        },
         {
           "id": "2026-07-bus-ticket-001",
           "amount": 3.69,
